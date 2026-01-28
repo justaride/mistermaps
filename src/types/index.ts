@@ -11,7 +11,8 @@ export type PatternId =
   | "3d-buildings"
   | "layer-explorer"
   | "layer-basics"
-  | "layer-inspector";
+  | "layer-inspector"
+  | "rendalen-data";
 
 export type PatternCategory = "data-viz" | "navigation" | "markers" | "layers";
 
