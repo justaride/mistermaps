@@ -26,8 +26,8 @@ export function useMap({ container, theme }: UseMapOptions) {
     const map = new mapboxgl.Map({
       container: container.current,
       style: STYLES[theme],
-      center: [-74.006, 40.7128],
-      zoom: 11,
+      center: [10.7522, 59.9139],
+      zoom: 12,
       pitch: 0,
       bearing: 0,
     });

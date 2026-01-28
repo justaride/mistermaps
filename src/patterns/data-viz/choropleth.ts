@@ -42,7 +42,7 @@ export const choroplethPattern: Pattern = {
   ],
 
   setup(map: Map, controls: Record<string, unknown>) {
-    const boroughs = createNYCBoroughs();
+    const boroughs = createOsloDistricts();
     const colors = getColorScheme(controls.colorScheme as string);
 
     map.addSource(SOURCE_ID, {
@@ -85,8 +85,8 @@ export const choroplethPattern: Pattern = {
 
     map.fitBounds(
       [
-        [-74.3, 40.5],
-        [-73.7, 40.95],
+        [10.6, 59.85],
+        [10.9, 59.97],
       ],
       { padding: 40 },
     );
@@ -164,95 +164,86 @@ function getColorScheme(scheme: string): [string, string, string] {
   return schemes[scheme] || schemes.blue;
 }
 
-function createNYCBoroughs(): GeoJSON.FeatureCollection {
+function createOsloDistricts(): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
     features: [
       {
         type: "Feature",
-        properties: { name: "Manhattan", value: 85 },
+        properties: { name: "Sentrum", value: 90 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-74.047, 40.682],
-              [-74.004, 40.699],
-              [-73.972, 40.73],
-              [-73.972, 40.797],
-              [-73.933, 40.834],
-              [-73.934, 40.873],
-              [-74.011, 40.755],
-              [-74.047, 40.682],
+              [10.73, 59.905],
+              [10.76, 59.905],
+              [10.76, 59.92],
+              [10.73, 59.92],
+              [10.73, 59.905],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Brooklyn", value: 65 },
+        properties: { name: "Grünerløkka", value: 75 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-74.042, 40.57],
-              [-73.833, 40.582],
-              [-73.855, 40.699],
-              [-73.972, 40.73],
-              [-74.004, 40.699],
-              [-74.047, 40.682],
-              [-74.042, 40.57],
+              [10.76, 59.92],
+              [10.79, 59.92],
+              [10.79, 59.935],
+              [10.76, 59.935],
+              [10.76, 59.92],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Queens", value: 45 },
+        properties: { name: "Frogner", value: 60 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-73.833, 40.582],
-              [-73.7, 40.606],
-              [-73.739, 40.793],
-              [-73.794, 40.8],
-              [-73.855, 40.699],
-              [-73.833, 40.582],
+              [10.69, 59.915],
+              [10.73, 59.915],
+              [10.73, 59.93],
+              [10.69, 59.93],
+              [10.69, 59.915],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Bronx", value: 30 },
+        properties: { name: "Majorstuen", value: 45 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-73.934, 40.873],
-              [-73.765, 40.898],
-              [-73.765, 40.817],
-              [-73.794, 40.8],
-              [-73.855, 40.81],
-              [-73.933, 40.834],
-              [-73.934, 40.873],
+              [10.7, 59.93],
+              [10.73, 59.93],
+              [10.73, 59.945],
+              [10.7, 59.945],
+              [10.7, 59.93],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Staten Island", value: 20 },
+        properties: { name: "Gamle Oslo", value: 30 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-74.255, 40.496],
-              [-74.052, 40.502],
-              [-74.047, 40.625],
-              [-74.142, 40.643],
-              [-74.255, 40.566],
-              [-74.255, 40.496],
+              [10.76, 59.9],
+              [10.8, 59.9],
+              [10.8, 59.92],
+              [10.76, 59.92],
+              [10.76, 59.9],
             ],
           ],
         },

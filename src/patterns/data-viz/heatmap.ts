@@ -41,7 +41,7 @@ export const heatmapPattern: Pattern = {
   ],
 
   setup(map: Map, controls: Record<string, unknown>) {
-    const points = generateRandomPoints([-74.05, 40.68], [-73.95, 40.78], 500);
+    const points = generateRandomPoints([10.65, 59.85], [10.85, 59.95], 500);
 
     map.addSource(SOURCE_ID, {
       type: "geojson",

@@ -6,6 +6,7 @@ import {
   ControlsPanel,
   CodeViewer,
   ThemeToggle,
+  SearchBox,
 } from "./components";
 import { patterns } from "./patterns";
 import type { PatternId, Theme } from "./types";
@@ -18,7 +19,7 @@ function App() {
     {},
   );
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
-  const [, setMap] = useState<Map | null>(null);
+  const [map, setMap] = useState<Map | null>(null);
 
   const activePattern = patterns.find((p) => p.id === activePatternId) || null;
 
@@ -61,6 +62,8 @@ function App() {
         controlValues={controlValues}
         onMapReady={handleMapReady}
       />
+
+      <SearchBox map={map} />
 
       <PatternSelector
         patterns={patterns}

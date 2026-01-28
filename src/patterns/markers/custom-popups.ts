@@ -205,47 +205,47 @@ type Location = {
 function getSampleLocations(): Location[] {
   return [
     {
-      name: "Central Park",
-      description: "Iconic urban park spanning 843 acres in Manhattan.",
-      rating: 5,
-      category: "Park",
-      coordinates: [-73.968285, 40.785091],
-    },
-    {
-      name: "Empire State Building",
-      description: "Historic 102-story Art Deco skyscraper.",
+      name: "Oslo Opera House",
+      description: "Award-winning opera house with walkable marble roof.",
       rating: 5,
       category: "Landmark",
-      coordinates: [-73.985428, 40.748817],
+      coordinates: [10.7527, 59.9075],
     },
     {
-      name: "Times Square",
-      description: "Bustling commercial and entertainment hub.",
+      name: "Vigeland Park",
+      description: "World's largest sculpture park by a single artist.",
+      rating: 5,
+      category: "Park",
+      coordinates: [10.7, 59.9269],
+    },
+    {
+      name: "Karl Johans gate",
+      description:
+        "Oslo's main street connecting the Palace to Central Station.",
       rating: 4,
       category: "Entertainment",
-      coordinates: [-73.985131, 40.758896],
+      coordinates: [10.7414, 59.9127],
     },
     {
-      name: "Brooklyn Bridge",
-      description:
-        "Historic suspension bridge connecting Manhattan and Brooklyn.",
+      name: "Akershus Fortress",
+      description: "Medieval castle and fortress overlooking the Oslo Fjord.",
       rating: 5,
       category: "Landmark",
-      coordinates: [-73.996864, 40.706086],
+      coordinates: [10.7369, 59.9072],
     },
     {
-      name: "High Line",
-      description: "Elevated linear park on former railroad tracks.",
+      name: "Aker Brygge",
+      description: "Popular waterfront district with restaurants and shops.",
       rating: 4,
-      category: "Park",
-      coordinates: [-74.004765, 40.748043],
+      category: "Entertainment",
+      coordinates: [10.7267, 59.9111],
     },
     {
-      name: "One World Trade Center",
-      description: "Tallest building in the Western Hemisphere.",
+      name: "Royal Palace",
+      description: "Official residence of the Norwegian monarch.",
       rating: 5,
       category: "Landmark",
-      coordinates: [-74.013169, 40.712742],
+      coordinates: [10.7275, 59.9169],
     },
   ];
 }

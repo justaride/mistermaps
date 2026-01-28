@@ -75,8 +75,8 @@ export const geojsonOverlayPattern: Pattern = {
 
     map.fitBounds(
       [
-        [-74.05, 40.68],
-        [-73.9, 40.82],
+        [10.68, 59.9],
+        [10.82, 59.95],
       ],
       { padding: 40 },
     );
@@ -159,60 +159,60 @@ function createSampleGeoJSON(): GeoJSON.FeatureCollection {
     features: [
       {
         type: "Feature",
-        properties: { name: "Area A" },
+        properties: { name: "Sentrum" },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-74.01, 40.72],
-              [-73.98, 40.72],
-              [-73.98, 40.74],
-              [-74.01, 40.74],
-              [-74.01, 40.72],
+              [10.73, 59.91],
+              [10.76, 59.91],
+              [10.76, 59.92],
+              [10.73, 59.92],
+              [10.73, 59.91],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Area B" },
+        properties: { name: "Grünerløkka" },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-73.97, 40.75],
-              [-73.94, 40.75],
-              [-73.94, 40.78],
-              [-73.97, 40.78],
-              [-73.97, 40.75],
+              [10.76, 59.92],
+              [10.79, 59.92],
+              [10.79, 59.935],
+              [10.76, 59.935],
+              [10.76, 59.92],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Connector" },
+        properties: { name: "Connection" },
         geometry: {
           type: "LineString",
           coordinates: [
-            [-73.985, 40.73],
-            [-73.975, 40.745],
-            [-73.96, 40.76],
+            [10.745, 59.915],
+            [10.755, 59.925],
+            [10.77, 59.927],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Area C" },
+        properties: { name: "Frogner" },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [-74.0, 40.76],
-              [-73.97, 40.76],
-              [-73.97, 40.79],
-              [-74.0, 40.79],
-              [-74.0, 40.76],
+              [10.7, 59.92],
+              [10.73, 59.92],
+              [10.73, 59.935],
+              [10.7, 59.935],
+              [10.7, 59.92],
             ],
           ],
         },
