@@ -7,6 +7,7 @@ import {
   geojsonOverlayPattern,
   buildings3DPattern,
   layerExplorerPattern,
+  layerInspectorPattern,
 } from "./layers";
 
 export const patterns: Pattern[] = [
@@ -20,4 +21,5 @@ export const patterns: Pattern[] = [
   geojsonOverlayPattern,
   buildings3DPattern,
   layerExplorerPattern,
+  layerInspectorPattern,
 ];

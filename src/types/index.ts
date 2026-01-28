@@ -10,7 +10,8 @@ export type PatternId =
   | "geojson-overlay"
   | "3d-buildings"
   | "layer-explorer"
-  | "layer-basics";
+  | "layer-basics"
+  | "layer-inspector";
 
 export type PatternCategory = "data-viz" | "navigation" | "markers" | "layers";
 
