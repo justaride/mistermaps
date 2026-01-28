@@ -1,0 +1,20 @@
+.selector {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  min-width: 280px;
+  padding: 16px;
+}
+
+.select {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.description {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
