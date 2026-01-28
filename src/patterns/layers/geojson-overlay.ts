@@ -75,8 +75,8 @@ export const geojsonOverlayPattern: Pattern = {
 
     map.fitBounds(
       [
-        [10.68, 59.9],
-        [10.82, 59.95],
+        [10.8, 61.7],
+        [11.3, 62.0],
       ],
       { padding: 40 },
     );
@@ -159,60 +159,60 @@ function createSampleGeoJSON(): GeoJSON.FeatureCollection {
     features: [
       {
         type: "Feature",
-        properties: { name: "Sentrum" },
+        properties: { name: "Bergset Area" },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.73, 59.91],
-              [10.76, 59.91],
-              [10.76, 59.92],
-              [10.73, 59.92],
-              [10.73, 59.91],
+              [10.95, 61.8],
+              [11.1, 61.8],
+              [11.1, 61.88],
+              [10.95, 61.88],
+              [10.95, 61.8],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Grünerløkka" },
+        properties: { name: "Forest Zone" },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.76, 59.92],
-              [10.79, 59.92],
-              [10.79, 59.935],
-              [10.76, 59.935],
-              [10.76, 59.92],
+              [11.1, 61.75],
+              [11.25, 61.75],
+              [11.25, 61.85],
+              [11.1, 61.85],
+              [11.1, 61.75],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Connection" },
+        properties: { name: "Trail Route" },
         geometry: {
           type: "LineString",
           coordinates: [
-            [10.745, 59.915],
-            [10.755, 59.925],
-            [10.77, 59.927],
+            [10.98, 61.82],
+            [11.05, 61.84],
+            [11.15, 61.8],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Frogner" },
+        properties: { name: "Mountain Area" },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.7, 59.92],
-              [10.73, 59.92],
-              [10.73, 59.935],
-              [10.7, 59.935],
-              [10.7, 59.92],
+              [10.85, 61.88],
+              [11.0, 61.88],
+              [11.0, 61.95],
+              [10.85, 61.95],
+              [10.85, 61.88],
             ],
           ],
         },

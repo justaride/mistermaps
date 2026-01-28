@@ -2,7 +2,11 @@ import type { Pattern } from "../types";
 import { heatmapPattern, choroplethPattern } from "./data-viz";
 import { routeDisplayPattern, distanceMeasurementPattern } from "./navigation";
 import { clusteredMarkersPattern, customPopupsPattern } from "./markers";
-import { geojsonOverlayPattern, buildings3DPattern } from "./layers";
+import {
+  geojsonOverlayPattern,
+  buildings3DPattern,
+  layerExplorerPattern,
+} from "./layers";
 
 export const patterns: Pattern[] = [
   heatmapPattern,
@@ -13,4 +17,5 @@ export const patterns: Pattern[] = [
   customPopupsPattern,
   geojsonOverlayPattern,
   buildings3DPattern,
+  layerExplorerPattern,
 ];

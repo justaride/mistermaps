@@ -40,7 +40,7 @@ export const clusteredMarkersPattern: Pattern = {
   ],
 
   setup(map: Map, controls: Record<string, unknown>) {
-    const points = generateRandomPoints([10.65, 59.88], [10.85, 59.96], 200);
+    const points = generateRandomPoints([10.8, 61.7], [11.3, 62.0], 200);
 
     map.addSource(SOURCE_ID, {
       type: "geojson",

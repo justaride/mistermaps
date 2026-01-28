@@ -38,8 +38,8 @@ export const buildings3DPattern: Pattern = {
 
   setup(map: Map, controls: Record<string, unknown>) {
     map.easeTo({
-      center: [10.7522, 59.9139],
-      zoom: 15.5,
+      center: [11.0, 61.83],
+      zoom: 14,
       pitch: 60,
       bearing: -17.6,
       duration: 1000,

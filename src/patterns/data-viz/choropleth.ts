@@ -42,7 +42,7 @@ export const choroplethPattern: Pattern = {
   ],
 
   setup(map: Map, controls: Record<string, unknown>) {
-    const boroughs = createOsloDistricts();
+    const boroughs = createRendalenAreas();
     const colors = getColorScheme(controls.colorScheme as string);
 
     map.addSource(SOURCE_ID, {
@@ -85,8 +85,8 @@ export const choroplethPattern: Pattern = {
 
     map.fitBounds(
       [
-        [10.6, 59.85],
-        [10.9, 59.97],
+        [10.7, 61.65],
+        [11.4, 62.0],
       ],
       { padding: 40 },
     );
@@ -164,86 +164,86 @@ function getColorScheme(scheme: string): [string, string, string] {
   return schemes[scheme] || schemes.blue;
 }
 
-function createOsloDistricts(): GeoJSON.FeatureCollection {
+function createRendalenAreas(): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
     features: [
       {
         type: "Feature",
-        properties: { name: "Sentrum", value: 90 },
+        properties: { name: "Bergset", value: 85 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.73, 59.905],
-              [10.76, 59.905],
-              [10.76, 59.92],
-              [10.73, 59.92],
-              [10.73, 59.905],
+              [10.95, 61.8],
+              [11.1, 61.8],
+              [11.1, 61.87],
+              [10.95, 61.87],
+              [10.95, 61.8],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Grünerløkka", value: 75 },
+        properties: { name: "Otnes", value: 70 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.76, 59.92],
-              [10.79, 59.92],
-              [10.79, 59.935],
-              [10.76, 59.935],
-              [10.76, 59.92],
+              [11.1, 61.78],
+              [11.25, 61.78],
+              [11.25, 61.85],
+              [11.1, 61.85],
+              [11.1, 61.78],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Frogner", value: 60 },
+        properties: { name: "Sjøli", value: 55 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.69, 59.915],
-              [10.73, 59.915],
-              [10.73, 59.93],
-              [10.69, 59.93],
-              [10.69, 59.915],
+              [10.85, 61.72],
+              [11.0, 61.72],
+              [11.0, 61.8],
+              [10.85, 61.8],
+              [10.85, 61.72],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Majorstuen", value: 45 },
+        properties: { name: "Øvre Rendal", value: 40 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.7, 59.93],
-              [10.73, 59.93],
-              [10.73, 59.945],
-              [10.7, 59.945],
-              [10.7, 59.93],
+              [10.9, 61.87],
+              [11.1, 61.87],
+              [11.1, 61.95],
+              [10.9, 61.95],
+              [10.9, 61.87],
             ],
           ],
         },
       },
       {
         type: "Feature",
-        properties: { name: "Gamle Oslo", value: 30 },
+        properties: { name: "Elvål", value: 25 },
         geometry: {
           type: "Polygon",
           coordinates: [
             [
-              [10.76, 59.9],
-              [10.8, 59.9],
-              [10.8, 59.92],
-              [10.76, 59.92],
-              [10.76, 59.9],
+              [11.0, 61.68],
+              [11.15, 61.68],
+              [11.15, 61.75],
+              [11.0, 61.75],
+              [11.0, 61.68],
             ],
           ],
         },

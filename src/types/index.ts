@@ -8,7 +8,8 @@ export type PatternId =
   | "clustered-markers"
   | "custom-popups"
   | "geojson-overlay"
-  | "3d-buildings";
+  | "3d-buildings"
+  | "layer-explorer";
 
 export type PatternCategory = "data-viz" | "navigation" | "markers" | "layers";
 
