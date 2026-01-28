@@ -3,6 +3,7 @@ import { heatmapPattern, choroplethPattern } from "./data-viz";
 import { routeDisplayPattern, distanceMeasurementPattern } from "./navigation";
 import { clusteredMarkersPattern, customPopupsPattern } from "./markers";
 import {
+  layerBasicsPattern,
   geojsonOverlayPattern,
   buildings3DPattern,
   layerExplorerPattern,
@@ -15,6 +16,7 @@ export const patterns: Pattern[] = [
   distanceMeasurementPattern,
   clusteredMarkersPattern,
   customPopupsPattern,
+  layerBasicsPattern,
   geojsonOverlayPattern,
   buildings3DPattern,
   layerExplorerPattern,

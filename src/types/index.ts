@@ -9,7 +9,8 @@ export type PatternId =
   | "custom-popups"
   | "geojson-overlay"
   | "3d-buildings"
-  | "layer-explorer";
+  | "layer-explorer"
+  | "layer-basics";
 
 export type PatternCategory = "data-viz" | "navigation" | "markers" | "layers";
 
