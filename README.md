@@ -22,6 +22,14 @@ VITE_MAPBOX_TOKEN=pk.your_token_here
 npm run dev
 ```
 
+## Routes
+
+| Path              | View                      |
+| ----------------- | ------------------------- |
+| `/`               | Landing page with mascot  |
+| `/map`            | Full-screen map browser   |
+| `/map?pattern=ID` | Map with specific pattern |
+
 ## Patterns
 
 | Pattern         | Description                                           |
@@ -52,6 +60,7 @@ The app loads live data from Norwegian public APIs:
 
 ## Features
 
+- Landing page with MrMaps robot mascot and pattern overview
 - Full-screen Mapbox map centered on Rendalen
 - Location search with autocomplete
 - Pattern selector dropdown
@@ -64,6 +73,10 @@ The app loads live data from Norwegian public APIs:
 - React 18
 - TypeScript 5
 - Vite 6
+- Tailwind CSS v4
+- Framer Motion
+- React Router v7
+- Lucide React icons
 - Mapbox GL JS 3
 - Turf.js 7
 - react-syntax-highlighter
@@ -78,11 +91,7 @@ npm run preview  # Preview production build
 
 ## Deployment
 
-Deployed on Vercel. Push to deploy:
-
-```bash
-vercel --prod
-```
+Deployed on Vercel. Push to `master` triggers automatic deploy.
 
 ## License
 
