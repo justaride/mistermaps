@@ -24,36 +24,9 @@ npm run dev
 
 ## Patterns
 
-### Data Visualization
-
-| Pattern    | Description                          |
-| ---------- | ------------------------------------ |
-| Heatmap    | Point density visualization          |
-| Choropleth | Colored regions (Rendalen districts) |
-
-### Navigation
-
-| Pattern              | Description           |
-| -------------------- | --------------------- |
-| Route Display        | Path with waypoints   |
-| Distance Measurement | Click-to-measure tool |
-
-### Markers
-
-| Pattern           | Description             |
-| ----------------- | ----------------------- |
-| Clustered Markers | Auto-grouping points    |
-| Custom Popups     | Rendalen landmarks info |
-
-### Layers (Learning & Data)
-
 | Pattern         | Description                                           |
 | --------------- | ----------------------------------------------------- |
 | Rendalen Data   | Live Norwegian data (boundary, nature, water, trails) |
-| Layer Basics    | Interactive layer tutorial                            |
-| GeoJSON Overlay | Load and style GeoJSON                                |
-| 3D Buildings    | Extruded building footprints                          |
-| Layer Explorer  | Toggle map style layers                               |
 | Layer Inspector | Click to inspect features                             |
 
 ## Rendalen Data Sources

@@ -8,9 +8,6 @@ type Props = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  "data-viz": "Data Visualization",
-  navigation: "Navigation",
-  markers: "Markers",
   layers: "Layers",
 };
 

@@ -14,7 +14,8 @@ import styles from "./App.module.css";
 
 function App() {
   const [theme, setTheme] = useState<Theme>("light");
-  const [activePatternId, setActivePatternId] = useState<PatternId>("heatmap");
+  const [activePatternId, setActivePatternId] =
+    useState<PatternId>("rendalen-data");
   const [controlValues, setControlValues] = useState<Record<string, unknown>>(
     {},
   );
