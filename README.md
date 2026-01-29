@@ -77,6 +77,23 @@ Field explorer identity — like a weathered field journal meets modern topograp
 
 **Visual effects:** Noise overlay, scanlines, grid-paper texture, topographic contour patterns, compass rose watermarks
 
+### MrMaps Mascot
+
+Sibling to MrNews — same 100x100 SVG architecture, shared animation patterns (spring physics, idle bob, AnimatePresence), distinct cartographic personality:
+
+| Trait        | MrNews              | MrMaps                         |
+| ------------ | ------------------- | ------------------------------ |
+| Antenna      | Radar ball (accent) | Compass rose with N-S needle   |
+| Body color   | Theme `--card`      | Khaki `#d4cbb5`                |
+| Face color   | Theme `--fg`        | Sage green `#6b8f71`           |
+| Badge text   | `MISTER NEWS`       | `MISTER MAPS` (burnt sienna)   |
+| Scan tool    | Magnifying glass    | Magnifier with water-blue tint |
+| Stamp tool   | Clipboard           | Folded map with contour lines  |
+| Detail       | —                   | Folded map poking out of body  |
+| State colors | Theme-based         | Earthy (sage, gold, sienna)    |
+
+5 expressions (neutral, happy, alert, thinking, wink) · 5 poses (idle, wave, scan, stamp, point) · 5 states (offline, online, scanning, alert, presenting)
+
 ## Features
 
 - Field explorer landing page with MrMaps robot mascot and scene cycling
