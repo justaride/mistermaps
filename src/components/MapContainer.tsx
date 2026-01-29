@@ -20,6 +20,7 @@ export function MapContainer({
   const containerRef = useRef<HTMLDivElement>(null);
   const { map, isLoaded } = useMap({ container: containerRef, theme });
   const activePatternRef = useRef<Pattern | null>(null);
+  const styleGenRef = useRef(0);
 
   useEffect(() => {
     if (map && isLoaded) {
@@ -30,23 +31,25 @@ export function MapContainer({
   useEffect(() => {
     if (!map || !isLoaded) return;
 
-    if (
-      activePatternRef.current &&
-      activePatternRef.current.id !== pattern?.id
-    ) {
+    if (activePatternRef.current) {
       activePatternRef.current.cleanup(map);
+      activePatternRef.current = null;
     }
 
-    if (pattern && activePatternRef.current?.id !== pattern.id) {
-      const styleLoadHandler = () => {
+    if (pattern) {
+      styleGenRef.current++;
+      const gen = styleGenRef.current;
+
+      const setupPattern = () => {
+        if (gen !== styleGenRef.current) return;
         pattern.setup(map, controlValues);
         activePatternRef.current = pattern;
       };
 
       if (map.isStyleLoaded()) {
-        styleLoadHandler();
+        setupPattern();
       } else {
-        map.once("style.load", styleLoadHandler);
+        map.once("style.load", setupPattern);
       }
     }
   }, [map, isLoaded, pattern?.id]);

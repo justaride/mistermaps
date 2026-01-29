@@ -12,6 +12,7 @@ const TRAILS_SOURCE = "rendalen-trails";
 const TRAILS_LAYER = "rendalen-trails-layer";
 
 let statusPanel: HTMLDivElement | null = null;
+let abortController: AbortController | null = null;
 
 export const rendalenDataPattern: Pattern = {
   id: "rendalen-data",
@@ -46,6 +47,9 @@ export const rendalenDataPattern: Pattern = {
   ],
 
   async setup(map: Map) {
+    abortController = new AbortController();
+    const { signal } = abortController;
+
     createStatusPanel();
     updateStatus("Loading Rendalen data...");
 
@@ -55,19 +59,25 @@ export const rendalenDataPattern: Pattern = {
       duration: 1500,
     });
 
-    // Load all data sources in parallel
     await Promise.all([
-      loadKommuneBoundary(map),
-      loadNatureReserves(map),
-      loadWaterBodies(map),
-      loadTrails(map),
+      loadKommuneBoundary(map, signal),
+      loadNatureReserves(map, signal),
+      loadWaterBodies(map, signal),
+      loadTrails(map, signal),
     ]);
 
-    updateStatus("All data loaded!");
-    setTimeout(() => updateStatus(""), 2000);
+    if (!signal.aborted) {
+      updateStatus("All data loaded!");
+      setTimeout(() => updateStatus(""), 2000);
+    }
   },
 
   cleanup(map: Map) {
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
+    }
+
     // Remove layers
     [
       KOMMUNE_FILL,
@@ -104,6 +114,7 @@ export const rendalenDataPattern: Pattern = {
     setVisible(KOMMUNE_LINE, controls.showBoundary as boolean);
     setVisible(NATURE_LAYER, controls.showNature as boolean);
     setVisible(WATER_LAYER, controls.showWater as boolean);
+    setVisible(WATER_LAYER + "-line", controls.showWater as boolean);
     setVisible(TRAILS_LAYER, controls.showTrails as boolean);
   },
 
@@ -187,11 +198,12 @@ function updateStatus(message: string) {
   }
 }
 
-async function loadKommuneBoundary(map: Map) {
+async function loadKommuneBoundary(map: Map, signal: AbortSignal) {
   try {
     updateStatus("Loading kommune boundary...");
     const response = await fetch(
       "https://ws.geonorge.no/kommuneinfo/v1/kommuner/3424/omrade",
+      { signal },
     );
     const data = await response.json();
 
@@ -224,7 +236,7 @@ async function loadKommuneBoundary(map: Map) {
   }
 }
 
-async function loadNatureReserves(map: Map) {
+async function loadNatureReserves(map: Map, signal: AbortSignal) {
   try {
     updateStatus("Loading nature reserves...");
 
@@ -248,7 +260,7 @@ async function loadNatureReserves(map: Map) {
       "&f=geojson" +
       "&outSR=4326";
 
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -279,7 +291,7 @@ async function loadNatureReserves(map: Map) {
   }
 }
 
-async function loadWaterBodies(map: Map) {
+async function loadWaterBodies(map: Map, signal: AbortSignal) {
   try {
     updateStatus("Loading water bodies...");
 
@@ -304,8 +316,8 @@ async function loadWaterBodies(map: Map) {
       `spatialRel=esriSpatialRelIntersects&outFields=elvId,navn&f=geojson&outSR=4326`;
 
     const [lakesResponse, riversResponse] = await Promise.all([
-      fetch(lakesUrl),
-      fetch(riversUrl),
+      fetch(lakesUrl, { signal }),
+      fetch(riversUrl, { signal }),
     ]);
 
     const lakesData = lakesResponse.ok ? await lakesResponse.json() : null;
@@ -355,7 +367,7 @@ async function loadWaterBodies(map: Map) {
   }
 }
 
-async function loadTrails(map: Map) {
+async function loadTrails(map: Map, signal: AbortSignal) {
   try {
     updateStatus("Loading hiking trails...");
 
@@ -365,7 +377,7 @@ async function loadTrails(map: Map) {
       "&typeName=app:Fotrute&srsName=EPSG:4326" +
       "&bbox=10.5,61.5,11.8,62.3,EPSG:4326&count=50";
 
-    const response = await fetch(wfsUrl);
+    const response = await fetch(wfsUrl, { signal });
     if (!response.ok) {
       throw new Error(`WFS request failed: ${response.status}`);
     }
@@ -443,8 +455,8 @@ function parsePosList(posList: string): [number, number][] {
   const coords: [number, number][] = [];
 
   for (let i = 0; i < values.length - 1; i += 2) {
-    const lon = values[i];
-    const lat = values[i + 1];
+    const lat = values[i];
+    const lon = values[i + 1];
     if (!isNaN(lon) && !isNaN(lat)) {
       coords.push([lon, lat]);
     }

@@ -50,6 +50,10 @@ export function useMap({ container, theme }: UseMapOptions) {
   useEffect(() => {
     if (!mapRef.current || !isLoaded) return;
     mapRef.current.setStyle(STYLES[theme]);
+    setIsLoaded(false);
+    mapRef.current.once("style.load", () => {
+      setIsLoaded(true);
+    });
   }, [theme, isLoaded]);
 
   return { map: mapRef.current, isLoaded };
