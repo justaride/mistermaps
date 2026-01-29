@@ -21,6 +21,7 @@ export function MapContainer({
   const { map, isLoaded } = useMap({ container: containerRef, theme });
   const activePatternRef = useRef<Pattern | null>(null);
   const styleGenRef = useRef(0);
+  const setupCompleteRef = useRef(false);
 
   useEffect(() => {
     if (map && isLoaded) {
@@ -35,15 +36,19 @@ export function MapContainer({
       activePatternRef.current.cleanup(map);
       activePatternRef.current = null;
     }
+    setupCompleteRef.current = false;
 
     if (pattern) {
       styleGenRef.current++;
       const gen = styleGenRef.current;
 
-      const setupPattern = () => {
+      const setupPattern = async () => {
         if (gen !== styleGenRef.current) return;
-        pattern.setup(map, controlValues);
+        await pattern.setup(map, controlValues);
+        if (gen !== styleGenRef.current) return;
         activePatternRef.current = pattern;
+        setupCompleteRef.current = true;
+        pattern.update(map, controlValues);
       };
 
       if (map.isStyleLoaded()) {
@@ -56,6 +61,7 @@ export function MapContainer({
 
   useEffect(() => {
     if (!map || !isLoaded || !pattern) return;
+    if (!setupCompleteRef.current) return;
     if (activePatternRef.current?.id === pattern.id) {
       pattern.update(map, controlValues);
     }

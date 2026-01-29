@@ -21,8 +21,18 @@ export default function MapView() {
   const [theme, setTheme] = useState<Theme>("light");
   const [activePatternId, setActivePatternId] =
     useState<PatternId>(initialPattern);
+  const getDefaults = (patternId: PatternId) => {
+    const p = patterns.find((p) => p.id === patternId);
+    if (!p) return {};
+    const defaults: Record<string, unknown> = {};
+    p.controls.forEach((c) => {
+      defaults[c.id] = c.defaultValue;
+    });
+    return defaults;
+  };
+
   const [controlValues, setControlValues] = useState<Record<string, unknown>>(
-    {},
+    () => getDefaults(initialPattern),
   );
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
   const [map, setMap] = useState<Map | null>(null);
@@ -30,13 +40,7 @@ export default function MapView() {
   const activePattern = patterns.find((p) => p.id === activePatternId) || null;
 
   useEffect(() => {
-    if (activePattern) {
-      const defaults: Record<string, unknown> = {};
-      activePattern.controls.forEach((control) => {
-        defaults[control.id] = control.defaultValue;
-      });
-      setControlValues(defaults);
-    }
+    setControlValues(getDefaults(activePatternId));
   }, [activePatternId]);
 
   useEffect(() => {

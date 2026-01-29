@@ -102,7 +102,8 @@ Sibling to MrNews — same 100x100 SVG architecture, shared animation patterns (
 - Full-screen Mapbox map centered on Rendalen
 - Location search with autocomplete
 - Pattern selector dropdown
-- Interactive controls panel
+- Interactive controls panel with synchronous filter initialization
+- Map filter toggles sync correctly with async layer data loading
 - Code viewer with copy functionality
 - Light/dark theme toggle
 
