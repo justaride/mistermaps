@@ -228,126 +228,54 @@ async function loadNatureReserves(map: Map) {
   try {
     updateStatus("Loading nature reserves...");
 
-    // Naturbase WFS for nature reserves in Rendalen area
+    const geometry = JSON.stringify({
+      xmin: 10.5,
+      ymin: 61.5,
+      xmax: 11.8,
+      ymax: 62.3,
+      spatialReference: { wkid: 4326 },
+    });
+
     const url =
-      "https://kart.miljodirektoratet.no/arcgis/services/vern/MapServer/WFSServer?" +
-      "service=WFS&version=2.0.0&request=GetFeature" +
-      "&typeName=vern:Naturvernområde" +
-      "&outputFormat=geojson" +
-      "&srsName=EPSG:4326" +
-      "&bbox=10.5,61.5,11.8,62.3,EPSG:4326";
+      "https://kart.miljodirektoratet.no/arcgis/rest/services/vern/MapServer/0/query?" +
+      "where=1%3D1" +
+      "&geometry=" +
+      encodeURIComponent(geometry) +
+      "&geometryType=esriGeometryEnvelope" +
+      "&inSR=4326" +
+      "&spatialRel=esriSpatialRelIntersects" +
+      "&outFields=*" +
+      "&f=geojson" +
+      "&outSR=4326";
 
     const response = await fetch(url);
 
-    if (response.ok) {
-      const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
 
-      if (
-        data.features &&
-        data.features.length > 0 &&
-        !map.getSource(NATURE_SOURCE)
-      ) {
-        map.addSource(NATURE_SOURCE, { type: "geojson", data });
+    const data = await response.json();
 
-        map.addLayer({
-          id: NATURE_LAYER,
-          type: "fill",
-          source: NATURE_SOURCE,
-          paint: {
-            "fill-color": "#22c55e",
-            "fill-opacity": 0.4,
-            "fill-outline-color": "#15803d",
-          },
-        });
-      }
-    } else {
-      // Fallback: create sample nature reserve polygons
-      await loadSampleNatureReserves(map);
+    if (
+      data.features &&
+      data.features.length > 0 &&
+      !map.getSource(NATURE_SOURCE)
+    ) {
+      map.addSource(NATURE_SOURCE, { type: "geojson", data });
+
+      map.addLayer({
+        id: NATURE_LAYER,
+        type: "fill",
+        source: NATURE_SOURCE,
+        paint: {
+          "fill-color": "#22c55e",
+          "fill-opacity": 0.4,
+          "fill-outline-color": "#15803d",
+        },
+      });
     }
   } catch (e) {
     console.error("Failed to load nature reserves:", e);
-    await loadSampleNatureReserves(map);
-  }
-}
-
-async function loadSampleNatureReserves(map: Map) {
-  // Approximate locations of known nature reserves near Rendalen
-  const sampleData: GeoJSON.FeatureCollection = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        properties: {
-          name: "Sølen landskapsvernområde",
-          type: "Landskapsvernområde",
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [
-            [
-              [11.0, 61.7],
-              [11.3, 61.7],
-              [11.3, 61.85],
-              [11.0, 61.85],
-              [11.0, 61.7],
-            ],
-          ],
-        },
-      },
-      {
-        type: "Feature",
-        properties: {
-          name: "Jutulhogget naturreservat",
-          type: "Naturreservat",
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [
-            [
-              [10.85, 61.92],
-              [10.95, 61.92],
-              [10.95, 61.98],
-              [10.85, 61.98],
-              [10.85, 61.92],
-            ],
-          ],
-        },
-      },
-      {
-        type: "Feature",
-        properties: {
-          name: "Fonnåsfjellet naturreservat",
-          type: "Naturreservat",
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [
-            [
-              [11.15, 61.95],
-              [11.35, 61.95],
-              [11.35, 62.05],
-              [11.15, 62.05],
-              [11.15, 61.95],
-            ],
-          ],
-        },
-      },
-    ],
-  };
-
-  if (!map.getSource(NATURE_SOURCE)) {
-    map.addSource(NATURE_SOURCE, { type: "geojson", data: sampleData });
-
-    map.addLayer({
-      id: NATURE_LAYER,
-      type: "fill",
-      source: NATURE_SOURCE,
-      paint: {
-        "fill-color": "#22c55e",
-        "fill-opacity": 0.4,
-        "fill-outline-color": "#15803d",
-      },
-    });
   }
 }
 
@@ -355,77 +283,46 @@ async function loadWaterBodies(map: Map) {
   try {
     updateStatus("Loading water bodies...");
 
-    // Major water bodies in Rendalen
+    const bbox = encodeURIComponent(
+      JSON.stringify({
+        xmin: 10.5,
+        ymin: 61.5,
+        xmax: 11.8,
+        ymax: 62.3,
+        spatialReference: { wkid: 4326 },
+      }),
+    );
+
+    const lakesUrl =
+      `https://kart.nve.no/enterprise/rest/services/Innsjodatabase2/MapServer/5/query?` +
+      `where=1%3D1&geometry=${bbox}&geometryType=esriGeometryEnvelope&inSR=4326&` +
+      `spatialRel=esriSpatialRelIntersects&outFields=vatnLnr,navn&f=geojson&outSR=4326`;
+
+    const riversUrl =
+      `https://kart.nve.no/enterprise/rest/services/Elvenett1/MapServer/2/query?` +
+      `where=1%3D1&geometry=${bbox}&geometryType=esriGeometryEnvelope&inSR=4326&` +
+      `spatialRel=esriSpatialRelIntersects&outFields=elvId,navn&f=geojson&outSR=4326`;
+
+    const [lakesResponse, riversResponse] = await Promise.all([
+      fetch(lakesUrl),
+      fetch(riversUrl),
+    ]);
+
+    const lakesData = lakesResponse.ok ? await lakesResponse.json() : null;
+    const riversData = riversResponse.ok ? await riversResponse.json() : null;
+
+    const combinedFeatures: GeoJSON.Feature[] = [];
+
+    if (lakesData?.features) {
+      combinedFeatures.push(...lakesData.features);
+    }
+    if (riversData?.features) {
+      combinedFeatures.push(...riversData.features);
+    }
+
     const waterData: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: { name: "Sølensjøen" },
-          geometry: {
-            type: "Polygon",
-            coordinates: [
-              [
-                [11.1, 61.72],
-                [11.25, 61.72],
-                [11.28, 61.78],
-                [11.22, 61.82],
-                [11.12, 61.8],
-                [11.08, 61.75],
-                [11.1, 61.72],
-              ],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: { name: "Osensjøen" },
-          geometry: {
-            type: "Polygon",
-            coordinates: [
-              [
-                [11.3, 61.55],
-                [11.42, 61.55],
-                [11.45, 61.62],
-                [11.38, 61.67],
-                [11.28, 61.65],
-                [11.25, 61.58],
-                [11.3, 61.55],
-              ],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: { name: "Lomnessjøen" },
-          geometry: {
-            type: "Polygon",
-            coordinates: [
-              [
-                [10.95, 61.88],
-                [11.02, 61.88],
-                [11.02, 61.92],
-                [10.95, 61.92],
-                [10.95, 61.88],
-              ],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: { name: "Glåma (river)" },
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [11.05, 61.6],
-              [11.0, 61.7],
-              [10.98, 61.8],
-              [11.02, 61.9],
-              [11.0, 62.0],
-            ],
-          },
-        },
-      ],
+      features: combinedFeatures,
     };
 
     if (!map.getSource(WATER_SOURCE)) {
@@ -442,7 +339,6 @@ async function loadWaterBodies(map: Map) {
         },
       });
 
-      // Add river line on top
       map.addLayer({
         id: WATER_LAYER + "-line",
         type: "line",
@@ -463,69 +359,19 @@ async function loadTrails(map: Map) {
   try {
     updateStatus("Loading hiking trails...");
 
-    // Popular trails in Rendalen area
-    const trailsData: GeoJSON.FeatureCollection = {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: { name: "Sølen rundtur", difficulty: "medium" },
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [11.12, 61.74],
-              [11.18, 61.76],
-              [11.22, 61.8],
-              [11.18, 61.82],
-              [11.14, 61.8],
-              [11.12, 61.76],
-              [11.12, 61.74],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: { name: "Jutulhogget sti", difficulty: "easy" },
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [10.86, 61.93],
-              [10.88, 61.95],
-              [10.92, 61.96],
-              [10.9, 61.97],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: { name: "Rendalen pilgrimsled", difficulty: "hard" },
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [10.95, 61.75],
-              [10.98, 61.8],
-              [11.0, 61.85],
-              [10.98, 61.9],
-              [11.02, 61.95],
-              [11.0, 62.0],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: { name: "Fonnåsfjellet tur", difficulty: "medium" },
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [11.2, 61.96],
-              [11.25, 61.98],
-              [11.28, 62.02],
-              [11.3, 62.0],
-            ],
-          },
-        },
-      ],
-    };
+    const wfsUrl =
+      "https://wfs.geonorge.no/skwms1/wfs.turogfriluftsruter?" +
+      "service=WFS&version=2.0.0&request=GetFeature" +
+      "&typeName=app:Fotrute&srsName=EPSG:4326" +
+      "&bbox=10.5,61.5,11.8,62.3,EPSG:4326&count=50";
+
+    const response = await fetch(wfsUrl);
+    if (!response.ok) {
+      throw new Error(`WFS request failed: ${response.status}`);
+    }
+
+    const gmlText = await response.text();
+    const trailsData = parseGmlToGeoJson(gmlText);
 
     if (!map.getSource(TRAILS_SOURCE)) {
       map.addSource(TRAILS_SOURCE, { type: "geojson", data: trailsData });
@@ -543,5 +389,66 @@ async function loadTrails(map: Map) {
     }
   } catch (e) {
     console.error("Failed to load trails:", e);
+    if (!map.getSource(TRAILS_SOURCE)) {
+      map.addSource(TRAILS_SOURCE, {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+      map.addLayer({
+        id: TRAILS_LAYER,
+        type: "line",
+        source: TRAILS_SOURCE,
+        paint: {
+          "line-color": "#f97316",
+          "line-width": 2,
+          "line-dasharray": [2, 1],
+        },
+      });
+    }
   }
+}
+
+function parseGmlToGeoJson(gmlText: string): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(gmlText, "text/xml");
+
+  const members = doc.querySelectorAll("member");
+
+  members.forEach((member) => {
+    const nameEl = member.querySelector("rutenavn");
+    const name = nameEl?.textContent || "Unknown trail";
+
+    const posListEl = member.querySelector("posList");
+    if (!posListEl?.textContent) return;
+
+    const coords = parsePosList(posListEl.textContent);
+    if (coords.length < 2) return;
+
+    features.push({
+      type: "Feature",
+      properties: { name },
+      geometry: {
+        type: "LineString",
+        coordinates: coords,
+      },
+    });
+  });
+
+  return { type: "FeatureCollection", features };
+}
+
+function parsePosList(posList: string): [number, number][] {
+  const values = posList.trim().split(/\s+/).map(Number);
+  const coords: [number, number][] = [];
+
+  for (let i = 0; i < values.length - 1; i += 2) {
+    const lon = values[i];
+    const lat = values[i + 1];
+    if (!isNaN(lon) && !isNaN(lat)) {
+      coords.push([lon, lat]);
+    }
+  }
+
+  return coords;
 }

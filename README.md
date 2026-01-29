@@ -47,24 +47,26 @@ npm run dev
 
 ### Layers (Learning & Data)
 
-| Pattern         | Description                                    |
-| --------------- | ---------------------------------------------- |
-| Rendalen Data   | Live Norwegian data (boundary, nature, trails) |
-| Layer Basics    | Interactive layer tutorial                     |
-| GeoJSON Overlay | Load and style GeoJSON                         |
-| 3D Buildings    | Extruded building footprints                   |
-| Layer Explorer  | Toggle map style layers                        |
-| Layer Inspector | Click to inspect features                      |
+| Pattern         | Description                                           |
+| --------------- | ----------------------------------------------------- |
+| Rendalen Data   | Live Norwegian data (boundary, nature, water, trails) |
+| Layer Basics    | Interactive layer tutorial                            |
+| GeoJSON Overlay | Load and style GeoJSON                                |
+| 3D Buildings    | Extruded building footprints                          |
+| Layer Explorer  | Toggle map style layers                               |
+| Layer Inspector | Click to inspect features                             |
 
 ## Rendalen Data Sources
 
 The app loads live data from Norwegian public APIs:
 
-| Source     | Data                 | API                             |
-| ---------- | -------------------- | ------------------------------- |
-| Geonorge   | Kommune boundary     | `ws.geonorge.no/kommuneinfo/v1` |
-| Naturbase  | Nature reserves      | `kart.miljodirektoratet.no`     |
-| Kartverket | Topographic features | `wfs.geonorge.no`               |
+| Source             | Data             | API                                                       |
+| ------------------ | ---------------- | --------------------------------------------------------- |
+| Geonorge           | Kommune boundary | `ws.geonorge.no/kommuneinfo/v1`                           |
+| Miljødirektoratet  | Nature reserves  | `kart.miljodirektoratet.no/arcgis/rest/services/vern`     |
+| NVE Innsjødatabase | Lakes            | `kart.nve.no/enterprise/rest/services/Innsjodatabase2`    |
+| NVE ELVIS          | Rivers           | `kart.nve.no/enterprise/rest/services/Elvenett1`          |
+| Turrutebasen       | Hiking trails    | `wfs.geonorge.no/skwms1/wfs.turogfriluftsruter` (WFS/GML) |
 
 **Rendalen Kommune Code:** 3424
 
