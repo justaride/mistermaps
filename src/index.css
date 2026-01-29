@@ -1,18 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Anton", sans-serif;
-  --font-body: "Inter", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  --font-display: "Oswald", sans-serif;
+  --font-body: "Source Sans 3", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
-  --color-bg: #f5f0e8;
-  --color-fg: #1a1a1a;
-  --color-card: #ffffff;
-  --color-accent: #ff5722;
-  --color-warn: #ffc107;
+  --color-bg: #eae6de;
+  --color-fg: #2c2c2c;
+  --color-card: #f7f5f0;
+  --color-accent: #c85a2a;
+  --color-warn: #d4a847;
   --color-danger: #f44336;
-  --color-border: #1a1a1a;
-  --color-muted: #666666;
+  --color-border: #3d3530;
+  --color-muted: #8a8278;
+  --color-topo: #6b8f71;
+  --color-water: #5b8fa8;
+  --color-contour: #c85a2a;
 }
 
 * {
@@ -44,8 +47,8 @@ body {
 :root {
   --panel-bg: rgba(255, 255, 255, 0.95);
   --panel-border: rgba(0, 0, 0, 0.1);
-  --text-primary: #1a1a1a;
-  --text-secondary: #666;
+  --text-primary: #2c2c2c;
+  --text-secondary: #8a8278;
   --accent: #3b82f6;
   --accent-hover: #2563eb;
 }
@@ -139,4 +142,17 @@ label {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
+}
+
+.grid-paper {
+  background-image:
+    linear-gradient(rgba(61, 53, 48, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 53, 48, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.topo-lines {
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='100' cy='100' rx='90' ry='60' fill='none' stroke='%23c85a2a' stroke-width='0.5' opacity='0.08'/%3E%3Cellipse cx='100' cy='100' rx='70' ry='45' fill='none' stroke='%23c85a2a' stroke-width='0.5' opacity='0.08'/%3E%3Cellipse cx='100' cy='100' rx='50' ry='30' fill='none' stroke='%23c85a2a' stroke-width='0.5' opacity='0.08'/%3E%3Cellipse cx='100' cy='100' rx='30' ry='18' fill='none' stroke='%23c85a2a' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
 }

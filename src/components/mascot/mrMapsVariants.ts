@@ -71,9 +71,9 @@ export const badgeScrollVariants: Variants = {
 };
 
 export const stateColors: Record<string, string> = {
-  offline: "#666",
-  online: "#4caf50",
-  scanning: "#ff9800",
-  alert: "#f44336",
-  presenting: "#3b82f6",
+  offline: "#8a8278",
+  online: "#6b8f71",
+  scanning: "#d4a847",
+  alert: "#c85a2a",
+  presenting: "#5b8fa8",
 };

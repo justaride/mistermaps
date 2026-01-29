@@ -58,9 +58,30 @@ The app loads live data from Norwegian public APIs:
 - Sølen landskapsvernområde (nature reserve)
 - Glåma river
 
+## Design System
+
+Field explorer identity — like a weathered field journal meets modern topographic tool.
+
+| Token    | Value                | Role                     |
+| -------- | -------------------- | ------------------------ |
+| `bg`     | `#eae6de` parchment  | Aged paper background    |
+| `fg`     | `#2c2c2c` charcoal   | Pencil-like text         |
+| `card`   | `#f7f5f0` linen      | Warm card surfaces       |
+| `accent` | `#c85a2a` sienna     | Contour lines, CTAs      |
+| `warn`   | `#d4a847` aged gold  | Compass brass highlights |
+| `border` | `#3d3530` brown-gray | Leather-binding borders  |
+| `topo`   | `#6b8f71` sage green | Topographic accents      |
+| `water`  | `#5b8fa8` steel blue | Water features           |
+
+**Typography:** Oswald (display) · Source Sans 3 (body) · JetBrains Mono (code)
+
+**Visual effects:** Noise overlay, scanlines, grid-paper texture, topographic contour patterns, compass rose watermarks
+
 ## Features
 
-- Landing page with MrMaps robot mascot and pattern overview
+- Field explorer landing page with MrMaps robot mascot and scene cycling
+- Field station console with live layer readings and coordinate display
+- Compass rose watermarks and topographic contour decorations
 - Full-screen Mapbox map centered on Rendalen
 - Location search with autocomplete
 - Pattern selector dropdown

@@ -64,26 +64,34 @@ export function LandingMascot() {
 
   return (
     <div
-      className="flex flex-col items-center gap-4"
+      className="flex flex-col items-center gap-3"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <SpeechBubble message={scene.message} state={scene.state} visible />
       <div
-        onClick={handleClick}
-        className={scene.navigateOnClick ? "cursor-pointer" : undefined}
-        role={scene.navigateOnClick ? "button" : undefined}
-        tabIndex={scene.navigateOnClick ? 0 : undefined}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && scene.navigateOnClick) handleClick();
-        }}
+        className="relative border-2 border-border bg-card p-4 rotate-[-0.5deg]"
+        style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
       >
-        <MrMaps
-          expression={scene.expression}
-          pose={scene.pose}
-          state={scene.state}
-          size={180}
-        />
+        <div className="absolute -top-2.5 left-3 bg-warn px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-fg border border-border">
+          Field Notes
+        </div>
+        <SpeechBubble message={scene.message} state={scene.state} visible />
+        <div
+          onClick={handleClick}
+          className={scene.navigateOnClick ? "cursor-pointer" : undefined}
+          role={scene.navigateOnClick ? "button" : undefined}
+          tabIndex={scene.navigateOnClick ? 0 : undefined}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && scene.navigateOnClick) handleClick();
+          }}
+        >
+          <MrMaps
+            expression={scene.expression}
+            pose={scene.pose}
+            state={scene.state}
+            size={180}
+          />
+        </div>
       </div>
       <div className="flex gap-1.5">
         {SCENES.map((_, i) => (

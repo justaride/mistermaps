@@ -36,7 +36,7 @@ export function MrMaps({
     >
       {/* Antenna - Compass */}
       <g transform="translate(100, 20)">
-        <line x1="0" y1="0" x2="0" y2="25" stroke="#555" strokeWidth="3" />
+        <line x1="0" y1="0" x2="0" y2="25" stroke="#4a4038" strokeWidth="3" />
         <motion.g
           variants={reduced ? undefined : compassVariants}
           animate={
@@ -47,25 +47,43 @@ export function MrMaps({
                 : "idle"
           }
         >
-          {/* Compass rose */}
+          {/* Compass rose with contour detail */}
           <circle
             cx="0"
             cy="0"
             r="10"
             fill="#e8e0d0"
-            stroke="#1a1a1a"
+            stroke="#3d3530"
             strokeWidth="2"
           />
+          <circle
+            cx="0"
+            cy="0"
+            r="8"
+            fill="none"
+            stroke="#3d3530"
+            strokeWidth="0.5"
+            opacity="0.4"
+          />
+          <circle
+            cx="0"
+            cy="0"
+            r="6"
+            fill="none"
+            stroke="#3d3530"
+            strokeWidth="0.3"
+            opacity="0.3"
+          />
           {/* N-S needle */}
-          <polygon points="0,-8 2,-1 -2,-1" fill="#f44336" />
-          <polygon points="0,8 2,1 -2,1" fill="#ccc" />
+          <polygon points="0,-8 2,-1 -2,-1" fill="#c85a2a" />
+          <polygon points="0,8 2,1 -2,1" fill="#b0a898" />
           {/* E-W ticks */}
           <line
             x1="-7"
             y1="0"
             x2="-4"
             y2="0"
-            stroke="#1a1a1a"
+            stroke="#3d3530"
             strokeWidth="1.5"
           />
           <line
@@ -73,10 +91,43 @@ export function MrMaps({
             y1="0"
             x2="7"
             y2="0"
-            stroke="#1a1a1a"
+            stroke="#3d3530"
             strokeWidth="1.5"
           />
-          <circle cx="0" cy="0" r="2" fill="#1a1a1a" />
+          {/* Diagonal ticks */}
+          <line
+            x1="-5"
+            y1="-5"
+            x2="-3.5"
+            y2="-3.5"
+            stroke="#3d3530"
+            strokeWidth="0.8"
+          />
+          <line
+            x1="5"
+            y1="-5"
+            x2="3.5"
+            y2="-3.5"
+            stroke="#3d3530"
+            strokeWidth="0.8"
+          />
+          <line
+            x1="-5"
+            y1="5"
+            x2="-3.5"
+            y2="3.5"
+            stroke="#3d3530"
+            strokeWidth="0.8"
+          />
+          <line
+            x1="5"
+            y1="5"
+            x2="3.5"
+            y2="3.5"
+            stroke="#3d3530"
+            strokeWidth="0.8"
+          />
+          <circle cx="0" cy="0" r="2" fill="#3d3530" />
         </motion.g>
       </g>
 
@@ -87,12 +138,12 @@ export function MrMaps({
         width="80"
         height="60"
         rx="8"
-        fill="#d4cfc7"
-        stroke="#1a1a1a"
+        fill="#c8bfad"
+        stroke="#3d3530"
         strokeWidth="2.5"
       />
       {/* Visor */}
-      <rect x="68" y="55" width="64" height="30" rx="4" fill="#1a1a1a" />
+      <rect x="68" y="55" width="64" height="30" rx="4" fill="#2c2c2c" />
 
       {/* Eyes */}
       <g transform="translate(88, 70)">
@@ -102,7 +153,7 @@ export function MrMaps({
           cy="0"
           rx="6"
           ry="6"
-          fill="#4caf50"
+          fill="#6b8f71"
           variants={eyeVariants}
           animate={expression}
         />
@@ -112,7 +163,7 @@ export function MrMaps({
           cy="0"
           rx="6"
           ry="6"
-          fill="#4caf50"
+          fill="#6b8f71"
           variants={expression === "wink" ? eyeVariants : undefined}
           animate={expression === "wink" ? "wink" : expression}
           style={
@@ -129,7 +180,7 @@ export function MrMaps({
         y1="58"
         x2="94"
         y2="58"
-        stroke="#4caf50"
+        stroke="#6b8f71"
         strokeWidth="2"
         strokeLinecap="round"
         variants={browVariants}
@@ -140,7 +191,7 @@ export function MrMaps({
         y1="58"
         x2="120"
         y2="58"
-        stroke="#4caf50"
+        stroke="#6b8f71"
         strokeWidth="2"
         strokeLinecap="round"
         variants={browVariants}
@@ -152,7 +203,7 @@ export function MrMaps({
         d={mouthPaths[expression]}
         transform="translate(88, 82)"
         fill="none"
-        stroke="#4caf50"
+        stroke="#6b8f71"
         strokeWidth="2"
         strokeLinecap="round"
         initial={false}
@@ -181,13 +232,13 @@ export function MrMaps({
         width="90"
         height="70"
         rx="6"
-        fill="#d4cfc7"
-        stroke="#1a1a1a"
+        fill="#c8bfad"
+        stroke="#3d3530"
         strokeWidth="2.5"
       />
 
       {/* Badge / LED panel */}
-      <rect x="65" y="120" width="70" height="16" rx="2" fill="#1a1a1a" />
+      <rect x="65" y="120" width="70" height="16" rx="2" fill="#2c2c2c" />
       <clipPath id="badge-clip">
         <rect x="65" y="120" width="70" height="16" rx="2" />
       </clipPath>
@@ -195,9 +246,9 @@ export function MrMaps({
         <motion.text
           x="67"
           y="133"
-          fill="#ff5722"
+          fill="#c85a2a"
           fontSize="10"
-          fontFamily="'IBM Plex Mono', monospace"
+          fontFamily="'JetBrains Mono', monospace"
           fontWeight="700"
           letterSpacing="2"
           variants={reduced ? undefined : badgeScrollVariants}
@@ -213,7 +264,7 @@ export function MrMaps({
         y1="142"
         x2="125"
         y2="142"
-        stroke="#aaa"
+        stroke="#a09888"
         strokeWidth="0.5"
       />
       <line
@@ -221,7 +272,7 @@ export function MrMaps({
         y1="148"
         x2="125"
         y2="148"
-        stroke="#aaa"
+        stroke="#a09888"
         strokeWidth="0.5"
       />
       <line
@@ -229,18 +280,76 @@ export function MrMaps({
         y1="154"
         x2="125"
         y2="154"
-        stroke="#aaa"
+        stroke="#a09888"
         strokeWidth="0.5"
       />
-      <line x1="90" y1="140" x2="90" y2="158" stroke="#aaa" strokeWidth="0.5" />
+      <line
+        x1="90"
+        y1="140"
+        x2="90"
+        y2="158"
+        stroke="#a09888"
+        strokeWidth="0.5"
+      />
       <line
         x1="110"
         y1="140"
         x2="110"
         y2="158"
-        stroke="#aaa"
+        stroke="#a09888"
         strokeWidth="0.5"
       />
+
+      {/* Folded map sticking out of body */}
+      <g transform="translate(130, 155)">
+        <rect
+          x="0"
+          y="-4"
+          width="12"
+          height="18"
+          fill="#e8e0d0"
+          stroke="#3d3530"
+          strokeWidth="1"
+          rx="1"
+        />
+        <line
+          x1="2"
+          y1="0"
+          x2="10"
+          y2="0"
+          stroke="#c85a2a"
+          strokeWidth="0.5"
+          opacity="0.6"
+        />
+        <line
+          x1="2"
+          y1="3"
+          x2="10"
+          y2="3"
+          stroke="#c85a2a"
+          strokeWidth="0.5"
+          opacity="0.6"
+        />
+        <line
+          x1="2"
+          y1="6"
+          x2="10"
+          y2="6"
+          stroke="#c85a2a"
+          strokeWidth="0.5"
+          opacity="0.6"
+        />
+        <line
+          x1="6"
+          y1="-2"
+          x2="6"
+          y2="12"
+          stroke="#5b8fa8"
+          strokeWidth="0.4"
+          opacity="0.5"
+          strokeDasharray="2 1"
+        />
+      </g>
 
       {/* Belly button / power indicator */}
       <circle
@@ -248,7 +357,7 @@ export function MrMaps({
         cy="165"
         r="5"
         fill="#333"
-        stroke="#555"
+        stroke="#4a4038"
         strokeWidth="1"
       />
       <circle cx="100" cy="165" r="2" fill={stateColors[state]} />
@@ -266,7 +375,7 @@ export function MrMaps({
           height="12"
           rx="6"
           fill="#b0a898"
-          stroke="#1a1a1a"
+          stroke="#3d3530"
           strokeWidth="2"
         />
         <circle
@@ -274,7 +383,7 @@ export function MrMaps({
           cy="121"
           r="8"
           fill="#c4bdb2"
-          stroke="#1a1a1a"
+          stroke="#3d3530"
           strokeWidth="2"
         />
         {/* Scan pose: magnifying glass */}
@@ -285,16 +394,16 @@ export function MrMaps({
               cy="0"
               r="9"
               fill="none"
-              stroke="#1a1a1a"
+              stroke="#3d3530"
               strokeWidth="2.5"
             />
-            <circle cx="0" cy="0" r="7" fill="rgba(59,130,246,0.15)" />
+            <circle cx="0" cy="0" r="7" fill="rgba(91,143,168,0.15)" />
             <line
               x1="6"
               y1="6"
               x2="12"
               y2="12"
-              stroke="#1a1a1a"
+              stroke="#3d3530"
               strokeWidth="2.5"
               strokeLinecap="round"
             />
@@ -309,7 +418,7 @@ export function MrMaps({
               width="16"
               height="12"
               fill="#e8e0d0"
-              stroke="#1a1a1a"
+              stroke="#3d3530"
               strokeWidth="1.5"
               rx="1"
             />
@@ -318,33 +427,37 @@ export function MrMaps({
               y1="-3"
               x2="6"
               y2="-3"
-              stroke="#aaa"
+              stroke="#c85a2a"
               strokeWidth="0.8"
+              opacity="0.6"
             />
             <line
               x1="-6"
               y1="0"
               x2="6"
               y2="0"
-              stroke="#aaa"
+              stroke="#c85a2a"
               strokeWidth="0.8"
+              opacity="0.6"
             />
             <line
               x1="-6"
               y1="3"
               x2="3"
               y2="3"
-              stroke="#aaa"
+              stroke="#c85a2a"
               strokeWidth="0.8"
+              opacity="0.6"
             />
             <line
               x1="0"
               y1="-6"
               x2="0"
               y2="6"
-              stroke="#ccc"
+              stroke="#5b8fa8"
               strokeWidth="0.5"
               strokeDasharray="2 1"
+              opacity="0.5"
             />
           </g>
         )}
@@ -363,7 +476,7 @@ export function MrMaps({
           height="12"
           rx="6"
           fill="#b0a898"
-          stroke="#1a1a1a"
+          stroke="#3d3530"
           strokeWidth="2"
         />
         <circle
@@ -371,7 +484,7 @@ export function MrMaps({
           cy="121"
           r="8"
           fill="#c4bdb2"
-          stroke="#1a1a1a"
+          stroke="#3d3530"
           strokeWidth="2"
         />
       </motion.g>
@@ -384,7 +497,7 @@ export function MrMaps({
         height="30"
         rx="4"
         fill="#b0a898"
-        stroke="#1a1a1a"
+        stroke="#3d3530"
         strokeWidth="2"
       />
       <rect
@@ -394,7 +507,7 @@ export function MrMaps({
         height="30"
         rx="4"
         fill="#b0a898"
-        stroke="#1a1a1a"
+        stroke="#3d3530"
         strokeWidth="2"
       />
 
@@ -405,8 +518,8 @@ export function MrMaps({
         width="30"
         height="10"
         rx="5"
-        fill="#999"
-        stroke="#1a1a1a"
+        fill="#8a8278"
+        stroke="#3d3530"
         strokeWidth="2"
       />
       <rect
@@ -415,8 +528,8 @@ export function MrMaps({
         width="30"
         height="10"
         rx="5"
-        fill="#999"
-        stroke="#1a1a1a"
+        fill="#8a8278"
+        stroke="#3d3530"
         strokeWidth="2"
       />
     </motion.svg>
