@@ -1,537 +1,465 @@
-import { motion } from "framer-motion";
-import type { MrMapsProps } from "./types";
+import { motion, AnimatePresence } from "framer-motion";
+import type { MrMapsProps, Expression, Pose } from "./types";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
-import {
-  bodyVariants,
-  armLeftVariants,
-  armRightVariants,
-  eyeVariants,
-  browVariants,
-  mouthPaths,
-  compassVariants,
-  badgeScrollVariants,
-  stateColors,
-} from "./mrMapsVariants";
+import { mouthPaths, stateColors } from "./mrMapsVariants";
+
+const STATE_MAPPING: Record<string, { expression: Expression; pose: Pose }> = {
+  offline: { expression: "neutral", pose: "idle" },
+  online: { expression: "neutral", pose: "idle" },
+  scanning: { expression: "thinking", pose: "scan" },
+  alert: { expression: "alert", pose: "point" },
+  presenting: { expression: "happy", pose: "idle" },
+};
+
+const EYE_SCALES: Record<Expression, { scaleY: number; y: number }> = {
+  neutral: { scaleY: 1, y: 0 },
+  happy: { scaleY: 0.6, y: 0 },
+  alert: { scaleY: 1.2, y: -1 },
+  thinking: { scaleY: 0.8, y: 1 },
+  wink: { scaleY: 1, y: 0 },
+};
+
+const BROW_TRANSFORMS: Record<Expression, { left: string; right: string }> = {
+  neutral: { left: "rotate(0)", right: "rotate(0)" },
+  happy: { left: "rotate(-5deg)", right: "rotate(5deg)" },
+  alert: { left: "rotate(8deg)", right: "rotate(-8deg)" },
+  thinking: { left: "rotate(-12deg)", right: "rotate(0)" },
+  wink: { left: "rotate(-5deg)", right: "rotate(5deg)" },
+};
+
+const ARM_TRANSFORMS: Record<Pose, { leftArm: string; rightArm: string }> = {
+  idle: { leftArm: "rotate(0)", rightArm: "rotate(0)" },
+  wave: { leftArm: "rotate(30deg)", rightArm: "rotate(-30deg)" },
+  scan: { leftArm: "rotate(15deg)", rightArm: "rotate(-15deg)" },
+  stamp: { leftArm: "rotate(0)", rightArm: "rotate(-90deg) translateY(-5px)" },
+  point: { leftArm: "rotate(0)", rightArm: "rotate(-45deg) translateX(5px)" },
+};
+
+const idleAnimation = {
+  y: [0, -2, 0],
+  transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" as const },
+};
+
+const compassPingAnimation = {
+  scale: [1, 1.3, 1],
+  opacity: [1, 0.6, 1],
+  transition: { duration: 1.2, repeat: Infinity, ease: "easeInOut" as const },
+};
+
+const scanArmAnimation = {
+  rotate: [0, 8, -8, 0],
+  transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" as const },
+};
 
 export function MrMaps({
-  expression = "neutral",
-  pose = "idle",
-  state = "online",
-  size = 200,
+  expression: expressionProp,
+  pose: poseProp,
+  state,
+  size = 64,
   className,
 }: MrMapsProps) {
-  const reduced = usePrefersReducedMotion();
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const shouldAnimate = !prefersReducedMotion;
+
+  const expression: Expression = state
+    ? STATE_MAPPING[state].expression
+    : (expressionProp ?? "neutral");
+
+  const pose: Pose = state ? STATE_MAPPING[state].pose : (poseProp ?? "idle");
+
+  const eyeStyle = EYE_SCALES[expression];
+  const browStyle = BROW_TRANSFORMS[expression];
+  const armStyle = ARM_TRANSFORMS[pose];
+
+  const transitionConfig = prefersReducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 300, damping: 20 };
 
   return (
     <motion.svg
-      viewBox="0 0 200 240"
       width={size}
-      height={size * 1.2}
-      className={className}
-      variants={bodyVariants}
-      initial="idle"
-      whileHover={reduced ? undefined : "hover"}
+      height={size}
+      viewBox="0 0 100 100"
       role="img"
-      aria-label="MrMaps robot mascot"
+      aria-label={`Mister Maps mascot - ${expression} expression, ${pose} pose`}
+      className={className}
+      animate={shouldAnimate && pose === "idle" ? idleAnimation : undefined}
     >
-      {/* Antenna - Compass */}
-      <g transform="translate(100, 20)">
-        <line x1="0" y1="0" x2="0" y2="25" stroke="#4a4038" strokeWidth="3" />
-        <motion.g
-          variants={reduced ? undefined : compassVariants}
-          animate={
-            state === "scanning"
-              ? "scanning"
-              : state === "alert"
-                ? "alert"
-                : "idle"
-          }
-        >
-          {/* Compass rose with contour detail */}
+      {/* Compass Antenna */}
+      <g id="antenna">
+        <line
+          x1="50"
+          y1="8"
+          x2="50"
+          y2="18"
+          stroke="#3d3530"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <motion.g animate={shouldAnimate ? compassPingAnimation : undefined}>
           <circle
-            cx="0"
-            cy="0"
-            r="10"
+            cx="50"
+            cy="6"
+            r="5"
             fill="#e8e0d0"
             stroke="#3d3530"
             strokeWidth="2"
           />
-          <circle
-            cx="0"
-            cy="0"
-            r="8"
-            fill="none"
-            stroke="#3d3530"
-            strokeWidth="0.5"
-            opacity="0.4"
-          />
-          <circle
-            cx="0"
-            cy="0"
-            r="6"
-            fill="none"
-            stroke="#3d3530"
-            strokeWidth="0.3"
-            opacity="0.3"
-          />
-          {/* N-S needle */}
-          <polygon points="0,-8 2,-1 -2,-1" fill="#c85a2a" />
-          <polygon points="0,8 2,1 -2,1" fill="#b0a898" />
-          {/* E-W ticks */}
+          <polygon points="50,2 51.5,5.5 48.5,5.5" fill="#c85a2a" />
+          <polygon points="50,10 51.5,6.5 48.5,6.5" fill="#b0a898" />
           <line
-            x1="-7"
-            y1="0"
-            x2="-4"
-            y2="0"
+            x1="46"
+            y1="6"
+            x2="48"
+            y2="6"
             stroke="#3d3530"
-            strokeWidth="1.5"
+            strokeWidth="1"
           />
           <line
-            x1="4"
-            y1="0"
-            x2="7"
-            y2="0"
+            x1="52"
+            y1="6"
+            x2="54"
+            y2="6"
             stroke="#3d3530"
-            strokeWidth="1.5"
+            strokeWidth="1"
           />
-          {/* Diagonal ticks */}
-          <line
-            x1="-5"
-            y1="-5"
-            x2="-3.5"
-            y2="-3.5"
-            stroke="#3d3530"
-            strokeWidth="0.8"
-          />
-          <line
-            x1="5"
-            y1="-5"
-            x2="3.5"
-            y2="-3.5"
-            stroke="#3d3530"
-            strokeWidth="0.8"
-          />
-          <line
-            x1="-5"
-            y1="5"
-            x2="-3.5"
-            y2="3.5"
-            stroke="#3d3530"
-            strokeWidth="0.8"
-          />
-          <line
-            x1="5"
-            y1="5"
-            x2="3.5"
-            y2="3.5"
-            stroke="#3d3530"
-            strokeWidth="0.8"
-          />
-          <circle cx="0" cy="0" r="2" fill="#3d3530" />
+          <circle cx="50" cy="6" r="1" fill="#3d3530" />
         </motion.g>
       </g>
 
-      {/* Head */}
-      <rect
-        x="60"
-        y="45"
-        width="80"
-        height="60"
-        rx="8"
-        fill="#c8bfad"
-        stroke="#3d3530"
-        strokeWidth="2.5"
-      />
-      {/* Visor */}
-      <rect x="68" y="55" width="64" height="30" rx="4" fill="#2c2c2c" />
-
-      {/* Eyes */}
-      <g transform="translate(88, 70)">
-        {/* Left eye */}
-        <motion.ellipse
-          cx="0"
-          cy="0"
-          rx="6"
-          ry="6"
-          fill="#6b8f71"
-          variants={eyeVariants}
-          animate={expression}
-        />
-        {/* Right eye */}
-        <motion.ellipse
-          cx="24"
-          cy="0"
-          rx="6"
-          ry="6"
-          fill="#6b8f71"
-          variants={expression === "wink" ? eyeVariants : undefined}
-          animate={expression === "wink" ? "wink" : expression}
-          style={
-            expression !== "wink"
-              ? { scaleY: expression === "happy" ? 0.6 : 1 }
-              : undefined
-          }
-        />
-      </g>
-
-      {/* Brows */}
-      <motion.line
-        x1="80"
-        y1="58"
-        x2="94"
-        y2="58"
-        stroke="#6b8f71"
-        strokeWidth="2"
-        strokeLinecap="round"
-        variants={browVariants}
-        animate={expression}
-      />
-      <motion.line
-        x1="106"
-        y1="58"
-        x2="120"
-        y2="58"
-        stroke="#6b8f71"
-        strokeWidth="2"
-        strokeLinecap="round"
-        variants={browVariants}
-        animate={expression}
-      />
-
-      {/* Mouth */}
-      <motion.path
-        d={mouthPaths[expression]}
-        transform="translate(88, 82)"
-        fill="none"
-        stroke="#6b8f71"
-        strokeWidth="2"
-        strokeLinecap="round"
-        initial={false}
-        animate={{ d: mouthPaths[expression] }}
-        transition={{ duration: 0.3 }}
-      />
-
-      {/* Status light */}
-      <motion.circle
-        cx="145"
-        cy="50"
-        r="4"
-        animate={{
-          fill: stateColors[state],
-          opacity: state === "scanning" ? [1, 0.3, 1] : 1,
-        }}
-        transition={
-          state === "scanning" ? { duration: 1, repeat: Infinity } : undefined
-        }
-      />
-
-      {/* Body */}
-      <rect
-        x="55"
-        y="110"
-        width="90"
-        height="70"
-        rx="6"
-        fill="#c8bfad"
-        stroke="#3d3530"
-        strokeWidth="2.5"
-      />
-
-      {/* Badge / LED panel */}
-      <rect x="65" y="120" width="70" height="16" rx="2" fill="#2c2c2c" />
-      <clipPath id="badge-clip">
-        <rect x="65" y="120" width="70" height="16" rx="2" />
-      </clipPath>
-      <g clipPath="url(#badge-clip)">
-        <motion.text
-          x="67"
-          y="133"
-          fill="#c85a2a"
-          fontSize="10"
-          fontFamily="'JetBrains Mono', monospace"
-          fontWeight="700"
-          letterSpacing="2"
-          variants={reduced ? undefined : badgeScrollVariants}
-          animate="animate"
-        >
-          MISTER MAPS ★ MISTER MAPS ★
-        </motion.text>
-      </g>
-
-      {/* Chest detail - grid lines */}
-      <line
-        x1="75"
-        y1="142"
-        x2="125"
-        y2="142"
-        stroke="#a09888"
-        strokeWidth="0.5"
-      />
-      <line
-        x1="75"
-        y1="148"
-        x2="125"
-        y2="148"
-        stroke="#a09888"
-        strokeWidth="0.5"
-      />
-      <line
-        x1="75"
-        y1="154"
-        x2="125"
-        y2="154"
-        stroke="#a09888"
-        strokeWidth="0.5"
-      />
-      <line
-        x1="90"
-        y1="140"
-        x2="90"
-        y2="158"
-        stroke="#a09888"
-        strokeWidth="0.5"
-      />
-      <line
-        x1="110"
-        y1="140"
-        x2="110"
-        y2="158"
-        stroke="#a09888"
-        strokeWidth="0.5"
-      />
-
-      {/* Folded map sticking out of body */}
-      <g transform="translate(130, 155)">
+      {/* Body Container */}
+      <g id="body-group">
+        {/* Main Body */}
         <rect
-          x="0"
-          y="-4"
-          width="12"
-          height="18"
-          fill="#e8e0d0"
+          x="25"
+          y="20"
+          width="50"
+          height="55"
+          rx="8"
+          fill="#d4cbb5"
           stroke="#3d3530"
-          strokeWidth="1"
-          rx="1"
+          strokeWidth="3"
         />
-        <line
-          x1="2"
-          y1="0"
-          x2="10"
-          y2="0"
-          stroke="#c85a2a"
-          strokeWidth="0.5"
-          opacity="0.6"
-        />
-        <line
-          x1="2"
-          y1="3"
-          x2="10"
-          y2="3"
-          stroke="#c85a2a"
-          strokeWidth="0.5"
-          opacity="0.6"
-        />
-        <line
-          x1="2"
-          y1="6"
-          x2="10"
-          y2="6"
-          stroke="#c85a2a"
-          strokeWidth="0.5"
-          opacity="0.6"
-        />
-        <line
-          x1="6"
-          y1="-2"
-          x2="6"
-          y2="12"
-          stroke="#5b8fa8"
-          strokeWidth="0.4"
-          opacity="0.5"
-          strokeDasharray="2 1"
-        />
-      </g>
 
-      {/* Belly button / power indicator */}
-      <circle
-        cx="100"
-        cy="165"
-        r="5"
-        fill="#333"
-        stroke="#4a4038"
-        strokeWidth="1"
-      />
-      <circle cx="100" cy="165" r="2" fill={stateColors[state]} />
+        {/* Screen/Face Area */}
+        <rect x="30" y="25" width="40" height="35" rx="4" fill="#2c2c2c" />
 
-      {/* Left arm */}
-      <motion.g
-        style={{ originX: "55px", originY: "120px" }}
-        variants={armLeftVariants}
-        animate={pose}
-      >
-        <rect
-          x="30"
-          y="115"
-          width="25"
-          height="12"
-          rx="6"
-          fill="#b0a898"
-          stroke="#3d3530"
-          strokeWidth="2"
-        />
-        <circle
-          cx="28"
-          cy="121"
-          r="8"
-          fill="#c4bdb2"
-          stroke="#3d3530"
-          strokeWidth="2"
-        />
-        {/* Scan pose: magnifying glass */}
-        {pose === "scan" && (
-          <g transform="translate(15, 108)">
-            <circle
-              cx="0"
-              cy="0"
-              r="9"
+        {/* Face */}
+        <g id="face">
+          {/* Left Eye */}
+          <motion.ellipse
+            cx="40"
+            cy="40"
+            rx="5"
+            ry="6"
+            fill="#6b8f71"
+            animate={{ scaleY: eyeStyle.scaleY, y: eyeStyle.y }}
+            transition={transitionConfig}
+            style={{ originX: "40px", originY: "40px" }}
+          />
+
+          {/* Right Eye */}
+          <motion.ellipse
+            cx="60"
+            cy="40"
+            rx="5"
+            ry="6"
+            fill="#6b8f71"
+            animate={{
+              scaleY: expression === "wink" ? 0.1 : eyeStyle.scaleY,
+              y: eyeStyle.y,
+            }}
+            transition={transitionConfig}
+            style={{ originX: "60px", originY: "40px" }}
+          />
+
+          {/* Left Brow */}
+          <motion.line
+            x1="34"
+            y1="32"
+            x2="46"
+            y2="32"
+            stroke="#6b8f71"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            animate={{ transform: browStyle.left }}
+            transition={transitionConfig}
+            style={{ originX: "40px", originY: "32px" }}
+          />
+
+          {/* Right Brow */}
+          <motion.line
+            x1="54"
+            y1="32"
+            x2="66"
+            y2="32"
+            stroke="#6b8f71"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            animate={{ transform: browStyle.right }}
+            transition={transitionConfig}
+            style={{ originX: "60px", originY: "32px" }}
+          />
+
+          {/* Mouth */}
+          <AnimatePresence mode="wait">
+            <motion.path
+              key={expression}
+              d={mouthPaths[expression]}
               fill="none"
-              stroke="#3d3530"
-              strokeWidth="2.5"
-            />
-            <circle cx="0" cy="0" r="7" fill="rgba(91,143,168,0.15)" />
-            <line
-              x1="6"
-              y1="6"
-              x2="12"
-              y2="12"
-              stroke="#3d3530"
+              stroke="#6b8f71"
               strokeWidth="2.5"
               strokeLinecap="round"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
             />
-          </g>
-        )}
-        {/* Stamp pose: folded map */}
-        {pose === "stamp" && (
-          <g transform="translate(10, 108)">
-            <rect
-              x="-8"
-              y="-6"
-              width="16"
-              height="12"
-              fill="#e8e0d0"
-              stroke="#3d3530"
-              strokeWidth="1.5"
-              rx="1"
-            />
-            <line
-              x1="-6"
-              y1="-3"
-              x2="6"
-              y2="-3"
-              stroke="#c85a2a"
-              strokeWidth="0.8"
-              opacity="0.6"
-            />
-            <line
-              x1="-6"
-              y1="0"
-              x2="6"
-              y2="0"
-              stroke="#c85a2a"
-              strokeWidth="0.8"
-              opacity="0.6"
-            />
-            <line
-              x1="-6"
-              y1="3"
-              x2="3"
-              y2="3"
-              stroke="#c85a2a"
-              strokeWidth="0.8"
-              opacity="0.6"
-            />
-            <line
-              x1="0"
-              y1="-6"
-              x2="0"
-              y2="6"
-              stroke="#5b8fa8"
-              strokeWidth="0.5"
-              strokeDasharray="2 1"
-              opacity="0.5"
-            />
-          </g>
-        )}
-      </motion.g>
+          </AnimatePresence>
+        </g>
 
-      {/* Right arm */}
-      <motion.g
-        style={{ originX: "145px", originY: "120px" }}
-        variants={armRightVariants}
-        animate={pose}
-      >
+        {/* Status Light */}
+        <motion.circle
+          cx="73"
+          cy="24"
+          r="3"
+          animate={{
+            fill: stateColors[state ?? "online"],
+            opacity: state === "scanning" ? [1, 0.3, 1] : 1,
+          }}
+          transition={
+            state === "scanning" ? { duration: 1, repeat: Infinity } : undefined
+          }
+        />
+
+        {/* Badge Screen */}
+        <defs>
+          <clipPath id="maps-badge-clip">
+            <rect x="39" y="63" width="22" height="8" rx="1" />
+          </clipPath>
+        </defs>
         <rect
-          x="145"
-          y="115"
-          width="25"
-          height="12"
-          rx="6"
-          fill="#b0a898"
+          x="38"
+          y="62"
+          width="24"
+          height="10"
+          rx="2"
+          fill="#3d3530"
           stroke="#3d3530"
           strokeWidth="2"
         />
-        <circle
-          cx="172"
-          cy="121"
-          r="8"
+        <rect x="39" y="63" width="22" height="8" rx="1" fill="#1a1a1a" />
+        <g clipPath="url(#maps-badge-clip)">
+          <motion.text
+            y="69.5"
+            fontSize="6"
+            fontWeight="bold"
+            fontFamily="'JetBrains Mono', monospace"
+            fill="#c85a2a"
+            initial={{ x: 62 }}
+            animate={shouldAnimate ? { x: [62, 10] } : { x: 36 }}
+            transition={
+              shouldAnimate
+                ? { duration: 4, repeat: Infinity, ease: "linear" }
+                : { duration: 0 }
+            }
+          >
+            MISTER MAPS
+          </motion.text>
+        </g>
+
+        {/* Folded map poking out of body */}
+        <g transform="translate(68, 54)">
+          <rect
+            x="0"
+            y="0"
+            width="6"
+            height="10"
+            rx="0.5"
+            fill="#e8e0d0"
+            stroke="#3d3530"
+            strokeWidth="1"
+          />
+          <line
+            x1="1"
+            y1="2.5"
+            x2="5"
+            y2="2.5"
+            stroke="#c85a2a"
+            strokeWidth="0.5"
+            opacity="0.6"
+          />
+          <line
+            x1="1"
+            y1="5"
+            x2="5"
+            y2="5"
+            stroke="#c85a2a"
+            strokeWidth="0.5"
+            opacity="0.6"
+          />
+          <line
+            x1="3"
+            y1="0.5"
+            x2="3"
+            y2="9"
+            stroke="#5b8fa8"
+            strokeWidth="0.3"
+            strokeDasharray="1.5 0.5"
+            opacity="0.5"
+          />
+        </g>
+
+        {/* Left Arm */}
+        <motion.g
+          id="left-arm"
+          animate={{ transform: armStyle.leftArm }}
+          transition={transitionConfig}
+          style={{ originX: "25px", originY: "45px" }}
+        >
+          <rect
+            x="12"
+            y="40"
+            width="15"
+            height="8"
+            rx="3"
+            fill="#c4bdb2"
+            stroke="#3d3530"
+            strokeWidth="2"
+          />
+          <circle
+            cx="14"
+            cy="44"
+            r="4"
+            fill="#c4bdb2"
+            stroke="#3d3530"
+            strokeWidth="2"
+          />
+
+          {/* Magnifier for scan pose */}
+          {pose === "scan" && (
+            <g transform="translate(8, 30)">
+              <circle
+                cx="0"
+                cy="0"
+                r="6"
+                fill="none"
+                stroke="#3d3530"
+                strokeWidth="2"
+              />
+              <circle cx="0" cy="0" r="4" fill="rgba(91,143,168,0.15)" />
+              <line
+                x1="4"
+                y1="4"
+                x2="9"
+                y2="9"
+                stroke="#3d3530"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </g>
+          )}
+
+          {/* Folded map for stamp pose */}
+          {pose === "stamp" && (
+            <g transform="translate(6, 30)">
+              <rect
+                x="-5"
+                y="-4"
+                width="10"
+                height="12"
+                rx="1"
+                fill="#e8e0d0"
+                stroke="#3d3530"
+                strokeWidth="1.5"
+              />
+              <line
+                x1="-3"
+                y1="-1"
+                x2="3"
+                y2="-1"
+                stroke="#c85a2a"
+                strokeWidth="0.8"
+                opacity="0.6"
+              />
+              <line
+                x1="-3"
+                y1="2"
+                x2="3"
+                y2="2"
+                stroke="#c85a2a"
+                strokeWidth="0.8"
+                opacity="0.6"
+              />
+              <line
+                x1="-3"
+                y1="5"
+                x2="1"
+                y2="5"
+                stroke="#c85a2a"
+                strokeWidth="0.8"
+                opacity="0.6"
+              />
+            </g>
+          )}
+        </motion.g>
+
+        {/* Right Arm */}
+        <motion.g
+          id="right-arm"
+          animate={{
+            transform: armStyle.rightArm,
+            ...(shouldAnimate && pose === "scan" ? scanArmAnimation : {}),
+          }}
+          transition={transitionConfig}
+          style={{ originX: "75px", originY: "45px" }}
+        >
+          <rect
+            x="73"
+            y="40"
+            width="15"
+            height="8"
+            rx="3"
+            fill="#c4bdb2"
+            stroke="#3d3530"
+            strokeWidth="2"
+          />
+          <circle
+            cx="86"
+            cy="44"
+            r="4"
+            fill="#c4bdb2"
+            stroke="#3d3530"
+            strokeWidth="2"
+          />
+        </motion.g>
+
+        {/* Legs */}
+        <rect
+          x="32"
+          y="75"
+          width="12"
+          height="10"
+          rx="2"
           fill="#c4bdb2"
           stroke="#3d3530"
           strokeWidth="2"
         />
-      </motion.g>
+        <rect
+          x="56"
+          y="75"
+          width="12"
+          height="10"
+          rx="2"
+          fill="#c4bdb2"
+          stroke="#3d3530"
+          strokeWidth="2"
+        />
 
-      {/* Legs */}
-      <rect
-        x="68"
-        y="180"
-        width="18"
-        height="30"
-        rx="4"
-        fill="#b0a898"
-        stroke="#3d3530"
-        strokeWidth="2"
-      />
-      <rect
-        x="114"
-        y="180"
-        width="18"
-        height="30"
-        rx="4"
-        fill="#b0a898"
-        stroke="#3d3530"
-        strokeWidth="2"
-      />
-
-      {/* Feet */}
-      <rect
-        x="62"
-        y="208"
-        width="30"
-        height="10"
-        rx="5"
-        fill="#8a8278"
-        stroke="#3d3530"
-        strokeWidth="2"
-      />
-      <rect
-        x="108"
-        y="208"
-        width="30"
-        height="10"
-        rx="5"
-        fill="#8a8278"
-        stroke="#3d3530"
-        strokeWidth="2"
-      />
+        {/* Feet */}
+        <rect x="30" y="85" width="16" height="6" rx="2" fill="#8a8278" />
+        <rect x="54" y="85" width="16" height="6" rx="2" fill="#8a8278" />
+      </g>
     </motion.svg>
   );
 }
