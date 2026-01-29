@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import type { Map } from "mapbox-gl";
 import { useMap } from "../hooks/useMap";
 import type { Theme, Pattern } from "../types";
@@ -21,9 +21,7 @@ export function MapContainer({
   const { map, isLoaded } = useMap({ container: containerRef, theme });
   const activePatternRef = useRef<Pattern | null>(null);
   const styleGenRef = useRef(0);
-  const setupCompleteRef = useRef(false);
-  const controlValuesRef = useRef(controlValues);
-  controlValuesRef.current = controlValues;
+  const [setupComplete, setSetupComplete] = useState(false);
 
   useEffect(() => {
     if (map && isLoaded) {
@@ -38,7 +36,7 @@ export function MapContainer({
       activePatternRef.current.cleanup(map);
       activePatternRef.current = null;
     }
-    setupCompleteRef.current = false;
+    setSetupComplete(false);
 
     if (pattern) {
       styleGenRef.current++;
@@ -46,11 +44,10 @@ export function MapContainer({
 
       const setupPattern = async () => {
         if (gen !== styleGenRef.current) return;
-        await pattern.setup(map, controlValuesRef.current);
+        await pattern.setup(map, controlValues);
         if (gen !== styleGenRef.current) return;
         activePatternRef.current = pattern;
-        setupCompleteRef.current = true;
-        pattern.update(map, controlValuesRef.current);
+        setSetupComplete(true);
       };
 
       if (map.isStyleLoaded()) {
@@ -62,12 +59,11 @@ export function MapContainer({
   }, [map, isLoaded, pattern?.id]);
 
   useEffect(() => {
-    if (!map || !isLoaded || !pattern) return;
-    if (!setupCompleteRef.current) return;
+    if (!map || !isLoaded || !pattern || !setupComplete) return;
     if (activePatternRef.current?.id === pattern.id) {
       pattern.update(map, controlValues);
     }
-  }, [map, isLoaded, pattern, controlValues]);
+  }, [map, isLoaded, pattern, controlValues, setupComplete]);
 
   return <div ref={containerRef} className={styles.container} />;
 }
