@@ -22,6 +22,14 @@ VITE_MAPBOX_TOKEN=pk.your_token_here
 npm run dev
 ```
 
+## Environment Variables
+
+| Key               | Required | Notes                          |
+| ----------------- | -------- | ------------------------------ |
+| `VITE_MAPBOX_TOKEN` | Yes      | Mapbox token for Mapbox GL JS. |
+
+On Vercel, set `VITE_MAPBOX_TOKEN` as a **Production** environment variable.
+
 ## Routes
 
 | Path              | View                      |
@@ -50,6 +58,10 @@ The app loads live data from Norwegian public APIs:
 | Turrutebasen       | Hiking trails    | `wfs.geonorge.no/skwms1/wfs.turogfriluftsruter` (WFS/GML) |
 
 **Rendalen Kommune Code:** 3424
+
+Notes:
+- Some sources return `MultiPolygon` / `MultiLineString` geometries; the map layer filters handle both.
+- Some endpoints may return empty results depending on bounding box and upstream availability.
 
 ### Featured Locations
 
@@ -124,6 +136,7 @@ Sibling to MrNews — same 100x100 SVG architecture, shared animation patterns (
 
 ```bash
 npm run dev      # Start dev server
+npm run lint     # ESLint checks
 npm run build    # Production build
 npm run preview  # Preview production build
 ```
@@ -131,6 +144,17 @@ npm run preview  # Preview production build
 ## Deployment
 
 Deployed on Vercel. Push to `master` triggers automatic deploy.
+
+- `vercel.json` includes an SPA rewrite so client-side routes like `/map` work on refresh.
+- Local Vercel config lives in `.vercel/` (not committed). Use `vercel deploy --prod` for manual production deploys.
+
+## Troubleshooting
+
+### Layers not appearing
+
+- Confirm `VITE_MAPBOX_TOKEN` is set (local `.env.local` or Vercel env var).
+- On `/map`, select the **Rendalen Data** pattern and wait for the “All data loaded!” status message.
+- If **Hiking Trails** is empty: the trails layer is loaded from WFS/GML and parsed client-side; upstream responses and axis order can vary. Open DevTools → Console/Network and check for request failures.
 
 ## License
 
