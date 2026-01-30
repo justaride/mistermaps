@@ -59,8 +59,21 @@ export function MapContainer({
   }, [map, isLoaded, pattern?.id]);
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log("[update effect]", {
+        map: !!map,
+        isLoaded,
+        pattern: pattern?.id,
+        setupComplete,
+        controlValues,
+        activeRef: activePatternRef.current?.id,
+      });
+    }
     if (!map || !isLoaded || !pattern || !setupComplete) return;
     if (activePatternRef.current?.id === pattern.id) {
+      if (import.meta.env.DEV) {
+        console.log("[update effect] calling pattern.update");
+      }
       pattern.update(map, controlValues);
     }
   }, [map, isLoaded, pattern, controlValues, setupComplete]);

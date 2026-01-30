@@ -104,8 +104,15 @@ export const rendalenDataPattern: Pattern = {
   },
 
   update(map: Map, controls: Record<string, unknown>) {
+    if (import.meta.env.DEV) {
+      console.log("[rendalen update]", controls);
+    }
     const setVisible = (id: string, visible: boolean) => {
-      if (map.getLayer(id)) {
+      const exists = !!map.getLayer(id);
+      if (import.meta.env.DEV) {
+        console.log(`[setVisible] ${id}: exists=${exists}, visible=${visible}`);
+      }
+      if (exists) {
         map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
       }
     };
