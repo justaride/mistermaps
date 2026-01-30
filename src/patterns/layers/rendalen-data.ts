@@ -351,7 +351,7 @@ async function loadWaterBodies(map: Map, signal: AbortSignal) {
         id: WATER_LAYER,
         type: "fill",
         source: WATER_SOURCE,
-        filter: ["==", "$type", "Polygon"],
+        filter: ["in", "$type", "Polygon", "MultiPolygon"],
         paint: {
           "fill-color": "#0ea5e9",
           "fill-opacity": 0.5,
@@ -362,7 +362,7 @@ async function loadWaterBodies(map: Map, signal: AbortSignal) {
         id: WATER_LAYER + "-line",
         type: "line",
         source: WATER_SOURCE,
-        filter: ["==", "$type", "LineString"],
+        filter: ["in", "$type", "LineString", "MultiLineString"],
         paint: {
           "line-color": "#0284c7",
           "line-width": 3,
@@ -432,16 +432,21 @@ function parseGmlToGeoJson(gmlText: string): GeoJSON.FeatureCollection {
   const parser = new DOMParser();
   const doc = parser.parseFromString(gmlText, "text/xml");
 
-  const members = doc.querySelectorAll("member");
+  const members = Array.from(doc.getElementsByTagNameNS("*", "member"));
 
   members.forEach((member) => {
-    const nameEl = member.querySelector("rutenavn");
-    const name = nameEl?.textContent || "Unknown trail";
+    const nameEl = member.getElementsByTagNameNS("*", "rutenavn")[0];
+    const name = nameEl?.textContent?.trim() || "Unknown trail";
 
-    const posListEl = member.querySelector("posList");
+    const posListEl = member.getElementsByTagNameNS("*", "posList")[0];
     if (!posListEl?.textContent) return;
 
-    const coords = parsePosList(posListEl.textContent);
+    const coords = parsePosList(posListEl.textContent, {
+      minLon: 10.5,
+      minLat: 61.5,
+      maxLon: 11.8,
+      maxLat: 62.3,
+    });
     if (coords.length < 2) return;
 
     features.push({
@@ -457,16 +462,52 @@ function parseGmlToGeoJson(gmlText: string): GeoJSON.FeatureCollection {
   return { type: "FeatureCollection", features };
 }
 
-function parsePosList(posList: string): [number, number][] {
+function parsePosList(
+  posList: string,
+  expectedBbox?: {
+    minLon: number;
+    minLat: number;
+    maxLon: number;
+    maxLat: number;
+  },
+): [number, number][] {
   const values = posList.trim().split(/\s+/).map(Number);
   const coords: [number, number][] = [];
 
-  for (let i = 0; i < values.length - 1; i += 2) {
-    const lat = values[i];
-    const lon = values[i + 1];
-    if (!isNaN(lon) && !isNaN(lat)) {
-      coords.push([lon, lat]);
+  const inBbox = (lon: number, lat: number) => {
+    if (!expectedBbox) return true;
+    return (
+      lon >= expectedBbox.minLon &&
+      lon <= expectedBbox.maxLon &&
+      lat >= expectedBbox.minLat &&
+      lat <= expectedBbox.maxLat
+    );
+  };
+
+  const pairCount = Math.floor(values.length / 2);
+  let swapAxisOrder = false;
+  if (expectedBbox && pairCount >= 1) {
+    let normalScore = 0;
+    let swappedScore = 0;
+    const samples = Math.min(pairCount, 10);
+    for (let i = 0; i < samples; i++) {
+      const a = values[i * 2];
+      const b = values[i * 2 + 1];
+      if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
+      if (inBbox(a, b)) normalScore++;
+      if (inBbox(b, a)) swappedScore++;
     }
+    swapAxisOrder = swappedScore > normalScore;
+  }
+
+  for (let i = 0; i < values.length - 1; i += 2) {
+    const a = values[i];
+    const b = values[i + 1];
+    if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
+
+    const lon = swapAxisOrder ? b : a;
+    const lat = swapAxisOrder ? a : b;
+    coords.push([lon, lat]);
   }
 
   return coords;
