@@ -9,6 +9,9 @@ type Props = {
 
 const CATEGORY_LABELS: Record<string, string> = {
   layers: "Layers",
+  "data-viz": "Data Viz",
+  markers: "Markers",
+  navigation: "Navigation",
 };
 
 export function PatternSelector({ patterns, activePattern, onSelect }: Props) {

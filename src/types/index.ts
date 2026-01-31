@@ -1,8 +1,20 @@
 import type { Map } from "mapbox-gl";
 
-export type PatternId = "rendalen-data" | "layer-inspector";
+export type PatternId =
+  | "rendalen-data"
+  | "layer-inspector"
+  | "layer-explorer"
+  | "layer-basics"
+  | "geojson-overlay"
+  | "3d-buildings"
+  | "choropleth"
+  | "heatmap"
+  | "route-display"
+  | "distance-measurement"
+  | "clustered-markers"
+  | "custom-popups";
 
-export type PatternCategory = "layers";
+export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
 
 export type ControlType = "slider" | "toggle" | "select" | "color";
 

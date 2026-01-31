@@ -30,12 +30,15 @@ npm run dev
 
 On Vercel, set `VITE_MAPBOX_TOKEN` as a **Production** environment variable.
 
+Note: `/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox token.
+
 ## Routes
 
 | Path              | View                      |
 | ----------------- | ------------------------- |
 | `/`               | Landing page with mascot  |
 | `/map`            | Full-screen map browser   |
+| `/maplibre`       | MapLibre “quick peek” map |
 | `/map?pattern=ID` | Map with specific pattern |
 
 ## Patterns

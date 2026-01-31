@@ -184,14 +184,23 @@ export default function Landing() {
               MISTER MAPS
             </span>
           </div>
-          <Link
-            to="/map"
-            className="inline-flex items-center gap-2 border-2 border-border bg-accent px-4 py-2 font-mono text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
-            style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
-          >
-            <Compass className="h-4 w-4" /> Enter Map{" "}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/maplibre"
+              className="inline-flex items-center gap-2 border-2 border-border bg-card px-4 py-2 font-mono text-sm font-bold text-fg transition-transform hover:-translate-y-0.5"
+              style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+            >
+              <Globe className="h-4 w-4" /> MapLibre Peek
+            </Link>
+            <Link
+              to="/map"
+              className="inline-flex items-center gap-2 border-2 border-border bg-accent px-4 py-2 font-mono text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+              style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+            >
+              <Compass className="h-4 w-4" /> Enter Map{" "}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
         <div className="relative border-b-2 border-border">
           <TopoWaveBorder />
@@ -255,6 +264,13 @@ export default function Landing() {
                 style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
               >
                 <Compass className="h-4 w-4" /> View Map
+              </Link>
+              <Link
+                to="/maplibre"
+                className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-mono text-sm font-bold text-fg transition-transform hover:-translate-y-0.5"
+                style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+              >
+                <Globe className="h-4 w-4" /> MapLibre Peek
               </Link>
               <a
                 href="#patterns"
