@@ -2,7 +2,7 @@
 
 Personal map design system built with React + TypeScript + Vite + Mapbox GL JS.
 
-A full-screen map pattern browser focused on **Rendalen Kommune, Norway**. Browse patterns, interact with live demos, and copy implementation code.
+A map pattern catalog and project showcase. Browse interactive Mapbox GL and MapLibre demos, interact with live Norwegian public APIs, and copy implementation code.
 
 **Live Demo:** [mister-maps.vercel.app](https://mister-maps.vercel.app)
 
@@ -24,29 +24,34 @@ npm run dev
 
 ## Environment Variables
 
-| Key               | Required | Notes                          |
-| ----------------- | -------- | ------------------------------ |
+| Key                 | Required | Notes                          |
+| ------------------- | -------- | ------------------------------ |
 | `VITE_MAPBOX_TOKEN` | Yes      | Mapbox token for Mapbox GL JS. |
 
 On Vercel, set `VITE_MAPBOX_TOKEN` as a **Production** environment variable.
 
-Note: `/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox token.
+Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox token.
 
 ## Routes
 
-| Path              | View                      |
-| ----------------- | ------------------------- |
-| `/`               | Landing page with mascot  |
-| `/map`            | Full-screen map browser   |
-| `/maplibre`       | MapLibre “quick peek” map |
-| `/map?pattern=ID` | Map with specific pattern |
+| Path                 | View                                        |
+| -------------------- | ------------------------------------------- |
+| `/`                  | Landing page — brand hub with mascot        |
+| `/maps`              | Maps catalog — filterable grid of all demos |
+| `/maps/:id`          | Map detail — single interactive demo        |
+| `/projects/rendalen` | Rendalen project — Norwegian data overlays  |
 
 ## Patterns
 
-| Pattern         | Description                                           |
-| --------------- | ----------------------------------------------------- |
-| Rendalen Data   | Live Norwegian data (boundary, nature, water, trails) |
-| Layer Inspector | Click to inspect features                             |
+11 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+
+| Category   | Patterns                                                                     |
+| ---------- | ---------------------------------------------------------------------------- |
+| Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings |
+| Data Viz   | Heatmap, Choropleth                                                          |
+| Markers    | Clustered Markers, Custom Popups                                             |
+| Navigation | Route Display, Distance Measurement                                          |
+| Providers  | MapLibre GL (OSM / CARTO)                                                    |
 
 ## Rendalen Data Sources
 
@@ -63,6 +68,7 @@ The app loads live data from Norwegian public APIs:
 **Rendalen Kommune Code:** 3424
 
 Notes:
+
 - Some sources return `MultiPolygon` / `MultiLineString` geometries; the map layer filters handle both.
 - Some endpoints may return empty results depending on bounding box and upstream availability.
 
@@ -111,14 +117,15 @@ Sibling to MrNews — same 100x100 SVG architecture, shared animation patterns (
 
 ## Features
 
-- Field explorer landing page with MrMaps robot mascot and scene cycling
-- Field station console with live layer readings and coordinate display
+- Brand landing page with MrMaps robot mascot and scene cycling
+- Maps catalog with category filter tabs
+- Individual map detail pages with controls and code viewer
+- Dedicated Rendalen project page with Norwegian data overlays
 - Compass rose watermarks and topographic contour decorations
-- Full-screen Mapbox map centered on Rendalen
+- Full-screen Mapbox GL maps centered on Rendalen
+- MapLibre GL support with OSM/CARTO basemaps
 - Location search with autocomplete
-- Pattern selector dropdown
 - Interactive controls panel with synchronous filter initialization
-- Map filter toggles sync correctly with async layer data loading
 - Code viewer with copy functionality
 - Light/dark theme toggle
 
@@ -148,7 +155,7 @@ npm run preview  # Preview production build
 
 Deployed on Vercel. Push to `master` triggers automatic deploy.
 
-- `vercel.json` includes an SPA rewrite so client-side routes like `/map` work on refresh.
+- `vercel.json` includes an SPA rewrite so client-side routes like `/maps` work on refresh.
 - Local Vercel config lives in `.vercel/` (not committed). Use `vercel deploy --prod` for manual production deploys.
 
 ## Troubleshooting
@@ -156,7 +163,7 @@ Deployed on Vercel. Push to `master` triggers automatic deploy.
 ### Layers not appearing
 
 - Confirm `VITE_MAPBOX_TOKEN` is set (local `.env.local` or Vercel env var).
-- On `/map`, select the **Rendalen Data** pattern and wait for the “All data loaded!” status message.
+- On `/projects/rendalen`, wait for the "All data loaded!" status message.
 - If **Hiking Trails** is empty: the trails layer is loaded from WFS/GML and parsed client-side; upstream responses and axis order can vary. Open DevTools → Console/Network and check for request failures.
 
 ## License
