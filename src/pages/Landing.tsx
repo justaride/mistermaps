@@ -1,25 +1,17 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Map,
   Layers,
   Code,
   Globe,
   Compass,
-  Droplets,
-  Trees,
-  Mountain,
   ArrowRight,
   Github,
+  Map,
+  Mountain,
 } from "lucide-react";
 import { MrMaps } from "../components/mascot";
 import { LandingMascot } from "../components/landing/LandingMascot";
-import { patterns } from "../patterns";
-
-const PATTERN_ICONS: Record<string, React.ReactNode> = {
-  "rendalen-data": <Mountain className="h-6 w-6" />,
-  "layer-inspector": <Layers className="h-6 w-6" />,
-};
 
 const FEATURES = [
   {
@@ -39,27 +31,6 @@ const FEATURES = [
     color: "bg-topo",
     title: "Code Snippets",
     description: "Copy-paste Mapbox GL JS patterns for your own projects.",
-  },
-];
-
-const LAYER_CARDS = [
-  {
-    icon: <Mountain className="h-4 w-4" />,
-    label: "Kommune",
-    value: "2430",
-    color: "#c85a2a",
-  },
-  {
-    icon: <Trees className="h-4 w-4" />,
-    label: "Nature",
-    value: "14 areas",
-    color: "#6b8f71",
-  },
-  {
-    icon: <Droplets className="h-4 w-4" />,
-    label: "Water",
-    value: "3 rivers",
-    color: "#5b8fa8",
   },
 ];
 
@@ -175,7 +146,6 @@ export default function Landing() {
     <div className="min-h-screen bg-bg text-fg">
       <div className="noise-overlay" />
 
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-bg/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
@@ -186,18 +156,11 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              to="/maplibre"
-              className="inline-flex items-center gap-2 border-2 border-border bg-card px-4 py-2 font-mono text-sm font-bold text-fg transition-transform hover:-translate-y-0.5"
-              style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
-            >
-              <Globe className="h-4 w-4" /> MapLibre Peek
-            </Link>
-            <Link
-              to="/map"
+              to="/maps"
               className="inline-flex items-center gap-2 border-2 border-border bg-accent px-4 py-2 font-mono text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
               style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
             >
-              <Compass className="h-4 w-4" /> Enter Map{" "}
+              <Compass className="h-4 w-4" /> Browse Maps{" "}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -207,7 +170,6 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -217,19 +179,12 @@ export default function Landing() {
         <CompassRoseWatermark className="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] -translate-y-10 translate-x-10 md:h-[500px] md:w-[500px]" />
 
         <div className="grid items-center gap-12 md:grid-cols-2">
-          {/* Left */}
           <div className="relative z-10 flex flex-col gap-6">
-            <span
-              className="inline-block w-fit border-2 border-border bg-warn px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider"
-              style={{ boxShadow: "2px 2px 0 var(--color-border)" }}
-            >
-              61.8°N 11.1°E · RENDALEN
-            </span>
             <h1 className="font-display text-5xl leading-tight tracking-wide md:text-6xl lg:text-7xl">
-              Explore
+              Mister
               <br />
               <span className="relative text-accent">
-                Rendalen
+                Maps
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
                   height="8"
@@ -254,165 +209,65 @@ export default function Landing() {
               </span>
             </h1>
             <p className="max-w-md border-l-2 border-accent pl-4 font-mono text-sm text-muted">
-              Interactive map patterns powered by Norwegian public APIs.
-              Kartverket, Naturbase, NVE — all in one place.
+              Interactive map patterns powered by Mapbox GL and MapLibre.
+              Norwegian public APIs, layer demos, and code snippets.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-4">
               <Link
-                to="/map"
-                className="inline-flex items-center gap-2 border-2 border-border bg-accent px-5 py-2.5 font-mono text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
-                style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+                to="/maps"
+                className="group flex flex-col gap-3 border-2 border-border bg-card p-5 transition-transform hover:-translate-y-1"
+                style={{
+                  boxShadow: "3px 3px 0 var(--color-border)",
+                  minWidth: 200,
+                }}
               >
-                <Compass className="h-4 w-4" /> View Map
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center border-2 border-border bg-accent/10 text-accent">
+                    <Map className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display text-lg tracking-wide">
+                    Maps of Maps
+                  </h3>
+                </div>
+                <p className="font-mono text-xs text-muted">
+                  Browse 11 Mapbox GL patterns + MapLibre
+                </p>
+                <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-accent group-hover:underline">
+                  Explore <ArrowRight className="h-3 w-3" />
+                </span>
               </Link>
               <Link
-                to="/maplibre"
-                className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-mono text-sm font-bold text-fg transition-transform hover:-translate-y-0.5"
-                style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+                to="/projects/rendalen"
+                className="group flex flex-col gap-3 border-2 border-border bg-card p-5 transition-transform hover:-translate-y-1"
+                style={{
+                  boxShadow: "3px 3px 0 var(--color-border)",
+                  minWidth: 200,
+                }}
               >
-                <Globe className="h-4 w-4" /> MapLibre Peek
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center border-2 border-border bg-topo/10 text-topo">
+                    <Mountain className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display text-lg tracking-wide">
+                    Projects
+                  </h3>
+                </div>
+                <p className="font-mono text-xs text-muted">
+                  Rendalen: Norwegian public data overlays
+                </p>
+                <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-accent group-hover:underline">
+                  Explore <ArrowRight className="h-3 w-3" />
+                </span>
               </Link>
-              <a
-                href="#patterns"
-                className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-mono text-sm font-bold text-fg transition-transform hover:-translate-y-0.5"
-                style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
-              >
-                Browse Patterns
-              </a>
             </div>
           </div>
 
-          {/* Right - Mascot + Field Station Console */}
           <div className="flex flex-col items-center gap-6">
             <LandingMascot />
-
-            {/* Field Station Console */}
-            <div
-              className="topo-lines relative w-full max-w-sm overflow-hidden border-2 border-border bg-card"
-              style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
-            >
-              <div className="scanlines" />
-              {/* Station header */}
-              <div className="flex items-center justify-between border-b-2 border-border bg-border/5 px-3 py-2">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted">
-                  Field Station
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-topo animate-pulse" />
-                  <span className="font-mono text-[10px] text-topo font-bold">
-                    LIVE
-                  </span>
-                </div>
-              </div>
-              {/* Content */}
-              <div className="p-4">
-                {/* Compass + coordinates */}
-                <div className="mb-3 flex items-center gap-2">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  >
-                    <Compass className="h-5 w-5 text-accent" />
-                  </motion.div>
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted">
-                    Rendalen · 61.8°N 11.1°E
-                  </span>
-                </div>
-                {/* Field readings */}
-                <div className="flex flex-col gap-2">
-                  {LAYER_CARDS.map((card) => (
-                    <div
-                      key={card.label}
-                      className="flex items-center gap-2 border border-border/30 bg-bg/50 px-3 py-1.5 font-mono text-xs"
-                    >
-                      <span style={{ color: card.color }}>{card.icon}</span>
-                      <span className="font-bold">{card.label}</span>
-                      <span className="ml-auto text-[10px] text-muted">
-                        {card.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Field log ticker */}
-              <div className="overflow-hidden border-t-2 border-border bg-border/5 py-1.5">
-                <motion.div
-                  className="flex whitespace-nowrap font-mono text-[10px] font-bold uppercase tracking-widest text-muted"
-                  animate={{ x: [0, -300] }}
-                  transition={{
-                    duration: 12,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                >
-                  <span className="px-4">
-                    FIELD LOG &middot; KARTVERKET &middot; NATURBASE &middot;
-                    NVE &middot; RENDALEN KOMMUNE &middot; FIELD LOG &middot;
-                    KARTVERKET &middot; NATURBASE &middot; NVE &middot; RENDALEN
-                    KOMMUNE
-                  </span>
-                </motion.div>
-              </div>
-            </div>
           </div>
         </div>
       </motion.section>
 
-      {/* Patterns */}
-      <section id="patterns" className="mx-auto max-w-6xl px-4 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="mb-2 font-display text-3xl tracking-wide md:text-4xl">
-            Available Patterns
-          </h2>
-          <p className="mb-8 font-mono text-sm text-muted">
-            Interactive map visualizations you can explore and learn from.
-          </p>
-          <div className="grid gap-6 sm:grid-cols-2">
-            {patterns.map((pattern, idx) => (
-              <Link
-                key={pattern.id}
-                to={`/map?pattern=${pattern.id}`}
-                className="group flex flex-col gap-3 border-2 border-border bg-card p-5 transition-transform hover:-translate-y-1"
-                style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center border-2 border-border bg-topo/10 text-topo">
-                    {PATTERN_ICONS[pattern.id] || <Map className="h-5 w-5" />}
-                  </div>
-                  <div>
-                    <h3 className="font-display text-lg tracking-wide">
-                      {pattern.name}
-                    </h3>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-                      {pattern.category}
-                    </span>
-                  </div>
-                  <span className="ml-auto font-mono text-[10px] text-muted/50">
-                    ELV {(idx + 1) * 340}m
-                  </span>
-                </div>
-                <p className="font-mono text-xs text-muted">
-                  {pattern.description}
-                </p>
-                <span className="mt-auto inline-flex items-center gap-1 font-mono text-xs font-bold text-accent group-hover:underline">
-                  Explore <ArrowRight className="h-3 w-3" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Features Strip */}
       <section className="grid-paper border-y-2 border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-3">
           {FEATURES.map((feature) => (
@@ -443,7 +298,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="relative overflow-hidden border-t-2 border-border bg-fg text-bg">
         <CompassRoseWatermark className="pointer-events-none absolute right-4 top-1/2 h-32 w-32 -translate-y-1/2 opacity-[0.06]" />
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6">

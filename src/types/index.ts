@@ -41,6 +41,15 @@ export type Pattern = {
   snippet: string;
 };
 
+export type CatalogEntry = {
+  patternId: PatternId | "maplibre";
+  name: string;
+  description: string;
+  capabilities: string[];
+  category: PatternCategory | "providers";
+  provider: "mapbox" | "maplibre";
+};
+
 export type Theme = "light" | "dark";
 
 export type AppState = {

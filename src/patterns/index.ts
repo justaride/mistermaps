@@ -11,11 +11,12 @@ import {
 import { clusteredMarkersPattern, customPopupsPattern } from "./markers";
 import { routeDisplayPattern, distanceMeasurementPattern } from "./navigation";
 
-export const patterns: Pattern[] = [
-  rendalenDataPattern,
+export { rendalenDataPattern };
+
+export const catalogPatterns: Pattern[] = [
+  layerBasicsPattern,
   layerInspectorPattern,
   layerExplorerPattern,
-  layerBasicsPattern,
   geojsonOverlayPattern,
   buildings3DPattern,
   heatmapPattern,
@@ -25,3 +26,5 @@ export const patterns: Pattern[] = [
   routeDisplayPattern,
   distanceMeasurementPattern,
 ];
+
+export const patterns: Pattern[] = [rendalenDataPattern, ...catalogPatterns];
