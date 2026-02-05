@@ -45,13 +45,13 @@ Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox
 
 20 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
 
-| Category   | Patterns                                                                     |
-| ---------- | ---------------------------------------------------------------------------- |
+| Category   | Patterns                                                                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade |
-| Data Viz   | Heatmap, Choropleth                                                          |
-| Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                |
-| Navigation | Route Display, Animated Route, Geolocation, Distance Measurement, Area Measurement |
-| Providers  | MapLibre GL (OSM / CARTO)                                                    |
+| Data Viz   | Heatmap, Choropleth                                                                                                                                                             |
+| Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                                                                                                                   |
+| Navigation | Route Display, Animated Route, Geolocation, Distance Measurement, Area Measurement                                                                                              |
+| Providers  | MapLibre GL (OSM / CARTO)                                                                                                                                                       |
 
 ## Rendalen Data Sources
 
@@ -150,6 +150,17 @@ npm run lint     # ESLint checks
 npm run build    # Production build
 npm run preview  # Preview production build
 ```
+
+## Autonomous Development (Ralph Wiggum)
+
+This project uses [Ralph Wiggum](https://github.com/fstandhartinger/ralph-wiggum) for spec-driven autonomous AI development.
+
+```bash
+./scripts/ralph-loop.sh        # Run autonomous build loop
+./scripts/ralph-loop.sh 20     # Limit to 20 iterations
+```
+
+Create specs in `specs/` with testable acceptance criteria. The loop picks the highest priority incomplete spec, implements it, verifies criteria, commits, and moves on — each iteration with fresh context.
 
 ## Deployment
 
