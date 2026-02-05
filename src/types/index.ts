@@ -7,12 +7,21 @@ export type PatternId =
   | "layer-basics"
   | "geojson-overlay"
   | "3d-buildings"
+  | "feature-state"
+  | "vector-feature-state"
+  | "vector-road-styling"
+  | "vector-debug-tools"
+  | "terrain-hillshade"
   | "choropleth"
   | "heatmap"
+  | "geolocation"
   | "route-display"
   | "distance-measurement"
+  | "area-measurement"
+  | "animated-route"
   | "clustered-markers"
-  | "custom-popups";
+  | "custom-popups"
+  | "pulsing-dot";
 
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
 

@@ -1,10 +1,14 @@
-import mapboxgl, { type Map } from "mapbox-gl";
+import mapboxgl, { type Map, type MapLayerMouseEvent } from "mapbox-gl";
 import type { Pattern } from "../../types";
 
 const SOURCE_ID = "popups-source";
 const LAYER_ID = "popups-layer";
 
 let popup: mapboxgl.Popup | null = null;
+let markerColor = "#8b5cf6";
+let clickHandler: ((e: MapLayerMouseEvent) => void) | null = null;
+let mouseEnterHandler: (() => void) | null = null;
+let mouseLeaveHandler: (() => void) | null = null;
 
 export const customPopupsPattern: Pattern = {
   id: "custom-popups",
@@ -38,6 +42,7 @@ export const customPopupsPattern: Pattern = {
 
   setup(map: Map, controls: Record<string, unknown>) {
     const locations = getSampleLocations();
+    markerColor = controls.markerColor as string;
 
     map.addSource(SOURCE_ID, {
       type: "geojson",
@@ -69,7 +74,7 @@ export const customPopupsPattern: Pattern = {
       maxWidth: "300px",
     });
 
-    map.on("click", LAYER_ID, (e) => {
+    clickHandler = (e) => {
       const feature = e.features?.[0];
       if (!feature) return;
 
@@ -88,7 +93,7 @@ export const customPopupsPattern: Pattern = {
           <h3 style="margin: 0 0 8px; font-size: 16px; color: #1a1a1a;">${props.name}</h3>
           <p style="margin: 0 0 8px; color: #666; font-size: 13px;">${props.description}</p>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <span style="background: ${controls.markerColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+            <span style="background: ${markerColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
               ${props.category}
             </span>
             <span style="color: #f59e0b; font-size: 13px;">
@@ -99,23 +104,38 @@ export const customPopupsPattern: Pattern = {
       `;
 
       popup?.setLngLat(coords).setHTML(html).addTo(map);
-    });
+    };
+    map.on("click", LAYER_ID, clickHandler);
 
-    map.on("mouseenter", LAYER_ID, () => {
+    mouseEnterHandler = () => {
       map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", LAYER_ID, () => {
+    };
+    map.on("mouseenter", LAYER_ID, mouseEnterHandler);
+
+    mouseLeaveHandler = () => {
       map.getCanvas().style.cursor = "";
-    });
+    };
+    map.on("mouseleave", LAYER_ID, mouseLeaveHandler);
   },
 
   cleanup(map: Map) {
     popup?.remove();
     popup = null;
 
-    map.off("click", LAYER_ID, () => {});
-    map.off("mouseenter", LAYER_ID, () => {});
-    map.off("mouseleave", LAYER_ID, () => {});
+    if (clickHandler) {
+      map.off("click", LAYER_ID, clickHandler);
+      clickHandler = null;
+    }
+    if (mouseEnterHandler) {
+      map.off("mouseenter", LAYER_ID, mouseEnterHandler);
+      mouseEnterHandler = null;
+    }
+    if (mouseLeaveHandler) {
+      map.off("mouseleave", LAYER_ID, mouseLeaveHandler);
+      mouseLeaveHandler = null;
+    }
+
+    map.getCanvas().style.cursor = "";
 
     if (map.getLayer(LAYER_ID)) map.removeLayer(LAYER_ID);
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
@@ -123,6 +143,8 @@ export const customPopupsPattern: Pattern = {
 
   update(map: Map, controls: Record<string, unknown>) {
     if (!map.getLayer(LAYER_ID)) return;
+
+    markerColor = controls.markerColor as string;
 
     map.setPaintProperty(
       LAYER_ID,

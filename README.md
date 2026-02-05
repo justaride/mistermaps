@@ -43,14 +43,14 @@ Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox
 
 ## Patterns
 
-11 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+20 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
 
 | Category   | Patterns                                                                     |
 | ---------- | ---------------------------------------------------------------------------- |
-| Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings |
+| Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade |
 | Data Viz   | Heatmap, Choropleth                                                          |
-| Markers    | Clustered Markers, Custom Popups                                             |
-| Navigation | Route Display, Distance Measurement                                          |
+| Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                |
+| Navigation | Route Display, Animated Route, Geolocation, Distance Measurement, Area Measurement |
 | Providers  | MapLibre GL (OSM / CARTO)                                                    |
 
 ## Rendalen Data Sources

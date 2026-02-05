@@ -1,4 +1,4 @@
-import type { Map, MapMouseEvent, GeoJSONSource } from "mapbox-gl";
+import type { GeoJSONSource, Map, MapMouseEvent } from "mapbox-gl";
 import * as turf from "@turf/turf";
 import type { Pattern } from "../../types";
 import {
@@ -8,10 +8,11 @@ import {
 } from "../utils/export";
 import { geojsonToGpx, geojsonToKml } from "../utils/geojson-formats";
 
-const SOURCE_ID = "measurement-source";
-const LINE_LAYER_ID = "measurement-line";
-const POINTS_LAYER_ID = "measurement-points";
-const LABEL_LAYER_ID = "measurement-label";
+const SOURCE_ID = "area-measurement-source";
+const FILL_LAYER_ID = "area-measurement-fill";
+const LINE_LAYER_ID = "area-measurement-outline";
+const POINTS_LAYER_ID = "area-measurement-vertices";
+const LABEL_LAYER_ID = "area-measurement-label";
 
 let points: [number, number][] = [];
 let hoverCoord: [number, number] | null = null;
@@ -33,42 +34,81 @@ let downloadKmlButton: HTMLButtonElement | null = null;
 let downloadGpxButton: HTMLButtonElement | null = null;
 let flashTimeout: number | null = null;
 
-export const distanceMeasurementPattern: Pattern = {
-  id: "distance-measurement",
-  name: "Distance Measurement",
+export const areaMeasurementPattern: Pattern = {
+  id: "area-measurement",
+  name: "Area Measurement",
   category: "navigation",
   description:
-    "Measure distance along a line. Click to add points, double-click or Enter to finish. Esc clears.",
+    "Draw a polygon to measure area. Click to add vertices, double-click to finish. Esc clears.",
   controls: [
-    {
-      id: "lineColor",
-      label: "Line Color",
-      type: "color",
-      defaultValue: "#ef4444",
-    },
     {
       id: "unit",
       label: "Unit",
       type: "select",
-      defaultValue: "kilometers",
+      defaultValue: "ha",
       options: [
-        { label: "Kilometers", value: "kilometers" },
-        { label: "Miles", value: "miles" },
-        { label: "Meters", value: "meters" },
+        { label: "Square meters (m²)", value: "m2" },
+        { label: "Hectares (ha)", value: "ha" },
+        { label: "Square kilometers (km²)", value: "km2" },
+        { label: "Acres (ac)", value: "acres" },
+        { label: "Square miles (mi²)", value: "sqmi" },
       ],
+    },
+    {
+      id: "fillColor",
+      label: "Fill Color",
+      type: "color",
+      defaultValue: "#a855f7",
+    },
+    {
+      id: "fillOpacity",
+      label: "Fill Opacity",
+      type: "slider",
+      defaultValue: 0.22,
+      min: 0,
+      max: 0.7,
+      step: 0.02,
+    },
+    {
+      id: "outlineColor",
+      label: "Outline Color",
+      type: "color",
+      defaultValue: "#7c3aed",
+    },
+    {
+      id: "lineWidth",
+      label: "Line Width",
+      type: "slider",
+      defaultValue: 3,
+      min: 1,
+      max: 8,
+      step: 1,
+    },
+    {
+      id: "showVertices",
+      label: "Vertices",
+      type: "toggle",
+      defaultValue: true,
+    },
+    {
+      id: "vertexSize",
+      label: "Vertex Size",
+      type: "slider",
+      defaultValue: 6,
+      min: 3,
+      max: 12,
+      step: 1,
     },
   ],
 
   setup(map: Map, controls: Record<string, unknown>) {
+    currentControls = controls;
     points = [];
     hoverCoord = null;
     isFinished = false;
-    currentControls = controls;
 
     createStatusPanel(map);
-    updateStatus(
-      "Click to add points. Double-click/Enter to finish. Esc clears. Backspace undoes.",
-    );
+    updateStatus("Click to add vertices. Double-click to finish. Esc clears.");
 
     map.addSource(SOURCE_ID, {
       type: "geojson",
@@ -79,13 +119,24 @@ export const distanceMeasurementPattern: Pattern = {
     });
 
     map.addLayer({
+      id: FILL_LAYER_ID,
+      type: "fill",
+      source: SOURCE_ID,
+      filter: ["in", "$type", "Polygon", "MultiPolygon"],
+      paint: {
+        "fill-color": controls.fillColor as string,
+        "fill-opacity": controls.fillOpacity as number,
+      },
+    });
+
+    map.addLayer({
       id: LINE_LAYER_ID,
       type: "line",
       source: SOURCE_ID,
       filter: ["==", "$type", "LineString"],
       paint: {
-        "line-color": controls.lineColor as string,
-        "line-width": 3,
+        "line-color": controls.outlineColor as string,
+        "line-width": controls.lineWidth as number,
         "line-dasharray": [2, 1],
       },
     });
@@ -96,10 +147,13 @@ export const distanceMeasurementPattern: Pattern = {
       source: SOURCE_ID,
       filter: ["==", "$type", "Point"],
       paint: {
-        "circle-radius": 6,
-        "circle-color": controls.lineColor as string,
+        "circle-radius": controls.vertexSize as number,
+        "circle-color": controls.outlineColor as string,
         "circle-stroke-width": 2,
         "circle-stroke-color": "#fff",
+      },
+      layout: {
+        visibility: controls.showVertices ? "visible" : "none",
       },
     });
 
@@ -107,16 +161,16 @@ export const distanceMeasurementPattern: Pattern = {
       id: LABEL_LAYER_ID,
       type: "symbol",
       source: SOURCE_ID,
-      filter: ["has", "distance"],
+      filter: ["has", "areaLabel"],
       layout: {
-        "text-field": ["get", "distance"],
+        "text-field": ["get", "areaLabel"],
         "text-size": 14,
-        "text-offset": [0, -1.5],
+        "text-offset": [0, -1.4],
         "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
       },
       paint: {
-        "text-color": "#333",
-        "text-halo-color": "#fff",
+        "text-color": "#111827",
+        "text-halo-color": "#ffffff",
         "text-halo-width": 2,
       },
     });
@@ -126,12 +180,14 @@ export const distanceMeasurementPattern: Pattern = {
         points = [];
         hoverCoord = null;
         isFinished = false;
+        updateStatus(
+          "New polygon. Click to add vertices. Double-click to finish. Esc clears.",
+        );
       }
-      const coord: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-      points.push(coord);
+
+      points.push([e.lngLat.lng, e.lngLat.lat]);
       requestUpdate(map);
     };
-
     map.on("click", clickHandler);
 
     moveHandler = (e) => {
@@ -142,7 +198,7 @@ export const distanceMeasurementPattern: Pattern = {
     map.on("mousemove", moveHandler);
 
     dblClickHandler = () => {
-      if (isFinished || points.length < 2) return;
+      if (isFinished || points.length < 3) return;
       isFinished = true;
       hoverCoord = null;
       requestUpdate(map);
@@ -156,12 +212,12 @@ export const distanceMeasurementPattern: Pattern = {
         hoverCoord = null;
         isFinished = false;
         requestUpdate(map);
-        updateStatus("Cleared. Click to add points.");
+        updateStatus("Cleared. Click to add vertices.");
         return;
       }
 
       if (e.key === "Enter") {
-        if (!isFinished && points.length >= 2) {
+        if (!isFinished && points.length >= 3) {
           isFinished = true;
           hoverCoord = null;
           requestUpdate(map);
@@ -207,6 +263,7 @@ export const distanceMeasurementPattern: Pattern = {
 
     map.doubleClickZoom.enable();
     map.getCanvas().style.cursor = "";
+
     points = [];
     hoverCoord = null;
     isFinished = false;
@@ -216,6 +273,7 @@ export const distanceMeasurementPattern: Pattern = {
     if (map.getLayer(LABEL_LAYER_ID)) map.removeLayer(LABEL_LAYER_ID);
     if (map.getLayer(POINTS_LAYER_ID)) map.removeLayer(POINTS_LAYER_ID);
     if (map.getLayer(LINE_LAYER_ID)) map.removeLayer(LINE_LAYER_ID);
+    if (map.getLayer(FILL_LAYER_ID)) map.removeLayer(FILL_LAYER_ID);
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
 
     if (statusPanel?.parentNode) {
@@ -234,56 +292,60 @@ export const distanceMeasurementPattern: Pattern = {
     if (!map.getLayer(LINE_LAYER_ID)) return;
 
     currentControls = controls;
+
+    map.setPaintProperty(FILL_LAYER_ID, "fill-color", controls.fillColor as string);
+    map.setPaintProperty(
+      FILL_LAYER_ID,
+      "fill-opacity",
+      controls.fillOpacity as number,
+    );
     map.setPaintProperty(
       LINE_LAYER_ID,
       "line-color",
-      controls.lineColor as string,
+      controls.outlineColor as string,
     );
+    map.setPaintProperty(LINE_LAYER_ID, "line-width", controls.lineWidth as number);
     map.setPaintProperty(
       POINTS_LAYER_ID,
       "circle-color",
-      controls.lineColor as string,
+      controls.outlineColor as string,
+    );
+    map.setPaintProperty(
+      POINTS_LAYER_ID,
+      "circle-radius",
+      controls.vertexSize as number,
+    );
+    map.setLayoutProperty(
+      POINTS_LAYER_ID,
+      "visibility",
+      controls.showVertices ? "visible" : "none",
     );
 
-    requestUpdate(map);
+    updateGeometry(map);
   },
 
-  snippet: `// Distance Measurement Pattern
+  snippet: `// Area Measurement Pattern
+// Click to add vertices. Double-click to finish.
 import * as turf from '@turf/turf';
 
-let points = [];
+const points = [];
 
 map.on('click', (e) => {
   points.push([e.lngLat.lng, e.lngLat.lat]);
-  updateMeasurement();
+  update();
 });
 
-function updateMeasurement() {
-  const features = [];
+function update() {
+  if (points.length < 3) return;
+  const ring = [...points, points[0]];
+  const polygon = turf.polygon([ring]);
+  const areaM2 = turf.area(polygon);
 
-  // Add point features
-  points.forEach(coord => {
-    features.push({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: coord }
-    });
-  });
-
-  // Add line and calculate distance
-  if (points.length > 1) {
-    const line = turf.lineString(points);
-    const distance = turf.length(line, { units: 'kilometers' });
-
-    features.push({
-      type: 'Feature',
-      properties: { distance: \`\${distance.toFixed(2)} km\` },
-      geometry: line.geometry
-    });
-  }
-
-  map.getSource('measurement').setData({
+  map.getSource('area-source').setData({
     type: 'FeatureCollection',
-    features
+    features: [
+      { type: 'Feature', geometry: polygon.geometry, properties: {} }
+    ]
   });
 }`,
 };
@@ -293,73 +355,110 @@ function requestUpdate(map: Map) {
   rafPending = true;
   requestAnimationFrame(() => {
     rafPending = false;
-    updateMeasurement(map);
+    updateGeometry(map);
   });
 }
 
-function updateMeasurement(map: Map) {
-  const source = map.getSource(SOURCE_ID) as GeoJSONSource;
+function updateGeometry(map: Map) {
+  const source = map.getSource(SOURCE_ID) as GeoJSONSource | undefined;
   if (!source) return;
 
-  const unit = (currentControls.unit as "kilometers" | "miles" | "meters") || "kilometers";
   const features: GeoJSON.Feature[] = [];
 
-  points.forEach((coord, i) => {
-    features.push({
-      type: "Feature",
-      properties: { index: i + 1 },
-      geometry: { type: "Point", coordinates: coord },
-    });
-  });
-
-  const lineCoords = getLineCoords();
-  let distanceLabel = "";
-  if (lineCoords.length > 1) {
-    const line = turf.lineString(lineCoords);
-    const distance = turf.length(line, { units: unit });
-    distanceLabel = formatDistance(distance, unit);
-
+  for (const coord of points) {
     features.push({
       type: "Feature",
       properties: {},
-      geometry: line.geometry,
+      geometry: { type: "Point", coordinates: coord },
     });
+  }
 
-    const labelPoint =
-      distance > 0
-        ? turf.along(line, distance / 2, { units: unit })
-        : turf.point(lineCoords[0]);
+  const lineCoords = getLineCoords();
+  if (lineCoords.length >= 2) {
     features.push({
       type: "Feature",
-      properties: { distance: distanceLabel },
+      properties: {},
+      geometry: { type: "LineString", coordinates: lineCoords },
+    });
+  }
+
+  const polygon = getPolygon();
+  let areaLabel = "";
+  if (polygon) {
+    features.push({
+      type: "Feature",
+      properties: {},
+      geometry: polygon.geometry,
+    });
+
+    const areaM2 = turf.area(polygon);
+    areaLabel = formatArea(areaM2, (currentControls.unit as string) || "ha");
+
+    const labelPoint = turf.centerOfMass(polygon);
+    features.push({
+      type: "Feature",
+      properties: { areaLabel },
       geometry: labelPoint.geometry,
     });
   }
 
-  source.setData({
-    type: "FeatureCollection",
-    features,
-  });
+  source.setData({ type: "FeatureCollection", features });
+  syncExportActions();
 
   if (map.getLayer(LINE_LAYER_ID)) {
-    map.setPaintProperty(LINE_LAYER_ID, "line-dasharray", isFinished ? [1, 0] : [2, 1]);
+    map.setPaintProperty(
+      LINE_LAYER_ID,
+      "line-dasharray",
+      isFinished ? [1, 0] : [2, 1],
+    );
   }
 
-  syncExportActions();
-  syncStatus(distanceLabel);
+  if (statusPanel) {
+    if (points.length === 0) {
+      updateStatus("Click to add vertices. Double-click to finish. Esc clears.");
+    } else if (points.length < 3) {
+      updateStatus(
+        `Vertices: ${points.length}. Keep clicking to create a polygon.`,
+      );
+    } else if (isFinished) {
+      updateStatus(areaLabel ? `Area: ${areaLabel}` : "Area ready.");
+    } else {
+      updateStatus(
+        areaLabel
+          ? `Area: ${areaLabel} (double-click to finish)`
+          : "Double-click to finish.",
+      );
+    }
+  }
 }
 
 function getLineCoords(): [number, number][] {
   if (points.length === 0) return [];
-  if (isFinished) return points;
+  if (isFinished) return [...points, points[0]];
   return hoverCoord ? [...points, hoverCoord] : points;
 }
 
-function formatDistance(value: number, unit: "kilometers" | "miles" | "meters") {
-  const suffix = unit === "kilometers" ? "km" : unit === "miles" ? "mi" : "m";
-  const abs = Math.abs(value);
+function getPolygon() {
+  if (points.length < 3) return null;
+  const ring = [...points, points[0]];
+  return turf.polygon([ring]);
+}
+
+function formatArea(areaM2: number, unit: string): string {
+  const conv =
+    unit === "km2"
+      ? { value: areaM2 / 1_000_000, suffix: "km²" }
+      : unit === "m2"
+        ? { value: areaM2, suffix: "m²" }
+        : unit === "acres"
+          ? { value: areaM2 / 4046.8564224, suffix: "ac" }
+          : unit === "sqmi"
+            ? { value: areaM2 / 2_589_988.110336, suffix: "mi²" }
+            : { value: areaM2 / 10_000, suffix: "ha" };
+
+  const abs = Math.abs(conv.value);
   const decimals = abs >= 100 ? 0 : abs >= 10 ? 1 : 2;
-  return `${value.toFixed(decimals)} ${suffix}`;
+  return `${conv.value.toFixed(decimals)} ${conv.suffix}`;
 }
 
 function createStatusPanel(map: Map) {
@@ -440,33 +539,8 @@ function flashStatus(map: Map, message: string) {
   }
   flashTimeout = window.setTimeout(() => {
     flashTimeout = null;
-    updateMeasurement(map);
+    updateGeometry(map);
   }, 1200);
-}
-
-function syncStatus(distanceLabel: string) {
-  if (points.length === 0) {
-    updateStatus(
-      "Click to add points. Double-click/Enter to finish. Esc clears. Backspace undoes.",
-    );
-    return;
-  }
-
-  if (points.length === 1) {
-    updateStatus("Add one more point to measure distance.");
-    return;
-  }
-
-  if (isFinished) {
-    updateStatus(distanceLabel ? `Distance: ${distanceLabel} (click to start new)` : "Finished.");
-    return;
-  }
-
-  updateStatus(
-    distanceLabel
-      ? `Distance: ${distanceLabel} (double-click/Enter to finish)`
-      : "Keep clicking to add points.",
-  );
 }
 
 function syncExportActions() {
@@ -478,7 +552,7 @@ function syncExportActions() {
     !downloadGpxButton
   )
     return;
-  const canExport = points.length >= 2;
+  const canExport = points.length >= 3;
   actionsRow.style.display = canExport ? "flex" : "none";
   copyButton.disabled = !canExport;
   downloadGeoJsonButton.disabled = !canExport;
@@ -487,13 +561,13 @@ function syncExportActions() {
 }
 
 function getExportGeoJson(): GeoJSON.FeatureCollection | null {
-  if (points.length < 2) return null;
+  if (points.length < 3) return null;
+  const polygon = getPolygon();
+  if (!polygon) return null;
 
-  const unit = (currentControls.unit as "kilometers" | "miles" | "meters") || "kilometers";
-  const line = turf.lineString(points);
-  const distanceM = turf.length(line, { units: "meters" });
-  const distanceUnit = turf.length(line, { units: unit });
-  const distanceLabel = formatDistance(distanceUnit, unit);
+  const areaM2 = turf.area(polygon);
+  const unit = (currentControls.unit as string) || "ha";
+  const areaLabel = formatArea(areaM2, unit);
 
   return {
     type: "FeatureCollection",
@@ -501,20 +575,15 @@ function getExportGeoJson(): GeoJSON.FeatureCollection | null {
       {
         type: "Feature",
         properties: {
-          distance_m: distanceM,
-          distance: distanceLabel,
+          area_m2: areaM2,
+          area: areaLabel,
           unit,
           vertex_count: points.length,
           finished: isFinished,
           generated_at: new Date().toISOString(),
         },
-        geometry: line.geometry,
+        geometry: polygon.geometry,
       },
-      ...points.map((coord, i) => ({
-        type: "Feature" as const,
-        properties: { index: i + 1 },
-        geometry: { type: "Point" as const, coordinates: coord },
-      })),
     ],
   };
 }
@@ -522,25 +591,26 @@ function getExportGeoJson(): GeoJSON.FeatureCollection | null {
 async function handleCopy(map: Map) {
   const geoJson = getExportGeoJson();
   if (!geoJson) {
-    flashStatus(map, "Add at least 2 points to export GeoJSON.");
+    flashStatus(map, "Add at least 3 vertices to export GeoJSON.");
     return;
   }
 
-  const ok = await copyText(JSON.stringify(geoJson, null, 2));
+  const text = JSON.stringify(geoJson, null, 2);
+  const ok = await copyText(text);
   flashStatus(map, ok ? "Copied GeoJSON to clipboard." : "Copy failed.");
 }
 
 function handleDownload(map: Map, format: "geojson" | "kml" | "gpx") {
   const geoJson = getExportGeoJson();
   if (!geoJson) {
-    flashStatus(map, "Add at least 2 points to export.");
+    flashStatus(map, "Add at least 3 vertices to export.");
     return;
   }
 
   const stamp = formatTimestampForFilename();
   if (format === "geojson") {
     downloadText(
-      `distance-measurement-${stamp}.geojson`,
+      `area-measurement-${stamp}.geojson`,
       JSON.stringify(geoJson, null, 2),
       "application/geo+json",
     );
@@ -550,8 +620,8 @@ function handleDownload(map: Map, format: "geojson" | "kml" | "gpx") {
 
   if (format === "kml") {
     downloadText(
-      `distance-measurement-${stamp}.kml`,
-      geojsonToKml(geoJson, { name: "Distance Measurement" }),
+      `area-measurement-${stamp}.kml`,
+      geojsonToKml(geoJson, { name: "Area Measurement" }),
       "application/vnd.google-earth.kml+xml",
     );
     flashStatus(map, "Downloaded KML.");
@@ -559,8 +629,8 @@ function handleDownload(map: Map, format: "geojson" | "kml" | "gpx") {
   }
 
   downloadText(
-    `distance-measurement-${stamp}.gpx`,
-    geojsonToGpx(geoJson, { name: "Distance Measurement" }),
+    `area-measurement-${stamp}.gpx`,
+    geojsonToGpx(geoJson, { name: "Area Measurement" }),
     "application/gpx+xml",
   );
   flashStatus(map, "Downloaded GPX.");

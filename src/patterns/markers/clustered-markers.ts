@@ -1,10 +1,14 @@
-import type { Map } from "mapbox-gl";
+import type { GeoJSONSource, Map, MapLayerMouseEvent } from "mapbox-gl";
 import type { Pattern } from "../../types";
 
 const SOURCE_ID = "clusters-source";
 const CLUSTERS_LAYER_ID = "clusters";
 const CLUSTER_COUNT_LAYER_ID = "cluster-count";
 const UNCLUSTERED_LAYER_ID = "unclustered-point";
+
+let clickHandler: ((e: MapLayerMouseEvent) => void) | null = null;
+let mouseEnterHandler: (() => void) | null = null;
+let mouseLeaveHandler: (() => void) | null = null;
 
 export const clusteredMarkersPattern: Pattern = {
   id: "clustered-markers",
@@ -106,14 +110,14 @@ export const clusteredMarkersPattern: Pattern = {
       },
     });
 
-    map.on("click", CLUSTERS_LAYER_ID, (e) => {
+    clickHandler = (e) => {
       const features = map.queryRenderedFeatures(e.point, {
         layers: [CLUSTERS_LAYER_ID],
       });
       const clusterId = features[0]?.properties?.cluster_id;
       if (clusterId === undefined) return;
 
-      const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
+      const source = map.getSource(SOURCE_ID) as GeoJSONSource;
       source.getClusterExpansionZoom(clusterId, (err, zoom) => {
         if (err || zoom === undefined || zoom === null) return;
         const geometry = features[0].geometry as GeoJSON.Point;
@@ -122,20 +126,35 @@ export const clusteredMarkersPattern: Pattern = {
           zoom,
         });
       });
-    });
+    };
+    map.on("click", CLUSTERS_LAYER_ID, clickHandler);
 
-    map.on("mouseenter", CLUSTERS_LAYER_ID, () => {
+    mouseEnterHandler = () => {
       map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", CLUSTERS_LAYER_ID, () => {
+    };
+    map.on("mouseenter", CLUSTERS_LAYER_ID, mouseEnterHandler);
+
+    mouseLeaveHandler = () => {
       map.getCanvas().style.cursor = "";
-    });
+    };
+    map.on("mouseleave", CLUSTERS_LAYER_ID, mouseLeaveHandler);
   },
 
   cleanup(map: Map) {
-    map.off("click", CLUSTERS_LAYER_ID, () => {});
-    map.off("mouseenter", CLUSTERS_LAYER_ID, () => {});
-    map.off("mouseleave", CLUSTERS_LAYER_ID, () => {});
+    if (clickHandler) {
+      map.off("click", CLUSTERS_LAYER_ID, clickHandler);
+      clickHandler = null;
+    }
+    if (mouseEnterHandler) {
+      map.off("mouseenter", CLUSTERS_LAYER_ID, mouseEnterHandler);
+      mouseEnterHandler = null;
+    }
+    if (mouseLeaveHandler) {
+      map.off("mouseleave", CLUSTERS_LAYER_ID, mouseLeaveHandler);
+      mouseLeaveHandler = null;
+    }
+
+    map.getCanvas().style.cursor = "";
 
     if (map.getLayer(CLUSTER_COUNT_LAYER_ID))
       map.removeLayer(CLUSTER_COUNT_LAYER_ID);

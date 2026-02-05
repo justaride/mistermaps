@@ -230,7 +230,7 @@ export default function Landing() {
                   </h3>
                 </div>
                 <p className="font-mono text-xs text-muted">
-                  Browse 11 Mapbox GL patterns + MapLibre
+                  Browse 20 Mapbox GL patterns + MapLibre
                 </p>
                 <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-accent group-hover:underline">
                   Explore <ArrowRight className="h-3 w-3" />

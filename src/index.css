@@ -62,6 +62,90 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-panel__message {
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+}
+
+.status-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-panel__button {
+  cursor: pointer;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.status-panel__button:hover {
+  background: var(--panel-border);
+  transform: translateY(-1px);
+}
+
+.status-panel__button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.status-panel__button.primary:hover {
+  background: var(--accent-hover);
+}
+
+.status-panel__button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.status-panel__button:disabled:hover {
+  background: transparent;
+}
+
+.geojson-import__file {
+  width: 100%;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.geojson-import__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  resize: vertical;
+}
+
+.geojson-import__textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .map-root button {
   cursor: pointer;
   border: none;
