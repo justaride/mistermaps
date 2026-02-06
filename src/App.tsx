@@ -3,6 +3,7 @@ import Landing from "./pages/Landing";
 import MapsCatalog from "./pages/MapsCatalog";
 import MapDetail from "./pages/MapDetail";
 import RendalenProject from "./pages/RendalenProject";
+import OsloSatellite from "./pages/OsloSatellite";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Route path="/maps" element={<MapsCatalog />} />
       <Route path="/maps/:id" element={<MapDetail />} />
       <Route path="/projects/rendalen" element={<RendalenProject />} />
+      <Route path="/projects/oslo-satellite" element={<OsloSatellite />} />
     </Routes>
   );
 }
