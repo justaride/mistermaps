@@ -34,12 +34,13 @@ Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox
 
 ## Routes
 
-| Path                 | View                                        |
-| -------------------- | ------------------------------------------- |
-| `/`                  | Landing page — brand hub with mascot        |
-| `/maps`              | Maps catalog — filterable grid of all demos |
-| `/maps/:id`          | Map detail — single interactive demo        |
-| `/projects/rendalen` | Rendalen project — Norwegian data overlays  |
+| Path                       | View                                                   |
+| -------------------------- | ------------------------------------------------------ |
+| `/`                        | Landing page — brand hub with mascot                   |
+| `/maps`                    | Maps catalog — filterable grid of all demos            |
+| `/maps/:id`                | Map detail — single interactive demo                   |
+| `/projects/rendalen`       | Rendalen project — Norwegian data overlays             |
+| `/projects/oslo-satellite` | Oslo Satellite — dark satellite map with blue clusters |
 
 ## Patterns
 
@@ -121,6 +122,7 @@ Sibling to MrNews — same 100x100 SVG architecture, shared animation patterns (
 - Maps catalog with category filter tabs
 - Individual map detail pages with controls and code viewer
 - Dedicated Rendalen project page with Norwegian data overlays
+- Oslo East satellite page with darkened imagery, orange roads, and blue cluster markers
 - Compass rose watermarks and topographic contour decorations
 - Full-screen Mapbox GL maps centered on Rendalen
 - MapLibre GL support with OSM/CARTO basemaps
