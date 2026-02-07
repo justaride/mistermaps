@@ -4,7 +4,7 @@ Personal map design system built with React + TypeScript + Vite + Mapbox GL JS.
 
 A map pattern catalog and project showcase. Browse interactive Mapbox GL and MapLibre demos, interact with live Norwegian public APIs, and copy implementation code.
 
-**Live Demo:** [mister-maps.vercel.app](https://mister-maps.vercel.app)
+**Live Demo:** [mistermaps.gabistudio.dev](https://mistermaps.gabistudio.dev)
 
 ## Quick Start
 
@@ -28,7 +28,7 @@ npm run dev
 | ------------------- | -------- | ------------------------------ |
 | `VITE_MAPBOX_TOKEN` | Yes      | Mapbox token for Mapbox GL JS. |
 
-On Vercel, set `VITE_MAPBOX_TOKEN` as a **Production** environment variable.
+On Coolify, set `VITE_MAPBOX_TOKEN` as a build argument.
 
 Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox token.
 
@@ -44,15 +44,15 @@ Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox
 
 ## Patterns
 
-20 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+21 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
 
-| Category   | Patterns                                                                                                                                                                        |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade |
-| Data Viz   | Heatmap, Choropleth                                                                                                                                                             |
-| Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                                                                                                                   |
-| Navigation | Route Display, Animated Route, Geolocation, Distance Measurement, Area Measurement                                                                                              |
-| Providers  | MapLibre GL (OSM / CARTO)                                                                                                                                                       |
+| Category   | Patterns                                                                                                                                                                                              |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade, NASA GIBS True Color |
+| Data Viz   | Heatmap, Choropleth                                                                                                                                                                                   |
+| Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                                                                                                                                         |
+| Navigation | Route Display, Animated Route, Geolocation, Distance Measurement, Area Measurement                                                                                                                    |
+| Providers  | MapLibre GL (OSM / CARTO)                                                                                                                                                                             |
 
 ## Rendalen Data Sources
 
@@ -166,16 +166,16 @@ Create specs in `specs/` with testable acceptance criteria. The loop picks the h
 
 ## Deployment
 
-Deployed on Vercel. Push to `master` triggers automatic deploy.
+Deployed on Coolify with Docker + nginx. Push to `master` triggers automatic deploy.
 
-- `vercel.json` includes an SPA rewrite so client-side routes like `/maps` work on refresh.
-- Local Vercel config lives in `.vercel/` (not committed). Use `vercel deploy --prod` for manual production deploys.
+- `Dockerfile` builds the Vite app and serves it via nginx.
+- `nginx.conf` handles SPA rewrites so client-side routes like `/maps` work on refresh.
 
 ## Troubleshooting
 
 ### Layers not appearing
 
-- Confirm `VITE_MAPBOX_TOKEN` is set (local `.env.local` or Vercel env var).
+- Confirm `VITE_MAPBOX_TOKEN` is set (local `.env.local` or Coolify build arg).
 - On `/projects/rendalen`, wait for the "All data loaded!" status message.
 - If **Hiking Trails** is empty: the trails layer is loaded from WFS/GML and parsed client-side; upstream responses and axis order can vary. Open DevTools → Console/Network and check for request failures.
 
