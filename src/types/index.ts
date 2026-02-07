@@ -12,6 +12,7 @@ export type PatternId =
   | "vector-road-styling"
   | "vector-debug-tools"
   | "terrain-hillshade"
+  | "nasa-gibs-true-color"
   | "choropleth"
   | "heatmap"
   | "geolocation"

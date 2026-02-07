@@ -100,6 +100,15 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "nasa-gibs-true-color",
+    name: "NASA GIBS True Color",
+    description:
+      "Daily MODIS global satellite imagery via NASA GIBS WMTS raster tiles.",
+    capabilities: ["WMTS raster", "MODIS Terra/Aqua", "daily imagery", "opacity"],
+    category: "layers",
+    provider: "mapbox",
+  },
+  {
     patternId: "heatmap",
     name: "Heatmap",
     description: "Density-based heatmap visualization of point data.",

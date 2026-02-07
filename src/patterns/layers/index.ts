@@ -4,6 +4,7 @@ export { geojsonOverlayPattern } from "./geojson-overlay";
 export { layerBasicsPattern } from "./layer-basics";
 export { layerExplorerPattern } from "./layer-explorer";
 export { layerInspectorPattern } from "./layer-inspector";
+export { nasaGibsTrueColorPattern } from "./nasa-gibs";
 export { rendalenDataPattern } from "./rendalen-data";
 export { terrainHillshadePattern } from "./terrain-hillshade";
 export { vectorDebugToolsPattern } from "./vector-debug-tools";
