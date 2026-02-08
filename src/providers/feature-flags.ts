@@ -1,7 +1,7 @@
 const DEFAULT_GEOCODING_PRIMARY_PROVIDER = "mapbox";
 const DEFAULT_GEOCODING_FALLBACK_ORDER = ["nominatim", "photon"];
 
-function parseBooleanFlag(
+export function parseBooleanFlag(
   value: string | undefined,
   defaultValue: boolean,
 ): boolean {
@@ -12,7 +12,10 @@ function parseBooleanFlag(
   return defaultValue;
 }
 
-function parseCsvFlag(value: string | undefined, fallback: string[]): string[] {
+export function parseCsvFlag(
+  value: string | undefined,
+  fallback: string[],
+): string[] {
   if (!value) return fallback;
   const parsed = value
     .split(",")
