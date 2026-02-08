@@ -10,28 +10,19 @@ import {
   ThemeToggle,
   SearchBox,
 } from "../components";
-import { catalogPatterns } from "../patterns";
-import type { Theme } from "../types";
+import { loadPatternById } from "../patterns/loadCatalogPattern";
+import type { Pattern, Theme } from "../types";
 import styles from "../App.module.css";
 
 export default function MapDetail() {
   const { id } = useParams<{ id: string }>();
   const isMaplibre = id === "maplibre";
-
-  const pattern = isMaplibre
-    ? null
-    : catalogPatterns.find((p) => p.id === id) || null;
+  const [pattern, setPattern] = useState<Pattern | null>(null);
+  const [isPatternLoading, setIsPatternLoading] = useState(!isMaplibre);
 
   const [theme, setTheme] = useState<Theme>("light");
   const [controlValues, setControlValues] = useState<Record<string, unknown>>(
-    () => {
-      if (!pattern) return {};
-      const defaults: Record<string, unknown> = {};
-      pattern.controls.forEach((c) => {
-        defaults[c.id] = c.defaultValue;
-      });
-      return defaults;
-    },
+    {},
   );
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
   const [map, setMap] = useState<Map | null>(null);
@@ -39,6 +30,59 @@ export default function MapDetail() {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    setCodeViewerOpen(false);
+
+    if (isMaplibre) {
+      setPattern(null);
+      setControlValues({});
+      setIsPatternLoading(false);
+      return;
+    }
+
+    if (!id) {
+      setPattern(null);
+      setControlValues({});
+      setIsPatternLoading(false);
+      return;
+    }
+
+    setIsPatternLoading(true);
+
+    void loadPatternById(id)
+      .then((loadedPattern) => {
+        if (isCancelled) return;
+
+        setPattern(loadedPattern);
+
+        if (!loadedPattern) {
+          setControlValues({});
+          return;
+        }
+
+        const defaults: Record<string, unknown> = {};
+        loadedPattern.controls.forEach((control) => {
+          defaults[control.id] = control.defaultValue;
+        });
+        setControlValues(defaults);
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        setPattern(null);
+        setControlValues({});
+      })
+      .finally(() => {
+        if (isCancelled) return;
+        setIsPatternLoading(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [id, isMaplibre]);
 
   const handleMapReady = useCallback((mapInstance: Map) => {
     setMap(mapInstance);
@@ -51,6 +95,14 @@ export default function MapDetail() {
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
+
+  if (!isMaplibre && isPatternLoading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-2 bg-bg text-fg">
+        <p className="font-mono text-lg">Loading pattern...</p>
+      </div>
+    );
+  }
 
   if (!isMaplibre && !pattern) {
     return (
