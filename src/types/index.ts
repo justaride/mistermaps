@@ -45,7 +45,7 @@ export type Pattern = {
   category: PatternCategory;
   description: string;
   controls: ControlConfig[];
-  setup: (map: Map, controls: Record<string, unknown>) => void;
+  setup: (map: Map, controls: Record<string, unknown>) => void | Promise<void>;
   cleanup: (map: Map) => void;
   update: (map: Map, controls: Record<string, unknown>) => void;
   snippet: string;

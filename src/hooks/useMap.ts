@@ -12,6 +12,7 @@ type UseMapOptions = {
 
 export function useMap({ container, theme }: UseMapOptions) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const prevThemeRef = useRef(theme);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -45,6 +46,8 @@ export function useMap({ container, theme }: UseMapOptions) {
 
   useEffect(() => {
     if (!mapRef.current || !isLoaded) return;
+    if (prevThemeRef.current === theme) return;
+    prevThemeRef.current = theme;
     mapRef.current.setStyle(mapboxBasemapProvider.getStyle(theme));
     setIsLoaded(false);
     mapRef.current.once("style.load", () => {
