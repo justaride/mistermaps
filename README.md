@@ -12,10 +12,14 @@ A map pattern catalog and project showcase. Browse interactive Mapbox GL and Map
 npm install
 ```
 
-Add your Mapbox token to `.env.local`:
+Add your Mapbox token and open-source endpoints to `.env.local`:
 
 ```
 VITE_MAPBOX_TOKEN=pk.your_token_here
+VITE_NOMINATIM_ENDPOINT=https://nominatim.openstreetmap.org
+VITE_PHOTON_ENDPOINT=https://photon.komoot.io
+VITE_OSRM_ENDPOINT=https://router.project-osrm.org/route/v1
+VITE_VALHALLA_ENDPOINT=https://valhalla1.openstreetmap.de
 ```
 
 ```bash
@@ -27,10 +31,14 @@ npm run dev
 | Key                 | Required | Notes                          |
 | ------------------- | -------- | ------------------------------ |
 | `VITE_MAPBOX_TOKEN` | Yes      | Mapbox token for Mapbox GL JS. |
+| `VITE_NOMINATIM_ENDPOINT` | No | OpenStreetMap Nominatim geocoder endpoint. |
+| `VITE_PHOTON_ENDPOINT` | No | Komoot Photon geocoder endpoint. |
+| `VITE_OSRM_ENDPOINT` | No | OSRM routing endpoint. |
+| `VITE_VALHALLA_ENDPOINT` | No | Valhalla routing/isochrone endpoint. |
 
 On Coolify, set `VITE_MAPBOX_TOKEN` as a build argument.
 
-Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox token.
+Note: `/maps/maplibre` uses **OpenFreeMap vector tiles** and does not require a Mapbox token.
 
 ## Routes
 
@@ -44,15 +52,29 @@ Note: `/maps/maplibre` uses OSM/CARTO raster tiles and does not require a Mapbox
 
 ## Patterns
 
-21 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+22 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
 
 | Category   | Patterns                                                                                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade, NASA GIBS True Color |
 | Data Viz   | Heatmap, Choropleth                                                                                                                                                                                   |
 | Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                                                                                                                                         |
-| Navigation | Route Display, Animated Route, Geolocation, Distance Measurement, Area Measurement                                                                                                                    |
-| Providers  | MapLibre GL (OSM / CARTO)                                                                                                                                                                             |
+| Navigation | Route Display, Animated Route, Isochrones (Valhalla), Geolocation, Distance Measurement, Area Measurement                                                                                             |
+| Providers  | MapLibre GL (OpenFreeMap Vector)                                                                                                                                                                      |
+
+## Open Source Providers & APIs
+
+Mister Maps is committed to vendor neutrality. Beyond Mapbox, we support:
+- **Geocoding:** Nominatim (OSM) and Photon (Komoot) as primary or fallback options.
+- **Routing:** OSRM for fast directions and Valhalla for multimodal routing.
+- **Isochrones:** Travel-time polygons powered by Valhalla.
+- **Vector Tiles:** OpenFreeMap (no-key) integrated into the MapLibre engine.
+
+## Model Context Protocol (MCP)
+
+This project supports [MCP](https://modelcontextprotocol.io) to allow AI agents to interact with map data. See `MCP.md` for setup instructions for:
+- **Mapbox MCP Server:** Geocoding and directions tools for agents.
+- **OpenStreetMap MCP Server:** POI search and map data inspection.
 
 ## Rendalen Data Sources
 

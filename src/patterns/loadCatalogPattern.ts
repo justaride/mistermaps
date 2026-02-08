@@ -41,6 +41,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./navigation/area-measurement")).areaMeasurementPattern,
   "animated-route": async () =>
     (await import("./navigation/animated-route")).animatedRoutePattern,
+  isochrones: async () =>
+    (await import("./navigation/isochrones")).isochronesPattern,
   "clustered-markers": async () =>
     (await import("./markers/clustered-markers")).clusteredMarkersPattern,
   "custom-popups": async () =>

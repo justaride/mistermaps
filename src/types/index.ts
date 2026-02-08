@@ -20,6 +20,7 @@ export type PatternId =
   | "distance-measurement"
   | "area-measurement"
   | "animated-route"
+  | "isochrones"
   | "clustered-markers"
   | "custom-popups"
   | "pulsing-dot";

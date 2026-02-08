@@ -1,18 +1,51 @@
 import type { Map } from "mapbox-gl";
 import type { Pattern } from "../../types";
+import {
+  mapboxRoutingProvider,
+  osrmRoutingProvider,
+} from "../../providers/routing";
+import type { LngLat } from "../../providers/types";
 
 const SOURCE_ID = "route-source";
 const LAYER_ID = "route-layer";
 const POINTS_SOURCE_ID = "route-points-source";
 const POINTS_LAYER_ID = "route-points-layer";
 
+const SAMPLE_COORDS: LngLat[] = [
+  [10.7522, 59.9139], // Oslo Sentrum
+  [10.6225, 59.9596], // Holmenkollen
+];
+
+let lastConfig = "";
+
 export const routeDisplayPattern: Pattern = {
   id: "route-display",
   name: "Route Display",
   category: "navigation",
   description:
-    "Display a path between waypoints with customizable line styling and markers.",
+    "Display a path between waypoints with customizable line styling and markers. Supports Mapbox and OSRM providers.",
   controls: [
+    {
+      id: "provider",
+      label: "Provider",
+      type: "select",
+      defaultValue: "mapbox",
+      options: [
+        { label: "Mapbox", value: "mapbox" },
+        { label: "OSRM (Open Source)", value: "osrm" },
+      ],
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      type: "select",
+      defaultValue: "driving",
+      options: [
+        { label: "Driving", value: "driving" },
+        { label: "Walking", value: "walking" },
+        { label: "Cycling", value: "cycling" },
+      ],
+    },
     {
       id: "lineWidth",
       label: "Line Width",
@@ -42,8 +75,14 @@ export const routeDisplayPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
-    const route = createSampleRoute();
+  async setup(map: Map, controls: Record<string, unknown>) {
+    lastConfig = JSON.stringify({
+      p: controls.provider,
+      pr: controls.profile,
+    });
+
+    const route = await fetchRoute(controls);
+    if (!route) return;
 
     map.addSource(SOURCE_ID, {
       type: "geojson",
@@ -61,14 +100,14 @@ export const routeDisplayPattern: Pattern = {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        features: route.map((coord, i) => ({
+        features: route.length > 0 ? [route[0], route[route.length - 1]].map((coord, i) => ({
           type: "Feature",
           properties: {
-            order: i + 1,
-            isEndpoint: i === 0 || i === route.length - 1,
+            order: i === 0 ? "Start" : "End",
+            isEndpoint: true,
           },
           geometry: { type: "Point", coordinates: coord },
-        })),
+        })) : [],
       },
     });
 
@@ -92,7 +131,7 @@ export const routeDisplayPattern: Pattern = {
       type: "circle",
       source: POINTS_SOURCE_ID,
       paint: {
-        "circle-radius": ["case", ["get", "isEndpoint"], 8, 5],
+        "circle-radius": 8,
         "circle-color": controls.lineColor as string,
         "circle-stroke-width": 2,
         "circle-stroke-color": "#fff",
@@ -102,7 +141,9 @@ export const routeDisplayPattern: Pattern = {
       },
     });
 
-    map.fitBounds(getBounds(route), { padding: 60 });
+    if (route.length > 0) {
+      map.fitBounds(getBounds(route), { padding: 60 });
+    }
   },
 
   cleanup(map: Map) {
@@ -112,8 +153,40 @@ export const routeDisplayPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  async update(map: Map, controls: Record<string, unknown>) {
     if (!map.getLayer(LAYER_ID)) return;
+
+    const currentConfig = JSON.stringify({
+      p: controls.provider,
+      pr: controls.profile,
+    });
+
+    if (currentConfig !== lastConfig) {
+      lastConfig = currentConfig;
+      const route = await fetchRoute(controls);
+      if (route) {
+        const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
+        if (source) {
+          source.setData({
+            type: "Feature",
+            properties: {},
+            geometry: { type: "LineString", coordinates: route },
+          });
+        }
+        
+        const ptsSource = map.getSource(POINTS_SOURCE_ID) as mapboxgl.GeoJSONSource;
+        if (ptsSource) {
+          ptsSource.setData({
+            type: "FeatureCollection",
+            features: [route[0], route[route.length - 1]].map((coord, i) => ({
+              type: "Feature",
+              properties: { order: i === 0 ? "Start" : "End", isEndpoint: true },
+              geometry: { type: "Point", coordinates: coord },
+            })),
+          });
+        }
+      }
+    }
 
     map.setPaintProperty(LAYER_ID, "line-color", controls.lineColor as string);
     map.setPaintProperty(LAYER_ID, "line-width", controls.lineWidth as number);
@@ -134,63 +207,52 @@ export const routeDisplayPattern: Pattern = {
     );
   },
 
-  snippet: `// Route Display Pattern
-const route = [[-74.006, 40.712], [-73.98, 40.76], ...];
+  snippet: `// Route Display with Provider Support
+import { mapboxRoutingProvider, osrmRoutingProvider } from './providers/routing';
 
-map.addSource('route-source', {
+const provider = controls.provider === 'osrm' ? osrmRoutingProvider : mapboxRoutingProvider;
+const result = await provider.route({
+  coordinates: [[10.75, 59.91], [10.62, 59.95]],
+  profile: 'driving'
+});
+
+map.addSource('route', {
   type: 'geojson',
   data: {
     type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: route
-    }
+    geometry: result.geometry
   }
 });
 
 map.addLayer({
   id: 'route-layer',
   type: 'line',
-  source: 'route-source',
-  layout: {
-    'line-join': 'round',
-    'line-cap': 'round'
-  },
+  source: 'route',
   paint: {
     'line-color': '#3b82f6',
     'line-width': 4
   }
-});
-
-// Add waypoint markers
-map.addSource('waypoints', {
-  type: 'geojson',
-  data: waypointsGeoJSON
-});
-
-map.addLayer({
-  id: 'waypoints-layer',
-  type: 'circle',
-  source: 'waypoints',
-  paint: {
-    'circle-radius': 8,
-    'circle-color': '#3b82f6',
-    'circle-stroke-width': 2,
-    'circle-stroke-color': '#fff'
-  }
 });`,
 };
 
-function createSampleRoute(): [number, number][] {
-  return [
-    [11.0, 61.78],
-    [10.98, 61.8],
-    [10.95, 61.83],
-    [10.97, 61.86],
-    [11.02, 61.88],
-    [11.05, 61.9],
-    [11.1, 61.92],
-  ];
+async function fetchRoute(
+  controls: Record<string, unknown>,
+): Promise<LngLat[] | null> {
+  const providerId = controls.provider as string;
+  const profile = (controls.profile as any) || "driving";
+  const provider =
+    providerId === "osrm" ? osrmRoutingProvider : mapboxRoutingProvider;
+
+  try {
+    const result = await provider.route({
+      coordinates: SAMPLE_COORDS,
+      profile,
+    });
+    return result.geometry.coordinates;
+  } catch (error) {
+    console.error(`Routing failed for ${providerId}:`, error);
+    return null;
+  }
 }
 
 function getBounds(

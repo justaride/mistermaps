@@ -20,11 +20,18 @@ Reference inventory: `/Users/gabrielboen/Documents/Mister Maps/open-source-maps-
 
 ## Implementation Status (2026-02-08)
 
-Completed (Week 1 foundation + Week 2 geocoding groundwork):
+Completed (Week 1 foundation + Week 2 geocoding groundwork + Week 3 routing):
 - Provider contracts + adapter structure added under `src/providers/` (`GeocodingProvider`, `RoutingProvider`, `BasemapProvider`).
 - `SearchBox` refactored to use a provider-neutral geocoding service with abort/cancellation.
 - Feature flags + dev telemetry hooks added for provider calls and fallback.
-- Nominatim + Photon geocoding adapters added (fallback disabled by default).
+- Nominatim + Photon geocoding adapters added.
+- **OSRM routing provider added** with configurable endpoint.
+- **Valhalla routing provider added** with isochrone support.
+- **RoutingService** with fallback logic implemented.
+- **Route Display** pattern updated to support provider switching (Mapbox/OSRM).
+- **Isochrones** pattern added using Valhalla API.
+- **OpenFreeMap vector tiles** integrated into the MapLibre demo.
+- **MCP Pilot** documentation created (`MCP.md`) with configuration for Mapbox and OSM servers.
 - Search results now label the provider source (Mapbox/Nominatim/Photon).
 
 Environment flags:
@@ -33,6 +40,8 @@ Environment flags:
 - `VITE_GEOCODING_FALLBACK_ORDER` (default: `nominatim,photon`)
 - `VITE_NOMINATIM_ENDPOINT` (default: `https://nominatim.openstreetmap.org`)
 - `VITE_PHOTON_ENDPOINT` (default: `https://photon.komoot.io`)
+- `VITE_OSRM_ENDPOINT` (default: `https://router.project-osrm.org/route/v1`)
+- `VITE_VALHALLA_ENDPOINT` (default: `https://valhalla1.openstreetmap.de`)
 
 ## Assumptions
 

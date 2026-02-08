@@ -3,3 +3,4 @@ export { distanceMeasurementPattern } from "./distance-measurement";
 export { areaMeasurementPattern } from "./area-measurement";
 export { geolocationPattern } from "./geolocation";
 export { animatedRoutePattern } from "./animated-route";
+export { isochronesPattern } from "./isochrones";

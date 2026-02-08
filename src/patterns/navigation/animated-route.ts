@@ -1,22 +1,43 @@
 import type { ExpressionSpecification, Map } from "mapbox-gl";
 import type { Pattern } from "../../types";
+import {
+  mapboxRoutingProvider,
+  osrmRoutingProvider,
+} from "../../providers/routing";
+import type { LngLat } from "../../providers/types";
 
 const SOURCE_ID = "animated-route-source";
 const BASE_LAYER_ID = "animated-route-base";
 const HIGHLIGHT_LAYER_ID = "animated-route-highlight";
 
+const SAMPLE_COORDS: LngLat[] = [
+  [10.7522, 59.9139], // Oslo Sentrum
+  [10.6225, 59.9596], // Holmenkollen
+];
+
 let currentControls: Record<string, unknown> = {};
 let animationFrameId: number | null = null;
 let lastTimeMs = 0;
 let progress = 0;
+let lastConfig = "";
 
 export const animatedRoutePattern: Pattern = {
   id: "animated-route",
   name: "Animated Route",
   category: "navigation",
   description:
-    "Animate a moving highlight along a line using line-gradient and line-progress.",
+    "Animate a moving highlight along a real route line using line-gradient and line-progress.",
   controls: [
+    {
+      id: "provider",
+      label: "Provider",
+      type: "select",
+      defaultValue: "mapbox",
+      options: [
+        { label: "Mapbox", value: "mapbox" },
+        { label: "OSRM (Open Source)", value: "osrm" },
+      ],
+    },
     {
       id: "speed",
       label: "Speed (loops/sec)",
@@ -64,10 +85,12 @@ export const animatedRoutePattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  async setup(map: Map, controls: Record<string, unknown>) {
     currentControls = controls;
+    lastConfig = JSON.stringify({ p: controls.provider });
 
-    const route = createSampleRoute();
+    const route = await fetchRoute(controls);
+    if (!route) return;
 
     map.addSource(SOURCE_ID, {
       type: "geojson",
@@ -130,10 +153,26 @@ export const animatedRoutePattern: Pattern = {
     progress = 0;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  async update(map: Map, controls: Record<string, unknown>) {
     if (!map.getLayer(BASE_LAYER_ID)) return;
 
     currentControls = controls;
+
+    const currentConfig = JSON.stringify({ p: controls.provider });
+    if (currentConfig !== lastConfig) {
+      lastConfig = currentConfig;
+      const route = await fetchRoute(controls);
+      if (route) {
+        const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
+        if (source) {
+          source.setData({
+            type: "Feature",
+            properties: {},
+            geometry: { type: "LineString", coordinates: route },
+          });
+        }
+      }
+    }
 
     map.setPaintProperty(BASE_LAYER_ID, "line-color", controls.baseColor as string);
     map.setPaintProperty(BASE_LAYER_ID, "line-width", controls.lineWidth as number);
@@ -147,31 +186,38 @@ export const animatedRoutePattern: Pattern = {
     map.setPaintProperty(HIGHLIGHT_LAYER_ID, "line-gradient", buildGradient(progress));
   },
 
-  snippet: `// Animated Route (line-gradient)
-// Requires: GeoJSON source with lineMetrics: true
+  snippet: `// Animated Route with Provider Support
+const provider = controls.provider === 'osrm' ? osrmRoutingProvider : mapboxRoutingProvider;
+const result = await provider.route({
+  coordinates: [[10.75, 59.91], [10.62, 59.95]],
+  profile: 'driving'
+});
+
 map.addSource('route', {
   type: 'geojson',
   lineMetrics: true,
-  data: { type: 'Feature', geometry: { type: 'LineString', coordinates: route } }
-});
-
-map.addLayer({
-  id: 'route-highlight',
-  type: 'line',
-  source: 'route',
-  paint: {
-    'line-width': 6,
-    'line-gradient': [
-      'interpolate', ['linear'], ['line-progress'],
-      0.0, 'rgba(0,0,0,0)',
-      0.45, 'rgba(0,0,0,0)',
-      0.50, '#f97316',
-      0.55, 'rgba(0,0,0,0)',
-      1.0, 'rgba(0,0,0,0)'
-    ]
-  }
+  data: { type: 'Feature', geometry: result.geometry }
 });`,
 };
+
+async function fetchRoute(
+  controls: Record<string, unknown>,
+): Promise<LngLat[] | null> {
+  const providerId = controls.provider as string;
+  const provider =
+    providerId === "osrm" ? osrmRoutingProvider : mapboxRoutingProvider;
+
+  try {
+    const result = await provider.route({
+      coordinates: SAMPLE_COORDS,
+      profile: "driving",
+    });
+    return result.geometry.coordinates;
+  } catch (error) {
+    console.error(`Routing failed for ${providerId}:`, error);
+    return null;
+  }
+}
 
 function startAnimation(map: Map) {
   stopAnimation();
@@ -231,18 +277,6 @@ function buildGradient(center: number): ExpressionSpecification {
     1,
     transparent,
   ] as unknown as ExpressionSpecification;
-}
-
-function createSampleRoute(): [number, number][] {
-  return [
-    [11.02, 61.78],
-    [10.98, 61.8],
-    [10.93, 61.83],
-    [10.96, 61.86],
-    [11.02, 61.88],
-    [11.07, 61.9],
-    [11.12, 61.91],
-  ];
 }
 
 function getBounds(
