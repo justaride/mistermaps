@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import type { Theme } from "../types";
+import { mapboxBasemapProvider } from "../providers/basemap";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-
-const STYLES: Record<Theme, string> = {
-  light: "mapbox://styles/mapbox/light-v11",
-  dark: "mapbox://styles/mapbox/dark-v11",
-};
 
 type UseMapOptions = {
   container: React.RefObject<HTMLDivElement | null>;
@@ -25,7 +21,7 @@ export function useMap({ container, theme }: UseMapOptions) {
 
     const map = new mapboxgl.Map({
       container: container.current,
-      style: STYLES[theme],
+      style: mapboxBasemapProvider.getStyle(theme),
       center: [11.0, 61.83],
       zoom: 10,
       pitch: 0,
@@ -49,7 +45,7 @@ export function useMap({ container, theme }: UseMapOptions) {
 
   useEffect(() => {
     if (!mapRef.current || !isLoaded) return;
-    mapRef.current.setStyle(STYLES[theme]);
+    mapRef.current.setStyle(mapboxBasemapProvider.getStyle(theme));
     setIsLoaded(false);
     mapRef.current.once("style.load", () => {
       setIsLoaded(true);

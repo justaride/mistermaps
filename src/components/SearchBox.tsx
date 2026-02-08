@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Map } from "mapbox-gl";
 import styles from "./SearchBox.module.css";
+import { geocodingService } from "../providers/geocoding";
 
 type Props = {
   map: Map | null;
@@ -10,15 +11,32 @@ type SearchResult = {
   id: string;
   place_name: string;
   center: [number, number];
+  providerId: string;
 };
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
+function getProviderLabel(providerId: string): string {
+  switch (providerId) {
+    case "mapbox":
+      return "Mapbox";
+    case "nominatim":
+      return "Nominatim";
+    case "photon":
+      return "Photon";
+    default:
+      return providerId;
+  }
+}
 
 export function SearchBox({ map }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const abortControllerRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,33 +52,49 @@ export function SearchBox({ map }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
   const search = async (q: string) => {
     if (!q.trim()) {
+      abortControllerRef.current?.abort();
       setResults([]);
+      setIsOpen(false);
       return;
     }
 
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&limit=5`;
+    abortControllerRef.current?.abort();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
-      const res = await fetch(url);
-      const data = await res.json();
+      const response = await geocodingService.geocode(
+        {
+          query: q,
+          limit: 5,
+        },
+        abortController.signal,
+      );
+
       setResults(
-        data.features?.map(
-          (f: {
-            id: string;
-            place_name: string;
-            center: [number, number];
-          }) => ({
-            id: f.id,
-            place_name: f.place_name,
-            center: f.center,
-          }),
-        ) || [],
+        response.results.map((result) => ({
+          id: result.id,
+          place_name: result.placeName,
+          center: result.center,
+          providerId: result.providerId,
+        })),
       );
       setIsOpen(true);
-    } catch {
+    } catch (error) {
+      if (isAbortError(error)) return;
       setResults([]);
+      setIsOpen(false);
     }
   };
 
@@ -100,7 +134,12 @@ export function SearchBox({ map }: Props) {
               onClick={() => handleSelect(result)}
               className={styles.result}
             >
-              {result.place_name}
+              <div className={styles.resultRow}>
+                <span className={styles.placeName}>{result.place_name}</span>
+                <span className={styles.providerTag}>
+                  {getProviderLabel(result.providerId)}
+                </span>
+              </div>
             </li>
           ))}
         </ul>
