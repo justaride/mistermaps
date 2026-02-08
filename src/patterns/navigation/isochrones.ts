@@ -1,7 +1,7 @@
 import type { Map, MapMouseEvent } from "mapbox-gl";
 import type { Pattern } from "../../types";
 import { valhallaRoutingProvider } from "../../providers/routing";
-import type { LngLat } from "../../providers/types";
+import type { LngLat, RoutingProfile } from "../../providers/types";
 
 const SOURCE_ID = "isochrone-source";
 const LAYER_ID_PREFIX = "isochrone-layer-";
@@ -10,6 +10,10 @@ let clickHandler: ((e: MapMouseEvent) => void) | null = null;
 let currentCenter: LngLat | null = null;
 let currentControls: Record<string, unknown> = {};
 let lastFetchKey = "";
+
+function isRoutingProfile(value: unknown): value is RoutingProfile {
+  return value === "driving" || value === "walking" || value === "cycling";
+}
 
 function roundCoord(n: number): number {
   return Math.round(n * 1e6) / 1e6;
@@ -55,7 +59,9 @@ async function updateIsochrones(
   controls: Record<string, unknown>,
 ) {
   const minutes = parseMinutes(controls.intervals);
-  const profile = typeof controls.profile === "string" ? controls.profile : "driving";
+  const profile = isRoutingProfile(controls.profile)
+    ? controls.profile
+    : "driving";
   const opacity =
     typeof controls.opacity === "number" && Number.isFinite(controls.opacity)
       ? controls.opacity
@@ -75,7 +81,7 @@ async function updateIsochrones(
     const data = await valhallaRoutingProvider.isochrone({
       center,
       minutes,
-      profile: profile as any,
+      profile,
     });
 
     if (!map.getSource(SOURCE_ID)) {
@@ -116,7 +122,6 @@ async function updateIsochrones(
       });
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Isochrone update failed:", error);
   }
 }

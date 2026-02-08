@@ -17,11 +17,9 @@ describe("loadPatternById", () => {
     const entries = CATALOG.filter(isMapboxCatalogEntry);
 
     for (const entry of entries) {
-      // eslint-disable-next-line no-await-in-loop
       const pattern = await loadPatternById(entry.patternId);
       expect(pattern).not.toBeNull();
       expect(pattern?.id).toBe(entry.patternId);
     }
   });
 });
-

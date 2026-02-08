@@ -4,7 +4,7 @@ import {
   mapboxRoutingProvider,
   osrmRoutingProvider,
 } from "../../providers/routing";
-import type { LngLat } from "../../providers/types";
+import type { LngLat, RoutingProfile } from "../../providers/types";
 
 const SOURCE_ID = "route-source";
 const LAYER_ID = "route-layer";
@@ -17,6 +17,10 @@ const SAMPLE_COORDS: LngLat[] = [
 ];
 
 let lastConfig = "";
+
+function isRoutingProfile(value: unknown): value is RoutingProfile {
+  return value === "driving" || value === "walking" || value === "cycling";
+}
 
 export const routeDisplayPattern: Pattern = {
   id: "route-display",
@@ -239,7 +243,9 @@ async function fetchRoute(
   controls: Record<string, unknown>,
 ): Promise<LngLat[] | null> {
   const providerId = controls.provider as string;
-  const profile = (controls.profile as any) || "driving";
+  const profile = isRoutingProfile(controls.profile)
+    ? controls.profile
+    : "driving";
   const provider =
     providerId === "osrm" ? osrmRoutingProvider : mapboxRoutingProvider;
 

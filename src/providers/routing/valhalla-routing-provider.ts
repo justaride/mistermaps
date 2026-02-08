@@ -18,7 +18,7 @@ type ValhallaIsochroneParams = {
 
 type ValhallaIsochroneResponse = {
   type: "FeatureCollection";
-  features: any[];
+  features: GeoJSON.Feature[];
 };
 
 export type IsochroneRequest = {
