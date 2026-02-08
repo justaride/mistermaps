@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 const Landing = lazy(() => import("./pages/Landing"));
 const MapsCatalog = lazy(() => import("./pages/MapsCatalog"));
 const MapDetail = lazy(() => import("./pages/MapDetail"));
+const Workbench = lazy(() => import("./pages/Workbench"));
 const RendalenProject = lazy(() => import("./pages/RendalenProject"));
 const OsloSatellite = lazy(() => import("./pages/OsloSatellite"));
 
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/maps" element={<MapsCatalog />} />
         <Route path="/maps/:id" element={<MapDetail />} />
+        <Route path="/workbench" element={<Workbench />} />
         <Route path="/projects/rendalen" element={<RendalenProject />} />
         <Route path="/projects/oslo-satellite" element={<OsloSatellite />} />
       </Routes>

@@ -1,4 +1,4 @@
-import type { Map } from "mapbox-gl";
+import type { Map, MapMouseEvent } from "mapbox-gl";
 import type { Pattern } from "../../types";
 import { valhallaRoutingProvider } from "../../providers/routing";
 import type { LngLat } from "../../providers/types";
@@ -6,8 +6,123 @@ import type { LngLat } from "../../providers/types";
 const SOURCE_ID = "isochrone-source";
 const LAYER_ID_PREFIX = "isochrone-layer-";
 
+let clickHandler: ((e: MapMouseEvent) => void) | null = null;
+let currentCenter: LngLat | null = null;
+let currentControls: Record<string, unknown> = {};
+let lastFetchKey = "";
+
+function roundCoord(n: number): number {
+  return Math.round(n * 1e6) / 1e6;
+}
+
+function getFetchKey(center: LngLat, profile: string, minutes: number[]): string {
+  return JSON.stringify({
+    c: [roundCoord(center[0]), roundCoord(center[1])],
+    p: profile,
+    m: minutes,
+  });
+}
+
+function removeLayers(map: Map) {
+  const layers = map.getStyle().layers || [];
+  for (const layer of layers) {
+    if (layer.id.startsWith(LAYER_ID_PREFIX) && map.getLayer(layer.id)) {
+      map.removeLayer(layer.id);
+    }
+  }
+}
+
+function applyOpacity(map: Map, opacity: number) {
+  const layers = map.getStyle().layers || [];
+  for (const layer of layers) {
+    if (!layer.id.startsWith(LAYER_ID_PREFIX)) continue;
+    if (!map.getLayer(layer.id)) continue;
+    map.setPaintProperty(layer.id, "fill-opacity", opacity);
+  }
+}
+
+function parseMinutes(raw: unknown): number[] {
+  const str = typeof raw === "string" ? raw : "";
+  return str
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => Number.isFinite(n) && n > 0);
+}
+
+async function updateIsochrones(
+  map: Map,
+  center: LngLat,
+  controls: Record<string, unknown>,
+) {
+  const minutes = parseMinutes(controls.intervals);
+  const profile = typeof controls.profile === "string" ? controls.profile : "driving";
+  const opacity =
+    typeof controls.opacity === "number" && Number.isFinite(controls.opacity)
+      ? controls.opacity
+      : 0.5;
+
+  const fetchKey = getFetchKey(center, profile, minutes);
+
+  // Opacity changes are frequent; avoid unnecessary network calls.
+  if (fetchKey === lastFetchKey && map.getSource(SOURCE_ID)) {
+    applyOpacity(map, opacity);
+    return;
+  }
+
+  lastFetchKey = fetchKey;
+
+  try {
+    const data = await valhallaRoutingProvider.isochrone({
+      center,
+      minutes,
+      profile: profile as any,
+    });
+
+    if (!map.getSource(SOURCE_ID)) {
+      map.addSource(SOURCE_ID, {
+        type: "geojson",
+        data,
+      });
+    } else {
+      (map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource).setData(data);
+    }
+
+    // Ensure deterministic order and avoid stale layers when intervals change.
+    removeLayers(map);
+
+    const colors = ["#4ade80", "#facc15", "#f87171", "#a78bfa", "#60a5fa"];
+
+    const features = [...data.features].sort((a, b) => {
+      const ca = Number(a.properties?.contour ?? 0);
+      const cb = Number(b.properties?.contour ?? 0);
+      // Largest first (background), smallest last (on top)
+      return cb - ca;
+    });
+
+    features.forEach((feature, i) => {
+      const contour = feature.properties?.contour;
+      const layerId = `${LAYER_ID_PREFIX}${String(contour ?? i)}`;
+
+      map.addLayer({
+        id: layerId,
+        type: "fill",
+        source: SOURCE_ID,
+        filter: ["==", ["get", "contour"], contour],
+        paint: {
+          "fill-color": colors[i % colors.length],
+          "fill-opacity": opacity,
+          "fill-outline-color": "#fff",
+        },
+      });
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Isochrone update failed:", error);
+  }
+}
+
 export const isochronesPattern: Pattern = {
-  id: "isochrones" as any, // We'll add this to PatternId type
+  id: "isochrones",
   name: "Isochrones (Travel Time)",
   category: "navigation",
   description:
@@ -47,85 +162,37 @@ export const isochronesPattern: Pattern = {
   ],
 
   async setup(map: Map, controls: Record<string, unknown>) {
-    const center = map.getCenter().toArray() as LngLat;
-    await this.updateIsochrones(map, center, controls);
+    currentControls = controls;
+    currentCenter = map.getCenter().toArray() as LngLat;
+    lastFetchKey = "";
 
-    map.on("click", this.handleMapClick.bind(this, map));
+    await updateIsochrones(map, currentCenter, currentControls);
+
+    clickHandler = (e) => {
+      currentCenter = [e.lngLat.lng, e.lngLat.lat] as LngLat;
+      void updateIsochrones(map, currentCenter, currentControls);
+    };
+    map.on("click", clickHandler);
   },
 
   cleanup(map: Map) {
-    const layers = map.getStyle().layers || [];
-    layers.forEach((layer) => {
-      if (layer.id.startsWith(LAYER_ID_PREFIX)) {
-        map.removeLayer(layer.id);
-      }
-    });
+    if (clickHandler) {
+      map.off("click", clickHandler);
+      clickHandler = null;
+    }
+
+    removeLayers(map);
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
-    map.off("click", this.handleMapClick);
+
+    currentCenter = null;
+    currentControls = {};
+    lastFetchKey = "";
   },
 
   async update(map: Map, controls: Record<string, unknown>) {
-    const center = map.getCenter().toArray() as LngLat;
-    await this.updateIsochrones(map, center, controls);
-  },
-
-  async handleMapClick(map: Map, e: any) {
-    const center = [e.lngLat.lng, e.lngLat.lat] as LngLat;
-    // We need to get current controls. This is a bit tricky with this pattern structure.
-    // For now, we'll just use the center from the map in update.
-  },
-
-  async updateIsochrones(map: Map, center: LngLat, controls: Record<string, unknown>) {
-    const minutes = (controls.intervals as string).split(",").map((s) => parseInt(s.trim()));
-    const profile = (controls.profile as any) || "driving";
-
-    try {
-      const data = await valhallaRoutingProvider.isochrone({
-        center,
-        minutes,
-        profile,
-      });
-
-      if (!map.getSource(SOURCE_ID)) {
-        map.addSource(SOURCE_ID, {
-          type: "geojson",
-          data,
-        });
-      } else {
-        (map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource).setData(data);
-      }
-
-      // Add layers for each contour if they don't exist
-      const colors = ["#4ade80", "#facc15", "#f87171", "#a78bfa", "#60a5fa"];
-      
-      // Remove old layers first to ensure order or just update
-      const existingLayers = map.getStyle().layers || [];
-      existingLayers.forEach(l => {
-        if (l.id.startsWith(LAYER_ID_PREFIX)) map.removeLayer(l.id);
-      });
-
-      // Valhalla returns features in order of time. We should render largest first (background) or use transparency.
-      // Actually, Valhalla contours usually overlap.
-      const features = [...data.features].reverse(); // Smallest last (on top)
-
-      features.forEach((feature, i) => {
-        const layerId = `${LAYER_ID_PREFIX}${i}`;
-        map.addLayer({
-          id: layerId,
-          type: "fill",
-          source: SOURCE_ID,
-          filter: ["==", ["get", "contour"], feature.properties.contour],
-          paint: {
-            "fill-color": colors[i % colors.length],
-            "fill-opacity": controls.opacity as number,
-            "fill-outline-color": "#fff",
-          },
-        });
-      });
-
-    } catch (error) {
-      console.error("Isochrone update failed:", error);
-    }
+    currentControls = controls;
+    const center = currentCenter ?? (map.getCenter().toArray() as LngLat);
+    await updateIsochrones(map, center, currentControls);
   },
 
   snippet: `// Isochrones with Valhalla

@@ -49,6 +49,26 @@ export default function MapsCatalog() {
             Interactive map patterns and providers to explore.
           </p>
 
+          <div
+            className="mb-8 flex flex-col gap-3 border-2 border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
+            style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+          >
+            <div>
+              <div className="font-display text-xl tracking-wide">Workbench</div>
+              <div className="mt-1 font-mono text-xs text-muted">
+                One map, many features. Toggle multiple patterns and copy an
+                assistant prompt for your exact configuration.
+              </div>
+            </div>
+            <Link
+              to="/workbench"
+              className="inline-flex items-center justify-center gap-2 border-2 border-border bg-topo px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5"
+              style={{ boxShadow: "2px 2px 0 var(--color-border)" }}
+            >
+              Open Workbench <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
           <div className="mb-8 flex flex-wrap gap-2">
             {TABS.map((tab) => (
               <button

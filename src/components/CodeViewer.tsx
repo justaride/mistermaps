@@ -4,6 +4,7 @@ import {
   type CSSProperties,
 } from "react";
 import type { Theme } from "../types";
+import { copyText } from "../patterns/utils/export";
 import styles from "./CodeViewer.module.css";
 
 type Props = {
@@ -27,6 +28,7 @@ type LoadedSyntax = {
 
 export function CodeViewer({ code, isOpen, theme, onClose }: Props) {
   const [loadedSyntax, setLoadedSyntax] = useState<LoadedSyntax | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!isOpen || loadedSyntax) return;
@@ -67,8 +69,11 @@ export function CodeViewer({ code, isOpen, theme, onClose }: Props) {
     };
   }, [isOpen, loadedSyntax]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(code);
+  const copyToClipboard = async () => {
+    const ok = await copyText(code);
+    if (!ok) return;
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
   };
 
   const Highlighter = loadedSyntax?.Highlighter;
@@ -81,7 +86,7 @@ export function CodeViewer({ code, isOpen, theme, onClose }: Props) {
       <div className={styles.header}>
         <h3 className={styles.title}>Implementation Code</h3>
         <div className={styles.actions}>
-          <button onClick={copyToClipboard}>Copy</button>
+          <button onClick={copyToClipboard}>{copied ? "Copied" : "Copy"}</button>
           <button className="secondary" onClick={onClose}>
             Close
           </button>

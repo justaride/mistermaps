@@ -33,6 +33,13 @@ export function SiteHeader() {
         </Link>
         <div className="flex items-center gap-3">
           <Link
+            to="/workbench"
+            className="inline-flex items-center gap-2 border-2 border-border bg-topo px-4 py-2 font-mono text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+            style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+          >
+            Workbench <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
             to="/maps"
             className="inline-flex items-center gap-2 border-2 border-border bg-accent px-4 py-2 font-mono text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
             style={{ boxShadow: "3px 3px 0 var(--color-border)" }}

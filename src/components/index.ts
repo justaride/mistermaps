@@ -1,8 +1,9 @@
 export { MapContainer } from "./MapContainer";
+export { MapContainerMulti } from "./MapContainerMulti";
 export { MapLibreContainer } from "./MapLibreContainer";
-export { PatternSelector } from "./PatternSelector";
-export { ControlsPanel } from "./ControlsPanel";
 export { CodeViewer } from "./CodeViewer";
-export { ThemeToggle } from "./ThemeToggle";
+export { ControlsPanel } from "./ControlsPanel";
+export { PatternSelector } from "./PatternSelector";
 export { SearchBox } from "./SearchBox";
 export { SiteHeader } from "./SiteHeader";
+export { ThemeToggle } from "./ThemeToggle";
