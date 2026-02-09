@@ -79,6 +79,40 @@ function renderControlInline(
   const id = controlDomId(patternId, config.id);
 
   switch (config.type) {
+    case "text":
+      return (
+        <input
+          type="text"
+          id={id}
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(config.id, e.target.value)}
+          className={styles.textInput}
+        />
+      );
+
+    case "textarea":
+      return (
+        <textarea
+          id={id}
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(config.id, e.target.value)}
+          className={`${styles.textInput} ${styles.textarea}`}
+          rows={7}
+          spellCheck={false}
+        />
+      );
+
+    case "button":
+      return (
+        <button
+          type="button"
+          className={`secondary ${styles.inlineButton}`}
+          onClick={() => onChange(config.id, Date.now())}
+        >
+          {config.label}
+        </button>
+      );
+
     case "slider":
       return (
         <div className={styles.sliderRow}>
@@ -143,7 +177,14 @@ function renderControlInline(
 }
 
 export default function Workbench() {
-  const mapboxCatalog = useMemo(() => CATALOG.filter(isMapboxCatalogEntry), []);
+  const mapboxCatalog = useMemo(
+    () =>
+      CATALOG.filter(
+        (entry) =>
+          isMapboxCatalogEntry(entry) && entry.workbenchCompatible !== false,
+      ),
+    [],
+  );
 
   const nameById = useMemo(() => {
     const record: Partial<Record<PatternId, string>> = {};

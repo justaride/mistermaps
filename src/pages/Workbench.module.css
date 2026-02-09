@@ -68,6 +68,33 @@
   border-color: var(--accent);
 }
 
+.textInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  font-family: var(--font-mono);
+}
+
+.textInput:focus {
+  border-color: var(--accent);
+}
+
+.textarea {
+  resize: vertical;
+  line-height: 1.35;
+}
+
+.inlineButton {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .notice {
   margin-top: 10px;
   padding: 10px 12px;
@@ -284,4 +311,3 @@
     height: 62vh;
   }
 }
-

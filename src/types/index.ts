@@ -13,6 +13,8 @@ export type PatternId =
   | "vector-debug-tools"
   | "terrain-hillshade"
   | "nasa-gibs-true-color"
+  | "style-switcher"
+  | "style-loader"
   | "choropleth"
   | "heatmap"
   | "geolocation"
@@ -29,6 +31,7 @@ export type PatternId =
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
 
 export type LayerSubcategory =
+  | "basemaps"
   | "fundamentals"
   | "vector-tiles"
   | "raster-3d"
@@ -53,7 +56,14 @@ export type CatalogTag =
   | "api-required"
   | "no-key";
 
-export type ControlType = "slider" | "toggle" | "select" | "color";
+export type ControlType =
+  | "slider"
+  | "toggle"
+  | "select"
+  | "color"
+  | "text"
+  | "textarea"
+  | "button";
 
 export type ControlConfig = {
   id: string;
@@ -87,6 +97,7 @@ export type CatalogEntry = {
   subcategory?: Subcategory;
   tags: CatalogTag[];
   provider: "mapbox" | "maplibre";
+  workbenchCompatible?: boolean;
 };
 
 export type Theme = "light" | "dark";

@@ -11,6 +11,7 @@ export const CATEGORY_META: Record<
 };
 
 export const SUBCATEGORY_LABELS: Record<Subcategory, string> = {
+  basemaps: "Basemaps & Styling",
   fundamentals: "Fundamentals",
   "vector-tiles": "Vector Tiles",
   "raster-3d": "Raster & 3D",

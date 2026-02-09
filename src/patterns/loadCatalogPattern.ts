@@ -3,6 +3,10 @@ import type { Pattern, PatternId } from "../types";
 type PatternLoader = () => Promise<Pattern>;
 
 const patternLoaders: Record<PatternId, PatternLoader> = {
+  "style-switcher": async () =>
+    (await import("./layers/style-switcher")).styleSwitcherPattern,
+  "style-loader": async () =>
+    (await import("./layers/style-loader")).styleLoaderPattern,
   "rendalen-data": async () =>
     (await import("./layers/rendalen-data")).rendalenDataPattern,
   "layer-inspector": async () =>

@@ -32,10 +32,30 @@ const PATTERN_APIS_BY_ID: Partial<Record<string, string[]>> = {
   "nasa-gibs-true-color": ["NASA GIBS (WMTS)"],
 };
 
+const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
+  Record<string, string[]>
+> = {
+  "style-switcher": [
+    "Switching style preserves center/zoom/bearing/pitch.",
+    "If overlays are enabled, they are restored when possible after style change.",
+    "Clear error state if a style fails to load.",
+  ],
+  "style-loader": [
+    "Supports pasting a style URL or raw JSON.",
+    "Shows validation errors and does not break the map session.",
+    "Reloading a style keeps viewport stable.",
+  ],
+};
+
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
   const api = PATTERN_APIS_BY_ID[entry.patternId];
   const category =
     CATALOG_CATEGORY_TO_ROADMAP_CATEGORY[entry.category] ?? "Layers & Data";
+
+  const acceptanceCriteria =
+    entry.patternId !== "maplibre"
+      ? IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID[entry.patternId]
+      : undefined;
 
   return {
     id: `pattern:${entry.patternId}`,
@@ -57,7 +77,7 @@ function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
     },
     links: { demoPath: `/maps/${entry.patternId}` },
     description: entry.description,
-    acceptanceCriteria: [],
+    acceptanceCriteria: acceptanceCriteria ?? [],
   };
 }
 
@@ -123,39 +143,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:style-switcher",
-    name: "Style Switcher",
-    artifact: "pattern",
-    status: "planned",
-    category: "Basemaps & Styling",
-    tags: ["interactive", "styling"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description:
-      "Switch basemap styles without losing the current viewport and context.",
-    acceptanceCriteria: [
-      "Switching style preserves center/zoom/bearing/pitch.",
-      "If overlays are enabled, they are restored when possible after style change.",
-      "Clear error state if a style fails to load.",
-    ],
-  },
-  {
-    id: "planned:style-loader",
-    name: "Style JSON / URL Loader",
-    artifact: "pattern",
-    status: "planned",
-    category: "Basemaps & Styling",
-    tags: ["interactive", "styling", "import"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Paste a style URL or JSON and load it safely.",
-    acceptanceCriteria: [
-      "Supports pasting a style URL or raw JSON.",
-      "Shows validation errors and does not break the map session.",
-      "Reloading a style keeps viewport stable.",
-    ],
-  },
   {
     id: "planned:terrain-exaggeration",
     name: "Terrain Exaggeration Controls",
@@ -619,4 +606,3 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   ...IMPLEMENTED_ROADMAP_ITEMS,
   ...PLANNED_ROADMAP_ITEMS,
 ];
-

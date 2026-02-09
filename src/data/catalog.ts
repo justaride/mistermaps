@@ -2,6 +2,28 @@ import type { CatalogEntry } from "../types";
 
 export const CATALOG: CatalogEntry[] = [
   {
+    patternId: "style-switcher",
+    name: "Style Switcher",
+    description: "Switch basemap styles without losing viewport or overlay context.",
+    capabilities: ["setStyle", "style.load", "camera preserve", "overlay restore"],
+    category: "layers",
+    subcategory: "basemaps",
+    tags: ["interactive"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
+    patternId: "style-loader",
+    name: "Style JSON / URL Loader",
+    description: "Paste a style URL or raw JSON and load it safely with validation.",
+    capabilities: ["setStyle", "style URL", "style JSON", "validation", "safe reload"],
+    category: "layers",
+    subcategory: "basemaps",
+    tags: ["interactive"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "layer-basics",
     name: "Layer Basics",
     description: "Fundamental Mapbox GL layer types and styling properties.",

@@ -41,7 +41,9 @@ export function ControlsPanel({
           <div className={styles.controls}>
             {controls.map((control) => (
               <div key={control.id} className={styles.control}>
-                <label htmlFor={control.id}>{control.label}</label>
+                {control.type !== "button" && (
+                  <label htmlFor={control.id}>{control.label}</label>
+                )}
                 {renderControl(control, values[control.id], onChange)}
               </div>
             ))}
@@ -61,6 +63,40 @@ function renderControl(
   onChange: (id: string, value: unknown) => void,
 ) {
   switch (config.type) {
+    case "text":
+      return (
+        <input
+          type="text"
+          id={config.id}
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(config.id, e.target.value)}
+          className={styles.textInput}
+        />
+      );
+
+    case "textarea":
+      return (
+        <textarea
+          id={config.id}
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(config.id, e.target.value)}
+          className={`${styles.textInput} ${styles.textarea}`}
+          rows={7}
+          spellCheck={false}
+        />
+      );
+
+    case "button":
+      return (
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => onChange(config.id, Date.now())}
+        >
+          {config.label}
+        </button>
+      );
+
     case "slider":
       return (
         <div className={styles.sliderWrapper}>
