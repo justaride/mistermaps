@@ -76,6 +76,17 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "symbol-labels-icons",
+    name: "Symbol Labels + Icons",
+    description:
+      "Symbol layer patterns for labels + icons, including SDF recoloring and collision settings.",
+    capabilities: ["symbol", "text", "SDF icons", "halo", "collision"],
+    category: "layers",
+    subcategory: "fundamentals",
+    tags: ["interactive", "vector"],
+    provider: "mapbox",
+  },
+  {
     patternId: "vector-feature-state",
     name: "Vector Feature State",
     description:

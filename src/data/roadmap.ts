@@ -65,6 +65,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Toggles for sky and hillshade are available when supported.",
     "Works on a terrain-capable basemap without console errors.",
   ],
+  "symbol-labels-icons": [
+    "Demonstrates icon + text symbols with size/color/halo controls.",
+    "Collision behavior is demonstrated and documented in code snippet.",
+    "No missing sprite warnings for included icons.",
+  ],
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -163,22 +168,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:symbol-labels-icons",
-    name: "Symbol Labels + Icons (SDF + text)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive", "vector"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Show label + icon symbol patterns with common paint/layout controls.",
-    acceptanceCriteria: [
-      "Demonstrates icon + text symbols with size/color/halo controls.",
-      "Collision behavior is demonstrated and documented in code snippet.",
-      "No missing sprite warnings for included icons.",
-    ],
-  },
   {
     id: "planned:line-decorations",
     name: "Line Decorations (dashes, arrows, gradients)",

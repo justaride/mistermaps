@@ -10,6 +10,7 @@ export type PatternId =
   | "image-overlay"
   | "map-compare-swipe"
   | "terrain-exaggeration"
+  | "symbol-labels-icons"
   | "geojson-overlay"
   | "3d-buildings"
   | "feature-state"
