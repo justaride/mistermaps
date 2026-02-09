@@ -6,6 +6,7 @@ export type PatternId =
   | "layer-inspector"
   | "layer-explorer"
   | "layer-basics"
+  | "hover-tooltips"
   | "raster-overlay"
   | "image-overlay"
   | "map-compare-swipe"

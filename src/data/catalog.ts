@@ -76,6 +76,19 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "hover-tooltips",
+    name: "Hover Tooltips",
+    description:
+      "Lightweight hover tooltips that follow the cursor without popup churn.",
+    capabilities: ["queryRenderedFeatures", "hover", "tooltip", "throttle"],
+    category: "layers",
+    subcategory: "fundamentals",
+    tags: ["interactive"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+  },
+  {
     patternId: "symbol-labels-icons",
     name: "Symbol Labels + Icons",
     description:

@@ -81,6 +81,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Selecting a result flies the camera and optionally drops a pin.",
     "Errors are handled without leaving stale results open.",
   ],
+  "hover-tooltips": [
+    "Tooltip follows cursor and updates on hover over features.",
+    "Debounces updates to avoid excessive re-renders.",
+    "Cursor state is restored on mouse leave.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -88,6 +93,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
 > = {
   // Implemented as a dual-engine demo via an engine toggle inside the pattern view.
   "geocoding-search": { mapbox: true, maplibre: true },
+  "hover-tooltips": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -272,24 +278,6 @@ export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
       "Works without freezing on a larger sample dataset.",
     ],
   },
-  {
-    id: "planned:hover-tooltips",
-    name: "Lightweight Hover Tooltip Pattern",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description:
-      "Hover tooltips using queryRenderedFeatures without popup churn.",
-    acceptanceCriteria: [
-      "Tooltip follows cursor and updates on hover over features.",
-      "Debounces updates to avoid excessive re-renders.",
-      "Cursor state is restored on mouse leave.",
-    ],
-  },
-
   {
     id: "planned:draw-tools-basic",
     name: "Draw Tools (Basic)",

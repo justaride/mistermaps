@@ -15,6 +15,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/layer-explorer")).layerExplorerPattern,
   "layer-basics": async () =>
     (await import("./layers/layer-basics")).layerBasicsPattern,
+  "hover-tooltips": async () =>
+    (await import("./layers/hover-tooltips")).hoverTooltipsPattern,
   "symbol-labels-icons": async () =>
     (await import("./layers/symbol-labels-icons")).symbolLabelsIconsPattern,
   "line-decorations": async () =>
