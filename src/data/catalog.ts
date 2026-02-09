@@ -265,6 +265,17 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "overpass-poi-overlay",
+    name: "Overpass POI Overlay",
+    description:
+      "Query OpenStreetMap features via Overpass API and render nearby POIs. Click map to set the search center.",
+    capabilities: ["Overpass API", "OSM POIs", "GeoJSON", "no-key"],
+    category: "navigation",
+    subcategory: "location-analysis",
+    tags: ["interactive", "open-source", "no-key", "api-required", "geojson"],
+    provider: "mapbox",
+  },
+  {
     patternId: "isochrones",
     name: "Isochrones (Travel Time)",
     description:

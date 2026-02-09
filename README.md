@@ -20,6 +20,7 @@ VITE_NOMINATIM_ENDPOINT=https://nominatim.openstreetmap.org
 VITE_PHOTON_ENDPOINT=https://photon.komoot.io
 VITE_OSRM_ENDPOINT=https://router.project-osrm.org/route/v1
 VITE_VALHALLA_ENDPOINT=https://valhalla1.openstreetmap.de
+VITE_OVERPASS_ENDPOINT=https://overpass.kumi.systems/api/interpreter
 ```
 
 ```bash
@@ -35,6 +36,7 @@ npm run dev
 | `VITE_PHOTON_ENDPOINT` | No | Komoot Photon geocoder endpoint. |
 | `VITE_OSRM_ENDPOINT` | No | OSRM routing endpoint. |
 | `VITE_VALHALLA_ENDPOINT` | No | Valhalla routing/isochrone endpoint. |
+| `VITE_OVERPASS_ENDPOINT` | No | Overpass API endpoint (OSM POI queries). |
 
 On Coolify, set `VITE_MAPBOX_TOKEN` as a build argument.
 
@@ -68,6 +70,7 @@ Mister Maps is committed to vendor neutrality. Beyond Mapbox, we support:
 - **Geocoding:** Nominatim (OSM) and Photon (Komoot) as primary or fallback options.
 - **Routing:** OSRM for fast directions and Valhalla for multimodal routing.
 - **Isochrones:** Travel-time polygons powered by Valhalla.
+- **OSM POIs:** Overpass API (no-key) for live POI/category overlays.
 - **Vector Tiles:** OpenFreeMap (no-key) integrated into the MapLibre engine.
 
 ## Model Context Protocol (MCP)

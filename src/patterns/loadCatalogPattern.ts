@@ -32,6 +32,9 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
   heatmap: async () => (await import("./data-viz/heatmap")).heatmapPattern,
   geolocation: async () =>
     (await import("./navigation/geolocation")).geolocationPattern,
+  "overpass-poi-overlay": async () =>
+    (await import("./navigation/overpass-poi-overlay"))
+      .overpassPoiOverlayPattern,
   "route-display": async () =>
     (await import("./navigation/route-display")).routeDisplayPattern,
   "distance-measurement": async () =>

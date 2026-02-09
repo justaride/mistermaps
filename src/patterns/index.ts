@@ -26,6 +26,7 @@ import {
   areaMeasurementPattern,
   animatedRoutePattern,
   isochronesPattern,
+  overpassPoiOverlayPattern,
 } from "./navigation";
 
 export { rendalenDataPattern };
@@ -48,6 +49,7 @@ export const catalogPatterns: Pattern[] = [
   customPopupsPattern,
   pulsingDotPattern,
   geolocationPattern,
+  overpassPoiOverlayPattern,
   areaMeasurementPattern,
   animatedRoutePattern,
   routeDisplayPattern,

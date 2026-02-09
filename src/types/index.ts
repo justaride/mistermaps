@@ -16,6 +16,7 @@ export type PatternId =
   | "choropleth"
   | "heatmap"
   | "geolocation"
+  | "overpass-poi-overlay"
   | "route-display"
   | "distance-measurement"
   | "area-measurement"
