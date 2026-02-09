@@ -60,6 +60,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "A draggable divider reveals left/right styles.",
     "Works on mobile and desktop layouts.",
   ],
+  "terrain-exaggeration": [
+    "Slider controls terrain exaggeration in real time.",
+    "Toggles for sky and hillshade are available when supported.",
+    "Works on a terrain-capable basemap without console errors.",
+  ],
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -158,23 +163,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:terrain-exaggeration",
-    name: "Terrain Exaggeration Controls",
-    artifact: "pattern",
-    status: "planned",
-    category: "Basemaps & Styling",
-    tags: ["interactive", "3d", "raster"],
-    engineSupport: { mapbox: true, maplibre: false },
-    dependencies: { tokenRequired: true },
-    description: "Control terrain exaggeration and optional sky/hillshade.",
-    acceptanceCriteria: [
-      "Slider controls terrain exaggeration in real time.",
-      "Toggles for sky and hillshade are available when supported.",
-      "Works on a terrain-capable basemap without console errors.",
-    ],
-  },
-
   {
     id: "planned:symbol-labels-icons",
     name: "Symbol Labels + Icons (SDF + text)",

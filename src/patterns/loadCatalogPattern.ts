@@ -35,6 +35,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/vector-debug-tools")).vectorDebugToolsPattern,
   "terrain-hillshade": async () =>
     (await import("./layers/terrain-hillshade")).terrainHillshadePattern,
+  "terrain-exaggeration": async () =>
+    (await import("./layers/terrain-exaggeration")).terrainExaggerationPattern,
   "nasa-gibs-true-color": async () =>
     (await import("./layers/nasa-gibs")).nasaGibsTrueColorPattern,
   choropleth: async () =>

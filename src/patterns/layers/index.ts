@@ -9,6 +9,7 @@ export { mapCompareSwipePattern } from "./map-compare-swipe";
 export { nasaGibsTrueColorPattern } from "./nasa-gibs";
 export { rasterOverlayPattern } from "./raster-overlay";
 export { rendalenDataPattern } from "./rendalen-data";
+export { terrainExaggerationPattern } from "./terrain-exaggeration";
 export { terrainHillshadePattern } from "./terrain-hillshade";
 export { vectorDebugToolsPattern } from "./vector-debug-tools";
 export { vectorFeatureStatePattern } from "./vector-feature-state";

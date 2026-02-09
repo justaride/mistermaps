@@ -35,6 +35,16 @@ export const CATALOG: CatalogEntry[] = [
     workbenchCompatible: false,
   },
   {
+    patternId: "terrain-exaggeration",
+    name: "Terrain Exaggeration Controls",
+    description: "Control terrain exaggeration and optional sky/hillshade.",
+    capabilities: ["terrain", "raster-dem", "exaggeration", "hillshade", "sky"],
+    category: "layers",
+    subcategory: "basemaps",
+    tags: ["interactive", "3d", "raster"],
+    provider: "mapbox",
+  },
+  {
     patternId: "layer-basics",
     name: "Layer Basics",
     description: "Fundamental Mapbox GL layer types and styling properties.",
