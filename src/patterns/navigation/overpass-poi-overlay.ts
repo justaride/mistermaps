@@ -39,7 +39,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
 
 let currentControls: Record<string, unknown> = {};
 let currentCenter: LngLat | null = null;
-let lastFetchKey = "";
+let lastAppliedKey = "";
 
 let clickHandler: ((e: MapMouseEvent) => void) | null = null;
 let moveEndHandler: (() => void) | null = null;
@@ -157,8 +157,7 @@ async function doFetch(map: Map) {
   const maxResults = parseNumber(currentControls.maxResults, 100);
 
   const fetchKey = getFetchKey(center, filter, radiusMeters, maxResults);
-  if (fetchKey === lastFetchKey && getSource(map)) return;
-  lastFetchKey = fetchKey;
+  if (fetchKey === lastAppliedKey && getSource(map)) return;
 
   cancelPendingWork();
 
@@ -171,12 +170,14 @@ async function doFetch(map: Map) {
     timeoutSeconds: 25,
   });
 
-  abortController = new AbortController();
-  const signal = abortController.signal;
+  const controller = new AbortController();
+  abortController = controller;
+  const signal = controller.signal;
+  const isStale = () => abortController !== controller;
 
   const timeoutMs = 20_000;
   const timeoutId = window.setTimeout(() => {
-    abortController?.abort();
+    controller.abort();
   }, timeoutMs);
 
   setStatus(
@@ -190,7 +191,9 @@ async function doFetch(map: Map) {
       maxTags: 25,
     });
 
+    if (isStale()) return;
     setGeoJson(map, fc);
+    lastAppliedKey = fetchKey;
 
     const cLng = roundCoord(center[0]);
     const cLat = roundCoord(center[1]);
@@ -198,18 +201,18 @@ async function doFetch(map: Map) {
       `Found ${fc.features.length} ${filter.value} within ${Math.round(radiusMeters)}m @ ${cLat}, ${cLng}. Click map to search elsewhere.`,
     );
   } catch (error) {
+    if (isStale()) return;
     // Keep previous data on errors; only update status.
-    if ((error as Error)?.name === "AbortError") {
-      setStatus("Cancelled.");
-      return;
-    }
+    if ((error as Error)?.name === "AbortError") return;
     console.error("Overpass request failed:", error);
     setStatus(
       "Overpass request failed (rate limit / timeout). Try a smaller radius or click again.",
     );
   } finally {
     window.clearTimeout(timeoutId);
-    abortController = null;
+    if (abortController === controller) {
+      abortController = null;
+    }
   }
 }
 
@@ -338,7 +341,7 @@ export const overpassPoiOverlayPattern: Pattern = {
   setup(map: Map, controls: Record<string, unknown>) {
     currentControls = controls;
     currentCenter = DEFAULT_CENTER;
-    lastFetchKey = "";
+    lastAppliedKey = "";
 
     ensureStatusPanel();
     setStatus("Click map to search OpenStreetMap POIs via Overpass.");
@@ -437,7 +440,7 @@ export const overpassPoiOverlayPattern: Pattern = {
 
   cleanup(map: Map) {
     cancelPendingWork();
-    lastFetchKey = "";
+    lastAppliedKey = "";
     currentCenter = null;
     currentControls = {};
 
@@ -514,4 +517,3 @@ map.addLayer({
   paint: { "circle-color": "#c85a2a", "circle-radius": 6 }
 });`,
 };
-
