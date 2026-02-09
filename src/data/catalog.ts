@@ -24,6 +24,17 @@ export const CATALOG: CatalogEntry[] = [
     workbenchCompatible: false,
   },
   {
+    patternId: "map-compare-swipe",
+    name: "Map Compare / Swipe",
+    description: "Compare two styles with a swipe divider and synced camera.",
+    capabilities: ["two maps", "camera sync", "swipe divider", "setStyle"],
+    category: "layers",
+    subcategory: "basemaps",
+    tags: ["interactive"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "layer-basics",
     name: "Layer Basics",
     description: "Fundamental Mapbox GL layer types and styling properties.",

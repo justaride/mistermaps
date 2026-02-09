@@ -35,6 +35,7 @@ export default function MapDetail() {
     let isCancelled = false;
 
     setCodeViewerOpen(false);
+    setMap(null);
 
     if (isMaplibre) {
       setPattern(null);
@@ -122,6 +123,13 @@ export default function MapDetail() {
     <div className={`${styles.app} map-root`}>
       {isMaplibre ? (
         <MapLibreContainer theme={theme} />
+      ) : pattern?.view ? (
+        <pattern.view
+          theme={theme}
+          values={controlValues}
+          onChange={handleControlChange}
+          onPrimaryMapReady={handleMapReady}
+        />
       ) : (
         <MapContainer
           theme={theme}

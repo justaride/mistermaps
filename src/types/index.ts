@@ -1,4 +1,5 @@
-import type { Map } from "mapbox-gl";
+import type { ComponentType } from "react";
+import type { Map, Map as MapboxMap } from "mapbox-gl";
 
 export type PatternId =
   | "rendalen-data"
@@ -7,6 +8,7 @@ export type PatternId =
   | "layer-basics"
   | "raster-overlay"
   | "image-overlay"
+  | "map-compare-swipe"
   | "geojson-overlay"
   | "3d-buildings"
   | "feature-state"
@@ -87,7 +89,15 @@ export type Pattern = {
   setup: (map: Map, controls: Record<string, unknown>) => void | Promise<void>;
   cleanup: (map: Map) => void;
   update: (map: Map, controls: Record<string, unknown>) => void;
+  view?: ComponentType<PatternViewProps>;
   snippet: string;
+};
+
+export type PatternViewProps = {
+  theme: Theme;
+  values: Record<string, unknown>;
+  onChange: (controlId: string, value: unknown) => void;
+  onPrimaryMapReady?: (map: MapboxMap) => void;
 };
 
 export type CatalogEntry = {

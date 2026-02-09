@@ -19,6 +19,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/raster-overlay")).rasterOverlayPattern,
   "image-overlay": async () =>
     (await import("./layers/image-overlay")).imageOverlayPattern,
+  "map-compare-swipe": async () =>
+    (await import("./layers/map-compare-swipe")).mapCompareSwipePattern,
   "geojson-overlay": async () =>
     (await import("./layers/geojson-overlay")).geojsonOverlayPattern,
   "3d-buildings": async () =>

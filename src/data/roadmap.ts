@@ -55,6 +55,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Fit-to-bounds action sets the camera correctly.",
     "Overlay can be toggled on/off without leaking sources/layers.",
   ],
+  "map-compare-swipe": [
+    "Two maps are rendered with synchronized camera movement.",
+    "A draggable divider reveals left/right styles.",
+    "Works on mobile and desktop layouts.",
+  ],
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -167,22 +172,6 @@ export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
       "Slider controls terrain exaggeration in real time.",
       "Toggles for sky and hillshade are available when supported.",
       "Works on a terrain-capable basemap without console errors.",
-    ],
-  },
-  {
-    id: "planned:map-compare-swipe",
-    name: "Map Compare / Swipe",
-    artifact: "pattern",
-    status: "planned",
-    category: "Basemaps & Styling",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Compare two styles with a swipe divider and synced camera.",
-    acceptanceCriteria: [
-      "Two maps are rendered with synchronized camera movement.",
-      "A draggable divider reveals left/right styles.",
-      "Works on mobile and desktop layouts.",
     ],
   },
 

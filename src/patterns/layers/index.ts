@@ -5,6 +5,7 @@ export { imageOverlayPattern } from "./image-overlay";
 export { layerBasicsPattern } from "./layer-basics";
 export { layerExplorerPattern } from "./layer-explorer";
 export { layerInspectorPattern } from "./layer-inspector";
+export { mapCompareSwipePattern } from "./map-compare-swipe";
 export { nasaGibsTrueColorPattern } from "./nasa-gibs";
 export { rasterOverlayPattern } from "./raster-overlay";
 export { rendalenDataPattern } from "./rendalen-data";
