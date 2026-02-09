@@ -27,6 +27,42 @@ export type IsochroneRequest = {
   profile?: RoutingProfile;
 };
 
+function decodePolyline6(encoded: string): LngLat[] {
+  const coords: LngLat[] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte: number;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+
+    coords.push([lng / 1e6, lat / 1e6]);
+  }
+
+  return coords;
+}
+
 /**
  * Valhalla implementation of RoutingProvider + Advanced features (Isochrones).
  */
@@ -34,7 +70,10 @@ export class ValhallaRoutingProvider implements RoutingProvider {
   readonly id = "valhalla";
   private readonly endpoint: string;
 
-  constructor(endpoint = import.meta.env.VITE_VALHALLA_ENDPOINT || DEFAULT_VALHALLA_ENDPOINT) {
+  constructor(
+    endpoint = import.meta.env.VITE_VALHALLA_ENDPOINT ||
+      DEFAULT_VALHALLA_ENDPOINT,
+  ) {
     this.endpoint = endpoint;
   }
 
@@ -56,7 +95,7 @@ export class ValhallaRoutingProvider implements RoutingProvider {
   ): Promise<RoutingResult> {
     const costing = this.mapCosting(request.profile);
     const locations = request.coordinates.map(([lon, lat]) => ({ lon, lat }));
-    
+
     const body = {
       locations,
       costing,
@@ -75,7 +114,7 @@ export class ValhallaRoutingProvider implements RoutingProvider {
 
     const payload = await response.json();
     const trip = payload.trip;
-    
+
     if (!trip || !trip.legs) {
       throw new ProviderRequestError("Valhalla routing returned no trip", {
         providerId: this.id,
@@ -83,13 +122,22 @@ export class ValhallaRoutingProvider implements RoutingProvider {
       });
     }
 
-    // Valhalla uses polyline6 by default usually, but we can request geojson or decode it.
-    // For simplicity in this demo, we assume the server might support a geojson path or we decode.
-    // Actually, Valhalla standard /route returns a 'shape' which is encoded polyline.
-    // Let's check if we can get coordinates directly or if we need a decoder.
-    // Most public Valhalla instances return 'shape'.
-    
-    throw new Error("Valhalla shape decoding not implemented yet in this adapter");
+    const coordinates: LngLat[] = [];
+    for (const leg of trip.legs) {
+      const decoded = decodePolyline6(leg.shape);
+      coordinates.push(...decoded);
+    }
+
+    const summary = trip.summary ?? trip.legs[0]?.summary ?? {};
+
+    return {
+      geometry: { type: "LineString", coordinates },
+      summary: {
+        distanceMeters: (summary.length ?? 0) * 1000,
+        durationSeconds: summary.time ?? 0,
+      },
+      providerId: this.id,
+    };
   }
 
   /**
@@ -103,7 +151,7 @@ export class ValhallaRoutingProvider implements RoutingProvider {
     const body: ValhallaIsochroneParams = {
       locations: [{ lon: request.center[0], lat: request.center[1] }],
       costing,
-      contours: request.minutes.map(m => ({ time: m })),
+      contours: request.minutes.map((m) => ({ time: m })),
       polygons: true,
     };
 

@@ -27,6 +27,31 @@ export type PatternId =
 
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
 
+export type LayerSubcategory =
+  | "fundamentals"
+  | "vector-tiles"
+  | "raster-3d"
+  | "data-import";
+
+export type NavigationSubcategory =
+  | "routing"
+  | "measurement"
+  | "location-analysis";
+
+export type Subcategory = LayerSubcategory | NavigationSubcategory;
+
+export type CatalogTag =
+  | "interactive"
+  | "3d"
+  | "vector"
+  | "raster"
+  | "animation"
+  | "geojson"
+  | "turf"
+  | "open-source"
+  | "api-required"
+  | "no-key";
+
 export type ControlType = "slider" | "toggle" | "select" | "color";
 
 export type ControlConfig = {
@@ -57,7 +82,9 @@ export type CatalogEntry = {
   name: string;
   description: string;
   capabilities: string[];
-  category: PatternCategory | "providers";
+  category: PatternCategory;
+  subcategory?: Subcategory;
+  tags: CatalogTag[];
   provider: "mapbox" | "maplibre";
 };
 

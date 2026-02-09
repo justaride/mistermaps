@@ -9,8 +9,18 @@ import {
   ThemeToggle,
 } from "../components";
 import { CATALOG } from "../data/catalog";
+import { SUBCATEGORY_LABELS } from "../data/catalog-meta";
+import { groupCatalog, type CatalogGroup } from "../data/catalog-utils";
 import { loadPatternById } from "../patterns/loadCatalogPattern";
-import type { CatalogEntry, ControlConfig, Pattern, PatternCategory, PatternId, Theme } from "../types";
+import type {
+  CatalogEntry,
+  ControlConfig,
+  Pattern,
+  PatternCategory,
+  PatternId,
+  Subcategory,
+  Theme,
+} from "../types";
 import { buildAssistantPrompt } from "../utils/buildAssistantPrompt";
 import { copyText } from "../patterns/utils/export";
 import appStyles from "../App.module.css";
@@ -22,7 +32,9 @@ type MapboxCatalogEntry = CatalogEntry & {
   category: PatternCategory;
 };
 
-function isMapboxCatalogEntry(entry: CatalogEntry): entry is MapboxCatalogEntry {
+function isMapboxCatalogEntry(
+  entry: CatalogEntry,
+): entry is MapboxCatalogEntry {
   return entry.provider === "mapbox" && entry.patternId !== "maplibre";
 }
 
@@ -154,9 +166,9 @@ export default function Workbench() {
   const [loadingById, setLoadingById] = useState<
     Partial<Record<PatternId, boolean>>
   >({});
-  const [loadedById, setLoadedById] = useState<Partial<Record<PatternId, Pattern>>>(
-    {},
-  );
+  const [loadedById, setLoadedById] = useState<
+    Partial<Record<PatternId, Pattern>>
+  >({});
   const [controlValuesById, setControlValuesById] = useState<
     Partial<Record<PatternId, Record<string, unknown>>>
   >({});
@@ -242,19 +254,13 @@ export default function Workbench() {
     });
   }, [filter, mapboxCatalog]);
 
-  const groupedCatalog = useMemo(() => {
-    const grouped: Record<PatternCategory, MapboxCatalogEntry[]> = {
-      layers: [],
-      "data-viz": [],
-      markers: [],
-      navigation: [],
-    };
-
-    for (const entry of filteredCatalog) {
-      grouped[entry.category].push(entry);
-    }
-    return grouped;
-  }, [filteredCatalog]);
+  const groupedCatalog = useMemo(
+    () =>
+      groupCatalog(filteredCatalog) as (CatalogGroup & {
+        entries: MapboxCatalogEntry[];
+      })[],
+    [filteredCatalog],
+  );
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
@@ -263,20 +269,21 @@ export default function Workbench() {
   const setPatternEnabled = (id: PatternId, enabled: boolean) => {
     if (enabled) {
       const group = CONFLICT_GROUP_BY_PATTERN[id];
-      const conflicts =
-        group
-          ? enabledIds.filter(
-              (otherId) =>
-                otherId !== id && CONFLICT_GROUP_BY_PATTERN[otherId] === group,
-            )
-          : [];
+      const conflicts = group
+        ? enabledIds.filter(
+            (otherId) =>
+              otherId !== id && CONFLICT_GROUP_BY_PATTERN[otherId] === group,
+          )
+        : [];
 
       if (conflicts.length > 0) {
         const disabledNames = conflicts
           .map((conflictId) => nameById[conflictId] ?? conflictId)
           .join(", ");
         const enabledName = nameById[id] ?? id;
-        setNotice(`Disabled ${disabledNames} because it conflicts with ${enabledName}.`);
+        setNotice(
+          `Disabled ${disabledNames} because it conflicts with ${enabledName}.`,
+        );
         window.setTimeout(() => setNotice(null), 2500);
       }
 
@@ -379,7 +386,9 @@ export default function Workbench() {
             onClick={handleCopyPrompt}
             disabled={!prompt || anyEnabledLoading}
             className={styles.smallButton}
-            title={anyEnabledLoading ? "Wait for patterns to finish loading" : ""}
+            title={
+              anyEnabledLoading ? "Wait for patterns to finish loading" : ""
+            }
           >
             <span className="inline-flex items-center gap-2">
               <Copy className="h-4 w-4" />
@@ -396,7 +405,10 @@ export default function Workbench() {
               View Prompt
             </span>
           </button>
-          <button className={`secondary ${styles.smallButtonSecondary}`} onClick={clearAll}>
+          <button
+            className={`secondary ${styles.smallButtonSecondary}`}
+            onClick={clearAll}
+          >
             <span className="inline-flex items-center gap-2">
               <X className="h-4 w-4" />
               Clear
@@ -406,21 +418,35 @@ export default function Workbench() {
 
         {notice && <div className={styles.notice}>{notice}</div>}
 
-        {(Object.keys(groupedCatalog) as PatternCategory[]).map((category) => (
-          <div key={category} className={styles.category}>
+        {groupedCatalog.map((group) => (
+          <div
+            key={`${group.category}::${group.subcategory ?? "none"}`}
+            className={styles.category}
+          >
             <div className={styles.categoryHeader}>
-              <h2 className={styles.categoryTitle}>{category}</h2>
+              <h2 className={styles.categoryTitle}>
+                {group.category}
+                {group.subcategory && (
+                  <span className="ml-2 text-xs font-normal text-muted">
+                    /{" "}
+                    {SUBCATEGORY_LABELS[group.subcategory as Subcategory] ??
+                      group.subcategory}
+                  </span>
+                )}
+              </h2>
               <div className={styles.subtitle}>
-                {groupedCatalog[category].length} items
+                {group.entries.length} items
               </div>
             </div>
 
-            {groupedCatalog[category].map((entry) => {
-              const id = entry.patternId;
+            {group.entries.map((entry) => {
+              const id = entry.patternId as PatternId;
               const enabled = Boolean(enabledById[id]);
               const pattern = loadedById[id];
               const isLoading = Boolean(loadingById[id] && !pattern);
-              const values = controlValuesById[id] ?? (pattern ? defaultsForPattern(pattern) : {});
+              const values =
+                controlValuesById[id] ??
+                (pattern ? defaultsForPattern(pattern) : {});
 
               return (
                 <div key={id} className={styles.entry}>
@@ -442,9 +468,13 @@ export default function Workbench() {
 
                         <button
                           className="secondary"
-                          onClick={() => pattern && handleViewPatternCode(pattern)}
+                          onClick={() =>
+                            pattern && handleViewPatternCode(pattern)
+                          }
                           disabled={!pattern}
-                          title={!pattern ? "Enable to load code" : "View snippet"}
+                          title={
+                            !pattern ? "Enable to load code" : "View snippet"
+                          }
                         >
                           <span className="inline-flex items-center gap-2">
                             <Code2 className="h-4 w-4" />
@@ -453,7 +483,9 @@ export default function Workbench() {
                         </button>
                       </div>
 
-                      <div className={styles.entryDesc}>{entry.description}</div>
+                      <div className={styles.entryDesc}>
+                        {entry.description}
+                      </div>
 
                       <div className={styles.pillRow}>
                         {entry.capabilities.slice(0, 6).map((cap) => (
@@ -485,7 +517,10 @@ export default function Workbench() {
                                 >
                                   {control.type !== "toggle" && (
                                     <label
-                                      htmlFor={controlDomId(pattern.id, control.id)}
+                                      htmlFor={controlDomId(
+                                        pattern.id,
+                                        control.id,
+                                      )}
                                     >
                                       {control.label}
                                     </label>

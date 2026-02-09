@@ -7,6 +7,9 @@ interface ImportMetaEnv {
   readonly VITE_GEOCODING_FALLBACK_ORDER?: string;
   readonly VITE_NOMINATIM_ENDPOINT?: string;
   readonly VITE_PHOTON_ENDPOINT?: string;
+  readonly VITE_OSRM_ENDPOINT?: string;
+  readonly VITE_VALHALLA_ENDPOINT?: string;
+  readonly DEV: boolean;
 }
 
 interface ImportMeta {

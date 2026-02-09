@@ -24,13 +24,7 @@ describe("CATALOG", () => {
   });
 
   it("categories are valid", () => {
-    const validCategories = [
-      "layers",
-      "data-viz",
-      "markers",
-      "navigation",
-      "providers",
-    ];
+    const validCategories = ["layers", "data-viz", "markers", "navigation"];
     for (const entry of CATALOG) {
       expect(validCategories).toContain(entry.category);
     }
