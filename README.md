@@ -48,13 +48,15 @@ Note: `/maps/maplibre` uses **OpenFreeMap vector tiles** and does not require a 
 | -------------------------- | ------------------------------------------------------ |
 | `/`                        | Landing page — brand hub with mascot                   |
 | `/maps`                    | Maps catalog — filterable grid of all demos            |
+| `/maps/roadmap`            | Maps roadmap — the "map of maps" inventory + gap list  |
 | `/maps/:id`                | Map detail — single interactive demo                   |
+| `/workbench`               | Workbench — enable multiple patterns on one map        |
 | `/projects/rendalen`       | Rendalen project — Norwegian data overlays             |
 | `/projects/oslo-satellite` | Oslo Satellite — dark satellite map with blue clusters |
 
 ## Patterns
 
-23 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+24 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
 
 | Category   | Patterns                                                                                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

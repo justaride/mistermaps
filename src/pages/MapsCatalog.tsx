@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Globe, Map } from "lucide-react";
+import { ArrowRight, Globe, ListTree, Map } from "lucide-react";
 import { SiteHeader } from "../components";
 import { CATALOG, MAPLIBRE_ENTRY } from "../data/catalog";
 import {
@@ -117,6 +117,27 @@ export default function MapsCatalog() {
               Open Workbench <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
+
+          <Link
+            to="/maps/roadmap"
+            className="mb-4 flex items-center gap-4 border-2 border-border bg-card p-5 transition-transform hover:-translate-y-0.5"
+            style={{ boxShadow: "3px 3px 0 var(--color-border)" }}
+          >
+            <div className="flex h-10 w-10 items-center justify-center border-2 border-border bg-warn/10 text-warn">
+              <ListTree className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <div className="font-display text-lg tracking-wide">
+                Maps Roadmap
+              </div>
+              <div className="font-mono text-xs text-muted">
+                The map of maps: inventory, coverage, and what to build next.
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-accent">
+              Explore <ArrowRight className="h-3 w-3" />
+            </span>
+          </Link>
 
           <Link
             to="/maps/maplibre"
