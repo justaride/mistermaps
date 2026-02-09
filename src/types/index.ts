@@ -11,6 +11,7 @@ export type PatternId =
   | "map-compare-swipe"
   | "terrain-exaggeration"
   | "symbol-labels-icons"
+  | "line-decorations"
   | "geojson-overlay"
   | "3d-buildings"
   | "feature-state"

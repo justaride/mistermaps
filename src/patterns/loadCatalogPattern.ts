@@ -17,6 +17,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/layer-basics")).layerBasicsPattern,
   "symbol-labels-icons": async () =>
     (await import("./layers/symbol-labels-icons")).symbolLabelsIconsPattern,
+  "line-decorations": async () =>
+    (await import("./layers/line-decorations")).lineDecorationsPattern,
   "raster-overlay": async () =>
     (await import("./layers/raster-overlay")).rasterOverlayPattern,
   "image-overlay": async () =>

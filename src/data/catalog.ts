@@ -87,6 +87,17 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "line-decorations",
+    name: "Line Decorations",
+    description:
+      "Line styling patterns for routes/paths: dashed, gradient, and directional arrows.",
+    capabilities: ["line-dasharray", "line-gradient", "line-progress", "arrows"],
+    category: "layers",
+    subcategory: "fundamentals",
+    tags: ["interactive"],
+    provider: "mapbox",
+  },
+  {
     patternId: "vector-feature-state",
     name: "Vector Feature State",
     description:

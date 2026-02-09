@@ -70,6 +70,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Collision behavior is demonstrated and documented in code snippet.",
     "No missing sprite warnings for included icons.",
   ],
+  "line-decorations": [
+    "Includes at least 3 line styles (dashed, gradient, directional/arrows).",
+    "Controls switch styles without recreating the entire map.",
+    "Snippet includes the key expressions/settings used.",
+  ],
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -168,22 +173,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:line-decorations",
-    name: "Line Decorations (dashes, arrows, gradients)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive", "styling"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Demonstrate line styling patterns for routes and paths.",
-    acceptanceCriteria: [
-      "Includes at least 3 line styles (dashed, gradient, directional/arrows).",
-      "Controls switch styles without recreating the entire map.",
-      "Snippet includes the key expressions/settings used.",
-    ],
-  },
   {
     id: "planned:fill-patterns",
     name: "Fill Patterns (Hatching/Stripes)",
