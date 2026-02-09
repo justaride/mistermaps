@@ -139,7 +139,7 @@ export default function MapDetail() {
         />
       )}
 
-      {!isMaplibre && <SearchBox map={map} />}
+      {!isMaplibre && !pattern?.disableGlobalSearch && <SearchBox map={map} />}
 
       <div className="absolute left-4 top-4 z-10">
         <Link

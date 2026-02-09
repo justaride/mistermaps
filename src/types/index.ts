@@ -25,6 +25,7 @@ export type PatternId =
   | "choropleth"
   | "heatmap"
   | "geolocation"
+  | "geocoding-search"
   | "overpass-poi-overlay"
   | "route-display"
   | "distance-measurement"
@@ -93,6 +94,8 @@ export type Pattern = {
   cleanup: (map: Map) => void;
   update: (map: Map, controls: Record<string, unknown>) => void;
   view?: ComponentType<PatternViewProps>;
+  // Some patterns render their own in-map search UI; disable the global SearchBox to avoid duplication.
+  disableGlobalSearch?: boolean;
   snippet: string;
 };
 

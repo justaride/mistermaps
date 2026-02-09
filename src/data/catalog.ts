@@ -358,6 +358,26 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "geocoding-search",
+    name: "Geocoding Search",
+    description:
+      "Search for places using Mapbox, Nominatim, or Photon. Fly to results and optionally drop a pin.",
+    capabilities: [
+      "geocoding",
+      "provider switch",
+      "debounce + abort",
+      "flyTo",
+      "pin overlay",
+    ],
+    category: "navigation",
+    subcategory: "location-analysis",
+    tags: ["api-required", "interactive"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "overpass-poi-overlay",
     name: "Overpass POI Overlay",
     description:

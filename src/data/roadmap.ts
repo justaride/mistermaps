@@ -30,6 +30,7 @@ const PATTERN_APIS_BY_ID: Partial<Record<string, string[]>> = {
   isochrones: ["Valhalla"],
   "overpass-poi-overlay": ["Overpass API"],
   "nasa-gibs-true-color": ["NASA GIBS (WMTS)"],
+  "geocoding-search": ["Mapbox Geocoding", "Nominatim", "Photon"],
 };
 
 const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
@@ -75,6 +76,18 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Controls switch styles without recreating the entire map.",
     "Snippet includes the key expressions/settings used.",
   ],
+  "geocoding-search": [
+    "Provider can be switched (mapbox/nominatim/photon).",
+    "Selecting a result flies the camera and optionally drops a pin.",
+    "Errors are handled without leaving stale results open.",
+  ],
+};
+
+const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
+  Record<string, { mapbox: boolean; maplibre: boolean }>
+> = {
+  // Implemented as a dual-engine demo via an engine toggle inside the pattern view.
+  "geocoding-search": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -87,6 +100,9 @@ function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
       ? IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID[entry.patternId]
       : undefined;
 
+  const engineSupportOverride =
+    ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID[entry.patternId];
+
   return {
     id: `pattern:${entry.patternId}`,
     name: entry.name,
@@ -94,10 +110,11 @@ function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
     status: "implemented",
     category,
     tags: entry.tags,
-    engineSupport: {
-      mapbox: entry.provider === "mapbox",
-      maplibre: entry.provider === "maplibre",
-    },
+    engineSupport:
+      engineSupportOverride ?? {
+        mapbox: entry.provider === "mapbox",
+        maplibre: entry.provider === "maplibre",
+      },
     dependencies: {
       tokenRequired: entry.provider === "mapbox",
       api,
