@@ -1,10 +1,12 @@
 export { buildings3DPattern } from "./buildings-3d";
 export { featureStatePattern } from "./feature-state";
 export { geojsonOverlayPattern } from "./geojson-overlay";
+export { imageOverlayPattern } from "./image-overlay";
 export { layerBasicsPattern } from "./layer-basics";
 export { layerExplorerPattern } from "./layer-explorer";
 export { layerInspectorPattern } from "./layer-inspector";
 export { nasaGibsTrueColorPattern } from "./nasa-gibs";
+export { rasterOverlayPattern } from "./raster-overlay";
 export { rendalenDataPattern } from "./rendalen-data";
 export { terrainHillshadePattern } from "./terrain-hillshade";
 export { vectorDebugToolsPattern } from "./vector-debug-tools";

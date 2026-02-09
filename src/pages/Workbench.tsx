@@ -180,7 +180,7 @@ export default function Workbench() {
   const mapboxCatalog = useMemo(
     () =>
       CATALOG.filter(
-        (entry) =>
+        (entry): entry is MapboxCatalogEntry =>
           isMapboxCatalogEntry(entry) && entry.workbenchCompatible !== false,
       ),
     [],

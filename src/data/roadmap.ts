@@ -45,6 +45,16 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Shows validation errors and does not break the map session.",
     "Reloading a style keeps viewport stable.",
   ],
+  "raster-overlay": [
+    "User can add a raster overlay by URL template and remove it again.",
+    "Opacity is adjustable via a control.",
+    "Attribution text is visible and configurable.",
+  ],
+  "image-overlay": [
+    "Renders an image source with user-provided URL + bounds.",
+    "Fit-to-bounds action sets the camera correctly.",
+    "Overlay can be toggled on/off without leaking sources/layers.",
+  ],
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -157,38 +167,6 @@ export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
       "Slider controls terrain exaggeration in real time.",
       "Toggles for sky and hillshade are available when supported.",
       "Works on a terrain-capable basemap without console errors.",
-    ],
-  },
-  {
-    id: "planned:raster-overlay",
-    name: "Generic Raster Overlay (XYZ/WMTS)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Basemaps & Styling",
-    tags: ["interactive", "raster", "import"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Add/remove a raster overlay via a user-provided tile URL.",
-    acceptanceCriteria: [
-      "User can add a raster overlay by URL template and remove it again.",
-      "Opacity is adjustable via a control.",
-      "Attribution text is visible and configurable.",
-    ],
-  },
-  {
-    id: "planned:image-overlay",
-    name: "Image Overlay (Bounds)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Basemaps & Styling",
-    tags: ["interactive", "import"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Render an image overlay positioned by geographic bounds.",
-    acceptanceCriteria: [
-      "Renders an image source with user-provided URL + bounds.",
-      "Fit-to-bounds action sets the camera correctly.",
-      "Overlay can be toggled on/off without leaking sources/layers.",
     ],
   },
   {

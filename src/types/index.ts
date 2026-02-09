@@ -5,6 +5,8 @@ export type PatternId =
   | "layer-inspector"
   | "layer-explorer"
   | "layer-basics"
+  | "raster-overlay"
+  | "image-overlay"
   | "geojson-overlay"
   | "3d-buildings"
   | "feature-state"

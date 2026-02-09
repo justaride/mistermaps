@@ -138,6 +138,34 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "raster-overlay",
+    name: "Raster Overlay (XYZ/WMTS)",
+    description:
+      "Add/remove a generic raster tile overlay using a URL template (XYZ/WMTS), with live opacity and attribution.",
+    capabilities: [
+      "raster source",
+      "tile URL template",
+      "min/max zoom",
+      "opacity",
+      "attribution",
+    ],
+    category: "layers",
+    subcategory: "data-import",
+    tags: ["interactive", "raster"],
+    provider: "mapbox",
+  },
+  {
+    patternId: "image-overlay",
+    name: "Image Overlay (Bounds)",
+    description:
+      "Render an image overlay positioned by geographic bounds, with opacity and fit-to-bounds controls.",
+    capabilities: ["image source", "bounds", "opacity", "fit bounds", "toggle"],
+    category: "layers",
+    subcategory: "data-import",
+    tags: ["interactive"],
+    provider: "mapbox",
+  },
+  {
     patternId: "geojson-overlay",
     name: "GeoJSON Overlay",
     description: "Paste/upload GeoJSON and render it with styling controls.",
