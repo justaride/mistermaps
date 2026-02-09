@@ -25,6 +25,7 @@ import {
   geolocationPattern,
   areaMeasurementPattern,
   animatedRoutePattern,
+  isochronesPattern,
 } from "./navigation";
 
 export { rendalenDataPattern };
@@ -51,6 +52,7 @@ export const catalogPatterns: Pattern[] = [
   animatedRoutePattern,
   routeDisplayPattern,
   distanceMeasurementPattern,
+  isochronesPattern,
 ];
 
 export const patterns: Pattern[] = [rendalenDataPattern, ...catalogPatterns];
