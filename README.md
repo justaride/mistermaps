@@ -54,14 +54,14 @@ Note: `/maps/maplibre` uses **OpenFreeMap vector tiles** and does not require a 
 
 ## Patterns
 
-22 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+23 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
 
 | Category   | Patterns                                                                                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade, NASA GIBS True Color |
 | Data Viz   | Heatmap, Choropleth                                                                                                                                                                                   |
 | Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                                                                                                                                         |
-| Navigation | Route Display, Animated Route, Isochrones (Valhalla), Geolocation, Distance Measurement, Area Measurement                                                                                             |
+| Navigation | Route Display, Animated Route, Isochrones (Valhalla), Geolocation, Overpass POI Overlay, Distance Measurement, Area Measurement                                                                          |
 | Providers  | MapLibre GL (OpenFreeMap Vector)                                                                                                                                                                      |
 
 ## Open Source Providers & APIs
