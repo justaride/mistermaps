@@ -54,6 +54,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
   choropleth: async () =>
     (await import("./data-viz/choropleth")).choroplethPattern,
   heatmap: async () => (await import("./data-viz/heatmap")).heatmapPattern,
+  "export-image-print": async () =>
+    (await import("./data-viz/export-image-print")).exportImagePrintPattern,
   geolocation: async () =>
     (await import("./navigation/geolocation")).geolocationPattern,
   "geocoding-search": async () =>

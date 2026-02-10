@@ -107,6 +107,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Includes copy-to-clipboard for address + coordinates.",
     "Fallback provider is used if the primary fails.",
   ],
+  "export-image-print": [
+    "Exports a PNG that includes required attribution.",
+    "Print view has a simplified layout suitable for paper/PDF.",
+    "Export does not crash when controls/panels are open.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -119,6 +124,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "property-filtering": { mapbox: true, maplibre: true },
   "streaming-updates": { mapbox: true, maplibre: true },
   "reverse-geocoding": { mapbox: true, maplibre: true },
+  "export-image-print": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -481,22 +487,6 @@ export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
       "Clicking a cluster expands it into a spider layout.",
       "Clicking away collapses it.",
       "Expanded points remain clickable with their original properties.",
-    ],
-  },
-  {
-    id: "planned:export-image-print",
-    name: "Screenshot / Export Image + Print View",
-    artifact: "pattern",
-    status: "planned",
-    category: "Data Viz & Export",
-    tags: ["export"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Export the current map view as PNG and provide a print layout.",
-    acceptanceCriteria: [
-      "Exports a PNG that includes required attribution.",
-      "Print view has a simplified layout suitable for paper/PDF.",
-      "Export does not crash when controls/panels are open.",
     ],
   },
 ];

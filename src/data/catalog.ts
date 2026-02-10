@@ -320,6 +320,19 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "export-image-print",
+    name: "Screenshot / Export Image + Print View",
+    description:
+      "Export the current map view as PNG with attribution, and open a print-friendly layout (dual-engine Mapbox/MapLibre).",
+    capabilities: ["canvas export", "attribution overlay", "print CSS", "preserveDrawingBuffer"],
+    category: "data-viz",
+    tags: ["interactive"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "clustered-markers",
     name: "Clustered Markers",
     description: "Cluster nearby points and expand on zoom.",
