@@ -5,6 +5,7 @@ export { imageOverlayPattern } from "./image-overlay";
 export { layerBasicsPattern } from "./layer-basics";
 export { layerExplorerPattern } from "./layer-explorer";
 export { layerInspectorPattern } from "./layer-inspector";
+export { fillPatternsPattern } from "./fill-patterns";
 export { hoverTooltipsPattern } from "./hover-tooltips";
 export { lineDecorationsPattern } from "./line-decorations";
 export { mapCompareSwipePattern } from "./map-compare-swipe";

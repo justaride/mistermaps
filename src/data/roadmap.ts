@@ -86,6 +86,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Debounces updates to avoid excessive re-renders.",
     "Cursor state is restored on mouse leave.",
   ],
+  "fill-patterns": [
+    "User can switch between at least 3 fill patterns.",
+    "Pattern scale/opacity controls are available when supported.",
+    "Legend notes how patterns are created and applied.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -94,6 +99,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   // Implemented as a dual-engine demo via an engine toggle inside the pattern view.
   "geocoding-search": { mapbox: true, maplibre: true },
   "hover-tooltips": { mapbox: true, maplibre: true },
+  "fill-patterns": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -196,22 +202,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:fill-patterns",
-    name: "Fill Patterns (Hatching/Stripes)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive", "styling"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Apply patterned fills to polygons using addImage + fill-pattern.",
-    acceptanceCriteria: [
-      "User can switch between at least 3 fill patterns.",
-      "Pattern scale/opacity controls are available when supported.",
-      "Legend notes how patterns are created and applied.",
-    ],
-  },
   {
     id: "planned:property-filtering",
     name: "Property-Based Filtering UI",

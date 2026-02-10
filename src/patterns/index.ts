@@ -3,6 +3,7 @@ import { heatmapPattern, choroplethPattern } from "./data-viz";
 import {
   buildings3DPattern,
   featureStatePattern,
+  fillPatternsPattern,
   geojsonOverlayPattern,
   hoverTooltipsPattern,
   imageOverlayPattern,
@@ -40,6 +41,7 @@ export { rendalenDataPattern };
 
 export const catalogPatterns: Pattern[] = [
   layerBasicsPattern,
+  fillPatternsPattern,
   layerInspectorPattern,
   layerExplorerPattern,
   hoverTooltipsPattern,

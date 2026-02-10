@@ -76,6 +76,19 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "fill-patterns",
+    name: "Fill Patterns",
+    description:
+      "Apply hatching/stripe/dot fill patterns to polygons using addImage + fill-pattern.",
+    capabilities: ["addImage", "fill-pattern", "canvas patterns", "legend"],
+    category: "layers",
+    subcategory: "fundamentals",
+    tags: ["interactive", "geojson"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+  },
+  {
     patternId: "hover-tooltips",
     name: "Hover Tooltips",
     description:
