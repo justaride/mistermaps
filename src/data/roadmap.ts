@@ -31,6 +31,7 @@ const PATTERN_APIS_BY_ID: Partial<Record<string, string[]>> = {
   "overpass-poi-overlay": ["Overpass API"],
   "nasa-gibs-true-color": ["NASA GIBS (WMTS)"],
   "geocoding-search": ["Mapbox Geocoding", "Nominatim", "Photon"],
+  "reverse-geocoding": ["Mapbox Geocoding", "Nominatim"],
 };
 
 const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
@@ -101,6 +102,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Pause/resume controls are present.",
     "Avoids re-adding sources/layers on every tick.",
   ],
+  "reverse-geocoding": [
+    "Clicking the map resolves a place/address and shows it in a panel.",
+    "Includes copy-to-clipboard for address + coordinates.",
+    "Fallback provider is used if the primary fails.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -112,6 +118,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "fill-patterns": { mapbox: true, maplibre: true },
   "property-filtering": { mapbox: true, maplibre: true },
   "streaming-updates": { mapbox: true, maplibre: true },
+  "reverse-geocoding": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -361,22 +368,6 @@ export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
       "Provider can be switched (mapbox/nominatim/photon).",
       "Selecting a result flies the camera and optionally drops a pin.",
       "Errors are handled without leaving stale results open.",
-    ],
-  },
-  {
-    id: "planned:reverse-geocoding",
-    name: "Reverse Geocoding On Click",
-    artifact: "pattern",
-    status: "planned",
-    category: "Search & Navigation",
-    tags: ["interactive", "api-required"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: { api: ["Mapbox Geocoding", "Nominatim"] },
-    description: "Click map to get the nearest address/place with fallback.",
-    acceptanceCriteria: [
-      "Clicking the map resolves a place/address and shows it in a panel.",
-      "Includes copy-to-clipboard for address + coordinates.",
-      "Fallback provider is used if the primary fails.",
     ],
   },
   {

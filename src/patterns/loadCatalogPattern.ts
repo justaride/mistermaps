@@ -58,6 +58,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./navigation/geolocation")).geolocationPattern,
   "geocoding-search": async () =>
     (await import("./navigation/geocoding-search")).geocodingSearchPattern,
+  "reverse-geocoding": async () =>
+    (await import("./navigation/reverse-geocoding")).reverseGeocodingPattern,
   "overpass-poi-overlay": async () =>
     (await import("./navigation/overpass-poi-overlay"))
       .overpassPoiOverlayPattern,

@@ -432,6 +432,20 @@ export const CATALOG: CatalogEntry[] = [
     workbenchCompatible: false,
   },
   {
+    patternId: "reverse-geocoding",
+    name: "Reverse Geocoding On Click",
+    description:
+      "Click the map to resolve the nearest address/place with fallback (Mapbox/Nominatim), plus copy-to-clipboard.",
+    capabilities: ["reverse geocoding", "click interaction", "fallback", "clipboard"],
+    category: "navigation",
+    subcategory: "location-analysis",
+    tags: ["api-required", "interactive"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "overpass-poi-overlay",
     name: "Overpass POI Overlay",
     description:

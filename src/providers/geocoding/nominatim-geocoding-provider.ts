@@ -4,9 +4,18 @@ import type {
   GeocodingRequest,
   GeocodingResult,
   LngLat,
+  ReverseGeocodingRequest,
+  ReverseGeocodingResult,
 } from "../types";
 
 type NominatimSearchResult = {
+  place_id?: number | string;
+  display_name?: string;
+  lat?: string;
+  lon?: string;
+};
+
+type NominatimReverseResult = {
   place_id?: number | string;
   display_name?: string;
   lat?: string;
@@ -86,5 +95,51 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
 
     return normalized;
   }
-}
 
+  async reverseGeocode(
+    request: ReverseGeocodingRequest,
+    signal?: AbortSignal,
+  ): Promise<ReverseGeocodingResult[]> {
+    const [lng, lat] = request.center;
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return [];
+
+    const url = new URL("/reverse", this.endpoint);
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("lat", String(lat));
+    url.searchParams.set("lon", String(lng));
+
+    const response = await fetch(url.toString(), {
+      signal,
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      throw new ProviderRequestError("Nominatim reverse geocoding request failed", {
+        providerId: this.id,
+        status: response.status,
+      });
+    }
+
+    const payload = (await response.json()) as unknown;
+    const item = payload as NominatimReverseResult;
+    if (!item || typeof item !== "object") return [];
+    if (!item.display_name) return [];
+
+    const center = normalizeLngLat(item.lon, item.lat);
+    if (!center) return [];
+
+    const placeId =
+      typeof item.place_id === "number" || typeof item.place_id === "string"
+        ? String(item.place_id)
+        : "";
+
+    return [
+      {
+        id: placeId ? `${this.id}:${placeId}` : `${this.id}:${item.display_name}`,
+        placeName: item.display_name,
+        center,
+        providerId: this.id,
+      },
+    ];
+  }
+}

@@ -23,6 +23,26 @@ export interface GeocodingProvider {
   ): Promise<GeocodingResult[]>;
 }
 
+export type ReverseGeocodingRequest = {
+  center: LngLat;
+  limit?: number;
+};
+
+export type ReverseGeocodingResult = {
+  id: string;
+  placeName: string;
+  center: LngLat;
+  providerId: ProviderId;
+};
+
+export interface ReverseGeocodingProvider {
+  id: ProviderId;
+  reverseGeocode(
+    request: ReverseGeocodingRequest,
+    signal?: AbortSignal,
+  ): Promise<ReverseGeocodingResult[]>;
+}
+
 export type RoutingProfile = "driving" | "walking" | "cycling";
 
 export type RoutingRequest = {

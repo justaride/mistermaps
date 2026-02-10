@@ -4,6 +4,8 @@ import type {
   GeocodingRequest,
   GeocodingResult,
   LngLat,
+  ReverseGeocodingRequest,
+  ReverseGeocodingResult,
 } from "../types";
 
 const MAPBOX_GEOCODING_ENDPOINT =
@@ -72,6 +74,57 @@ export class MapboxGeocodingProvider implements GeocodingProvider {
       if (!feature.id || !feature.place_name || !center) continue;
       results.push({
         id: `${this.id}:${feature.id}`,
+        placeName: feature.place_name,
+        center,
+        providerId: this.id,
+      });
+    }
+
+    return results;
+  }
+
+  async reverseGeocode(
+    request: ReverseGeocodingRequest,
+    signal?: AbortSignal,
+  ): Promise<ReverseGeocodingResult[]> {
+    const [lng, lat] = request.center;
+
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return [];
+
+    if (!this.accessToken) {
+      throw new ProviderRequestError("Mapbox token is not configured", {
+        providerId: this.id,
+        code: "missing_token",
+      });
+    }
+
+    const limit = Math.max(1, Math.min(request.limit ?? 1, 5));
+    const params = new URLSearchParams({
+      access_token: this.accessToken,
+      limit: String(limit),
+    });
+    const url = `${MAPBOX_GEOCODING_ENDPOINT}/${encodeURIComponent(
+      `${lng},${lat}`,
+    )}.json?${params.toString()}`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+      throw new ProviderRequestError("Mapbox reverse geocoding request failed", {
+        providerId: this.id,
+        status: response.status,
+      });
+    }
+
+    const payload = (await response.json()) as MapboxGeocodingResponse;
+    const features = Array.isArray(payload.features) ? payload.features : [];
+    const results: ReverseGeocodingResult[] = [];
+
+    for (const feature of features) {
+      const center = normalizeLngLat(feature.center);
+      if (!feature.place_name || !center) continue;
+      const fid = feature.id ? `${this.id}:${feature.id}` : `${this.id}:${feature.place_name}`;
+      results.push({
+        id: fid,
         placeName: feature.place_name,
         center,
         providerId: this.id,
