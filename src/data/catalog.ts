@@ -116,6 +116,20 @@ export const CATALOG: CatalogEntry[] = [
     workbenchCompatible: false,
   },
   {
+    patternId: "streaming-updates",
+    name: "Streaming Updates (setData)",
+    description:
+      "Simulate incremental feature updates and keep the map responsive (dual-engine Mapbox/MapLibre).",
+    capabilities: ["GeoJSON source", "setData", "incremental updates", "pause/resume"],
+    category: "layers",
+    subcategory: "data-import",
+    tags: ["interactive", "geojson", "animation"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "symbol-labels-icons",
     name: "Symbol Labels + Icons",
     description:

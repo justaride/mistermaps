@@ -96,6 +96,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Active filters are visible and can be cleared.",
     "Works on a sample dataset with at least 2 properties.",
   ],
+  "streaming-updates": [
+    "Append/update features over time via setData.",
+    "Pause/resume controls are present.",
+    "Avoids re-adding sources/layers on every tick.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -106,6 +111,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "hover-tooltips": { mapbox: true, maplibre: true },
   "fill-patterns": { mapbox: true, maplibre: true },
   "property-filtering": { mapbox: true, maplibre: true },
+  "streaming-updates": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -208,22 +214,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:streaming-updates",
-    name: "Streaming Updates (setData)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive", "performance"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Simulate incremental feature updates and keep the map responsive.",
-    acceptanceCriteria: [
-      "Append/update features over time via setData.",
-      "Pause/resume controls are present.",
-      "Avoids re-adding sources/layers on every tick.",
-    ],
-  },
   {
     id: "planned:clip-simplify",
     name: "Viewport Clip + Simplification",
