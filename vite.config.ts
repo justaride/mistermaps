@@ -2,9 +2,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import viteCompression from "vite-plugin-compression";
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
+export default defineConfig(() => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    viteCompression({
+      algorithm: "gzip",
+      ext: ".gz",
+      apply: "build",
+      threshold: 1024,
+    }),
+  ],
   css: {
     modules: {
       localsConvention: "camelCase",
@@ -12,6 +22,25 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1800,
+    target: "es2020",
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+
+          if (id.includes("mapbox-gl") || id.includes("maplibre-gl")) {
+            return "map-engines";
+          }
+          if (id.includes("@turf/") || id.includes("/@turf")) return "geo";
+          if (id.includes("react-syntax-highlighter")) return "code";
+          if (id.includes("framer-motion") || id.includes("lucide-react")) {
+            return "ui";
+          }
+
+          return "vendor";
+        },
+      },
+    },
   },
   test: {
     globals: true,
@@ -19,4 +48,4 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
   },
-});
+}));

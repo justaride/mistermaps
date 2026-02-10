@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 import maplibregl from "maplibre-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider, openFreeMapBasemapProvider } from "../../providers";
+import { getSource, once } from "../utils/map-compat";
 
 type Engine = "mapbox" | "maplibre";
 type LngLat = [number, number];
@@ -147,7 +148,7 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
   };
 
   const setDataOnMap = (map: mapboxgl.Map | maplibregl.Map) => {
-    const src = map.getSource(SOURCE_ID) as unknown as { setData?: (d: unknown) => void };
+    const src = getSource(map, SOURCE_ID) as { setData?: (d: unknown) => void };
     src.setData?.(buildCollection(featuresRef.current));
   };
 
@@ -295,7 +296,7 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
     if (!map || !loaded) return;
     const camera = getCamera(map);
     map.setStyle(style);
-    map.once("style.load", () => {
+    once(map, "style.load", () => {
       map.jumpTo(camera as never);
       map.resize();
       ensureDemo(map);
@@ -423,4 +424,3 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
     </div>
   );
 }
-

@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 import maplibregl from "maplibre-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider, openFreeMapBasemapProvider } from "../../providers";
+import { once } from "../utils/map-compat";
 
 type Engine = "mapbox" | "maplibre";
 type LngLat = [number, number];
@@ -273,7 +274,7 @@ function PropertyFilteringView({ theme, onPrimaryMapReady }: PatternViewProps) {
     if (!map || !loaded) return;
     const camera = getCamera(map);
     map.setStyle(style);
-    map.once("style.load", () => {
+    once(map, "style.load", () => {
       map.jumpTo(camera as never);
       map.resize();
       ensureDemo(map);
@@ -428,4 +429,3 @@ function PropertyFilteringView({ theme, onPrimaryMapReady }: PatternViewProps) {
     </div>
   );
 }
-

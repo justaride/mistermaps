@@ -11,6 +11,7 @@ import {
 } from "../../providers";
 import type { ReverseGeocodingService } from "../../providers";
 import { copyText } from "../utils/export";
+import { getSource, once } from "../utils/map-compat";
 
 type Engine = "mapbox" | "maplibre";
 type ProviderMode = "mapbox" | "nominatim";
@@ -94,7 +95,7 @@ function ensurePin(map: mapboxgl.Map | maplibregl.Map) {
 }
 
 function setPin(map: mapboxgl.Map | maplibregl.Map, center: [number, number]) {
-  const src = map.getSource(PIN_SOURCE_ID) as unknown as {
+  const src = getSource(map, PIN_SOURCE_ID) as {
     setData?: (d: unknown) => void;
   };
   src.setData?.({
@@ -303,7 +304,7 @@ function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
     if (!map || !loaded) return;
     const camera = getCamera(map);
     map.setStyle(style);
-    map.once("style.load", () => {
+    once(map, "style.load", () => {
       map.jumpTo(camera as never);
       map.resize();
       ensurePin(map);
@@ -429,4 +430,3 @@ function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
     </div>
   );
 }
-

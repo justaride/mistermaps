@@ -4,6 +4,7 @@ import maplibregl from "maplibre-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider, openFreeMapBasemapProvider } from "../../providers";
 import { formatTimestampForFilename } from "../utils/export";
+import { once } from "../utils/map-compat";
 
 type Engine = "mapbox" | "maplibre";
 
@@ -354,7 +355,7 @@ function ExportImagePrintView({ theme, onPrimaryMapReady }: PatternViewProps) {
       bearing: 0,
       pitch: 0,
       preserveDrawingBuffer: true,
-    });
+    } as unknown as maplibregl.MapOptions);
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     mapRef.current = map;
     map.on("load", () => {
@@ -385,7 +386,7 @@ function ExportImagePrintView({ theme, onPrimaryMapReady }: PatternViewProps) {
     if (!map || !loaded) return;
     const camera = getCamera(map);
     map.setStyle(style);
-    map.once("style.load", () => {
+    once(map, "style.load", () => {
       map.jumpTo(camera as never);
       map.resize();
       ensureDemo(map);
@@ -509,4 +510,3 @@ function ExportImagePrintView({ theme, onPrimaryMapReady }: PatternViewProps) {
     </div>
   );
 }
-
