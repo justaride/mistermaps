@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import type { GeoJSONSource } from "mapbox-gl";
 import { ArrowLeft } from "lucide-react";
+import "../map/engine-css";
 import { useDarkSatelliteMap } from "../hooks/useDarkSatelliteMap";
 import containerStyles from "../components/MapContainer.module.css";
 import styles from "../App.module.css";

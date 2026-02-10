@@ -28,6 +28,14 @@ export default defineConfig(() => ({
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
 
+          // Keep engine CSS separate so it doesn't force-load the large engine JS chunk on landing.
+          if (
+            id.endsWith(".css") &&
+            (id.includes("mapbox-gl") || id.includes("maplibre-gl"))
+          ) {
+            return "map-engines-css";
+          }
+
           if (id.includes("mapbox-gl") || id.includes("maplibre-gl")) {
             return "map-engines";
           }

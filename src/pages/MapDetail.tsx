@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import type { Map } from "mapbox-gl";
 import { ArrowLeft } from "lucide-react";
+import "../map/engine-css";
 import {
   MapContainer,
   MapLibreContainer,
