@@ -102,6 +102,20 @@ export const CATALOG: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "property-filtering",
+    name: "Property-Based Filtering UI",
+    description:
+      "Filter visible features by property values with a small UI that drives setFilter (dual-engine Mapbox/MapLibre).",
+    capabilities: ["setFilter", "expressions", "multi-filter UI", "clearable filters"],
+    category: "layers",
+    subcategory: "fundamentals",
+    tags: ["interactive", "geojson"],
+    // Catalog/provider is Mapbox for compatibility with existing loader/test expectations.
+    // The demo itself supports MapLibre via an engine toggle inside the pattern view.
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "symbol-labels-icons",
     name: "Symbol Labels + Icons",
     description:

@@ -3,6 +3,8 @@ import type { Map, Map as MapboxMap } from "mapbox-gl";
 
 export type PatternId =
   | "rendalen-data"
+  | "property-filtering"
+  | "streaming-updates"
   | "layer-inspector"
   | "layer-explorer"
   | "layer-basics"
@@ -28,6 +30,7 @@ export type PatternId =
   | "heatmap"
   | "geolocation"
   | "geocoding-search"
+  | "reverse-geocoding"
   | "overpass-poi-overlay"
   | "route-display"
   | "distance-measurement"
@@ -36,7 +39,8 @@ export type PatternId =
   | "isochrones"
   | "clustered-markers"
   | "custom-popups"
-  | "pulsing-dot";
+  | "pulsing-dot"
+  | "export-image-print";
 
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
 

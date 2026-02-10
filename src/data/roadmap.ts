@@ -91,6 +91,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Pattern scale/opacity controls are available when supported.",
     "Legend notes how patterns are created and applied.",
   ],
+  "property-filtering": [
+    "Filters update map layers via setFilter (or equivalent).",
+    "Active filters are visible and can be cleared.",
+    "Works on a sample dataset with at least 2 properties.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -100,6 +105,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "geocoding-search": { mapbox: true, maplibre: true },
   "hover-tooltips": { mapbox: true, maplibre: true },
   "fill-patterns": { mapbox: true, maplibre: true },
+  "property-filtering": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -202,22 +208,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS: RoadmapItem[] = [
-  {
-    id: "planned:property-filtering",
-    name: "Property-Based Filtering UI",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Filter visible features by property values with a small UI.",
-    acceptanceCriteria: [
-      "Filters update map layers via setFilter (or equivalent).",
-      "Active filters are visible and can be cleared.",
-      "Works on a sample dataset with at least 2 properties.",
-    ],
-  },
   {
     id: "planned:streaming-updates",
     name: "Streaming Updates (setData)",
