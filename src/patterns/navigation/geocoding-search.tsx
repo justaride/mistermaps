@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import maplibregl from "maplibre-gl";
+import type { GeoJSONSource, Map as MapboxMap } from "mapbox-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import type { Pattern, PatternViewProps } from "../../types";
 import {
   createGeocodingService,
@@ -9,6 +9,8 @@ import {
 } from "../../providers/geocoding";
 import { NominatimGeocodingProvider } from "../../providers/geocoding/nominatim-geocoding-provider";
 import { PhotonGeocodingProvider } from "../../providers/geocoding/photon-geocoding-provider";
+import { once } from "../utils/map-compat";
+import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -44,7 +46,7 @@ function getProviderLabel(providerId: string): string {
   }
 }
 
-function getCamera(map: mapboxgl.Map | maplibregl.Map) {
+function getCamera(map: MapboxMap | MapLibreMap) {
   const center = map.getCenter();
   return {
     center: [center.lng, center.lat] as [number, number],
@@ -57,17 +59,17 @@ function getCamera(map: mapboxgl.Map | maplibregl.Map) {
 const PIN_SOURCE_ID = "geocode-pin-src";
 const PIN_LAYER_ID = "geocode-pin-layer";
 
-function removePin(map: mapboxgl.Map | maplibregl.Map) {
-  const m = map as unknown as mapboxgl.Map;
+function removePin(map: MapboxMap | MapLibreMap) {
+  const m = map as unknown as MapboxMap;
   if (m.getLayer(PIN_LAYER_ID)) m.removeLayer(PIN_LAYER_ID);
   if (m.getSource(PIN_SOURCE_ID)) m.removeSource(PIN_SOURCE_ID);
 }
 
 function upsertPin(
-  map: mapboxgl.Map | maplibregl.Map,
+  map: MapboxMap | MapLibreMap,
   center: [number, number],
 ) {
-  const m = map as unknown as mapboxgl.Map;
+  const m = map as unknown as MapboxMap;
   const data = {
     type: "FeatureCollection",
     features: [
@@ -79,9 +81,7 @@ function upsertPin(
     ],
   } as const;
 
-  const existing = m.getSource(PIN_SOURCE_ID) as
-    | mapboxgl.GeoJSONSource
-    | undefined;
+  const existing = m.getSource(PIN_SOURCE_ID) as GeoJSONSource | undefined;
 
   if (existing) {
     existing.setData(data as never);
@@ -107,18 +107,15 @@ function upsertPin(
 }
 
 function runAfterStyleReady(
-  map: mapboxgl.Map | maplibregl.Map,
+  map: MapboxMap | MapLibreMap,
   fn: () => void,
 ) {
-  const m = map as unknown as mapboxgl.Map;
+  const m = map as unknown as MapboxMap;
   if (m.isStyleLoaded()) {
     fn();
     return;
   }
-  (m as unknown as { once: (type: string, listener: () => void) => void }).once(
-    "style.load",
-    fn,
-  );
+  once(m, "style.load", fn);
 }
 
 export const geocodingSearchPattern: Pattern = {
@@ -184,7 +181,8 @@ function GeocodingSearchView({
   onPrimaryMapReady,
 }: PatternViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | maplibregl.Map | null>(null);
+  const mapRef = useRef<MapboxMap | MapLibreMap | null>(null);
+  const recreateTokenRef = useRef(0);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [query, setQuery] = useState("");
@@ -239,6 +237,7 @@ function GeocodingSearchView({
     if (!containerRef.current) return;
 
     const recreateMap = () => {
+      const token = (recreateTokenRef.current += 1);
       setIsLoaded(false);
 
       const prev = mapRef.current;
@@ -251,9 +250,41 @@ function GeocodingSearchView({
         mapRef.current = null;
       }
 
-      if (engine === "mapbox") {
-        mapboxgl.accessToken = MAPBOX_TOKEN;
-        const map = new mapboxgl.Map({
+      void (async () => {
+        if (engine === "mapbox") {
+          const mapboxgl = await loadMapboxGL();
+          if (recreateTokenRef.current !== token) return;
+
+          mapboxgl.accessToken = MAPBOX_TOKEN;
+          const map = new mapboxgl.Map({
+            container: containerRef.current!,
+            style: mapStyle,
+            center: [10.75, 59.91],
+            zoom: 11.5,
+            bearing: 0,
+            pitch: 0,
+          });
+          map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+          map.on("load", () => {
+            if (recreateTokenRef.current !== token) return;
+            mapRef.current = map;
+            setIsLoaded(true);
+            onPrimaryMapReady?.(map);
+
+            if (dropPin && pinCenterRef.current) {
+              runAfterStyleReady(map, () =>
+                upsertPin(map, pinCenterRef.current!),
+              );
+            }
+          });
+          return;
+        }
+
+        const maplibregl = await loadMapLibreGL();
+        if (recreateTokenRef.current !== token) return;
+
+        const map = new maplibregl.Map({
           container: containerRef.current!,
           style: mapStyle,
           center: [10.75, 59.91],
@@ -261,44 +292,29 @@ function GeocodingSearchView({
           bearing: 0,
           pitch: 0,
         });
-        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        map.addControl(new maplibregl.NavigationControl(), "top-right");
 
         map.on("load", () => {
+          if (recreateTokenRef.current !== token) return;
           mapRef.current = map;
           setIsLoaded(true);
-          onPrimaryMapReady?.(map);
+          onPrimaryMapReady?.(map as unknown as MapboxMap);
 
           if (dropPin && pinCenterRef.current) {
-            runAfterStyleReady(map, () => upsertPin(map, pinCenterRef.current!));
+            runAfterStyleReady(map, () =>
+              upsertPin(map, pinCenterRef.current!),
+            );
           }
         });
-        return;
-      }
-
-      const map = new maplibregl.Map({
-        container: containerRef.current!,
-        style: mapStyle,
-        center: [10.75, 59.91],
-        zoom: 11.5,
-        bearing: 0,
-        pitch: 0,
-      });
-      map.addControl(new maplibregl.NavigationControl(), "top-right");
-
-      map.on("load", () => {
-        mapRef.current = map;
-        setIsLoaded(true);
-        onPrimaryMapReady?.(map as unknown as mapboxgl.Map);
-
-        if (dropPin && pinCenterRef.current) {
-          runAfterStyleReady(map, () => upsertPin(map, pinCenterRef.current!));
-        }
+      })().catch(() => {
+        // ignore
       });
     };
 
     recreateMap();
 
     return () => {
+      recreateTokenRef.current += 1;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -313,9 +329,7 @@ function GeocodingSearchView({
     // Preserve camera + re-apply pin after style change.
     const camera = getCamera(map);
     map.setStyle(mapStyle as never);
-    (
-      map as unknown as { once: (type: string, listener: () => void) => void }
-    ).once("style.load", () => {
+    once(map as unknown as MapboxMap, "style.load", () => {
       map.jumpTo(camera as never);
       if (dropPin && pinCenterRef.current) {
         upsertPin(map, pinCenterRef.current);

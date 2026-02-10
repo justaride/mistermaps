@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl, {
-  type Map,
-  type MapLayerMouseEvent,
-  type GeoJSONSource,
-} from "mapbox-gl";
-import maplibregl from "maplibre-gl";
+import type { Map, MapLayerMouseEvent, GeoJSONSource } from "mapbox-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider } from "../../providers/basemap";
+import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -389,6 +385,7 @@ function createEngineButtonClass(active: boolean) {
 function HoverTooltipsView({ theme, values, onPrimaryMapReady }: PatternViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LayerEventTarget | null>(null);
+  const recreateTokenRef = useRef(0);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const [engine, setEngine] = useState<Engine>("mapbox");
@@ -517,6 +514,7 @@ function HoverTooltipsView({ theme, values, onPrimaryMapReady }: PatternViewProp
 
   const recreateMap = () => {
     if (!containerRef.current) return;
+    const token = (recreateTokenRef.current += 1);
 
     const prev = mapRef.current;
     const camera = prev ? getCamera(prev) : null;
@@ -532,60 +530,73 @@ function HoverTooltipsView({ theme, values, onPrimaryMapReady }: PatternViewProp
 
     setLoaded(false);
 
-    if (engine === "mapbox") {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      const map = new mapboxgl.Map({
-        container: containerRef.current,
+    void (async () => {
+      if (engine === "mapbox") {
+        const mapboxgl = await loadMapboxGL();
+        if (recreateTokenRef.current !== token) return;
+
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        const map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style,
+          center: [10.7522, 59.9139],
+          zoom: 12.5,
+          bearing: 0,
+          pitch: 0,
+        });
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+        const m = map as unknown as LayerEventTarget;
+        mapRef.current = m;
+
+        map.on("load", () => {
+          if (recreateTokenRef.current !== token) return;
+          setLoaded(true);
+          onPrimaryMapReady?.(map);
+          if (!tooltipRef.current) tooltipRef.current = createTooltip(m.getContainer());
+          setTooltipHidden(tooltipRef.current, true);
+          ensureDemo(m);
+          ensureListeners(m);
+          if (camera) map.jumpTo(camera as never);
+        });
+        return;
+      }
+
+      const maplibregl = await loadMapLibreGL();
+      if (recreateTokenRef.current !== token) return;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current!,
         style,
         center: [10.7522, 59.9139],
         zoom: 12.5,
         bearing: 0,
         pitch: 0,
       });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
 
       const m = map as unknown as LayerEventTarget;
       mapRef.current = m;
 
       map.on("load", () => {
+        if (recreateTokenRef.current !== token) return;
         setLoaded(true);
-        onPrimaryMapReady?.(map);
+        onPrimaryMapReady?.(map as unknown as Map);
         if (!tooltipRef.current) tooltipRef.current = createTooltip(m.getContainer());
         setTooltipHidden(tooltipRef.current, true);
         ensureDemo(m);
         ensureListeners(m);
         if (camera) map.jumpTo(camera as never);
       });
-      return;
-    }
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style,
-      center: [10.7522, 59.9139],
-      zoom: 12.5,
-      bearing: 0,
-      pitch: 0,
-    });
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-
-    const m = map as unknown as LayerEventTarget;
-    mapRef.current = m;
-
-    map.on("load", () => {
-      setLoaded(true);
-      onPrimaryMapReady?.(map as unknown as mapboxgl.Map);
-      if (!tooltipRef.current) tooltipRef.current = createTooltip(m.getContainer());
-      setTooltipHidden(tooltipRef.current, true);
-      ensureDemo(m);
-      ensureListeners(m);
-      if (camera) map.jumpTo(camera as never);
+    })().catch(() => {
+      // ignore
     });
   };
 
   useEffect(() => {
     recreateMap();
     return () => {
+      recreateTokenRef.current += 1;
       const map = mapRef.current;
       if (!map) return;
       teardownListeners(map);

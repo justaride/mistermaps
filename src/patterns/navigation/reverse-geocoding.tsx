@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import maplibregl from "maplibre-gl";
+import type { Map as MapboxMap } from "mapbox-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import {
   MapboxGeocodingProvider,
@@ -12,6 +12,7 @@ import {
 import type { ReverseGeocodingService } from "../../providers";
 import { copyText } from "../utils/export";
 import { getSource, once } from "../utils/map-compat";
+import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
 type Engine = "mapbox" | "maplibre";
 type ProviderMode = "mapbox" | "nominatim";
@@ -27,7 +28,7 @@ function styleFor(engine: Engine, theme: Theme): string {
     : mapboxBasemapProvider.getStyle(theme);
 }
 
-function getCamera(map: mapboxgl.Map | maplibregl.Map) {
+function getCamera(map: MapboxMap | MapLibreMap) {
   const c = map.getCenter();
   return {
     center: [c.lng, c.lat] as [number, number],
@@ -54,7 +55,7 @@ function buildService(primary: ProviderMode): ReverseGeocodingService {
   });
 }
 
-function getAttributionText(map: mapboxgl.Map | maplibregl.Map): string {
+function getAttributionText(map: MapboxMap | MapLibreMap): string {
   const container = map.getContainer();
   const el = container.querySelector(
     ".mapboxgl-ctrl-attrib, .maplibregl-ctrl-attrib",
@@ -63,7 +64,7 @@ function getAttributionText(map: mapboxgl.Map | maplibregl.Map): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
-function ensurePin(map: mapboxgl.Map | maplibregl.Map) {
+function ensurePin(map: MapboxMap | MapLibreMap) {
   const m = map as unknown as {
     getSource: (id: string) => unknown;
     addSource: (id: string, source: unknown) => void;
@@ -94,7 +95,7 @@ function ensurePin(map: mapboxgl.Map | maplibregl.Map) {
   }
 }
 
-function setPin(map: mapboxgl.Map | maplibregl.Map, center: [number, number]) {
+function setPin(map: MapboxMap | MapLibreMap, center: [number, number]) {
   const src = getSource(map, PIN_SOURCE_ID) as {
     setData?: (d: unknown) => void;
   };
@@ -138,7 +139,8 @@ map.on('click', async (e) => {
 
 function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | maplibregl.Map | null>(null);
+  const mapRef = useRef<MapboxMap | MapLibreMap | null>(null);
+  const recreateTokenRef = useRef(0);
   const clickHandlerRef = useRef<((e: unknown) => void) | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -158,7 +160,7 @@ function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const style = useMemo(() => styleFor(engine, theme), [engine, theme]);
   const service = useMemo(() => buildService(provider), [provider]);
 
-  const teardownClick = (map: mapboxgl.Map | maplibregl.Map) => {
+  const teardownClick = (map: MapboxMap | MapLibreMap) => {
     const h = clickHandlerRef.current;
     if (!h) return;
     try {
@@ -173,7 +175,7 @@ function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
     clickHandlerRef.current = null;
   };
 
-  const ensureClick = (map: mapboxgl.Map | maplibregl.Map) => {
+  const ensureClick = (map: MapboxMap | MapLibreMap) => {
     teardownClick(map);
     clickHandlerRef.current = (e: unknown) => {
       const ev = e as { lngLat?: { lng: number; lat: number } };
@@ -222,6 +224,7 @@ function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
 
   const recreateMap = () => {
     if (!containerRef.current) return;
+    const token = (recreateTokenRef.current += 1);
     const prev = mapRef.current;
     const camera = prev ? getCamera(prev) : null;
     if (prev) {
@@ -237,52 +240,65 @@ function ReverseGeocodingView({ theme, onPrimaryMapReady }: PatternViewProps) {
     setLoaded(false);
     setAttribution("");
 
-    if (engine === "mapbox") {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      const map = new mapboxgl.Map({
-        container: containerRef.current,
+    void (async () => {
+      if (engine === "mapbox") {
+        const mapboxgl = await loadMapboxGL();
+        if (recreateTokenRef.current !== token) return;
+
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        const map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style,
+          center: [10.7522, 59.9139],
+          zoom: 12.5,
+          bearing: 0,
+          pitch: 0,
+        });
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        mapRef.current = map;
+        map.on("load", () => {
+          if (recreateTokenRef.current !== token) return;
+          setLoaded(true);
+          onPrimaryMapReady?.(map);
+          ensurePin(map);
+          ensureClick(map);
+          if (camera) map.jumpTo(camera);
+          setAttribution(getAttributionText(map));
+        });
+        return;
+      }
+
+      const maplibregl = await loadMapLibreGL();
+      if (recreateTokenRef.current !== token) return;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current!,
         style,
         center: [10.7522, 59.9139],
         zoom: 12.5,
         bearing: 0,
         pitch: 0,
       });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
       mapRef.current = map;
       map.on("load", () => {
+        if (recreateTokenRef.current !== token) return;
         setLoaded(true);
-        onPrimaryMapReady?.(map);
+        onPrimaryMapReady?.(map as unknown as MapboxMap);
         ensurePin(map);
         ensureClick(map);
-        if (camera) map.jumpTo(camera);
+        if (camera) map.jumpTo(camera as never);
         setAttribution(getAttributionText(map));
       });
-      return;
-    }
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style,
-      center: [10.7522, 59.9139],
-      zoom: 12.5,
-      bearing: 0,
-      pitch: 0,
-    });
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    mapRef.current = map;
-    map.on("load", () => {
-      setLoaded(true);
-      onPrimaryMapReady?.(map as unknown as mapboxgl.Map);
-      ensurePin(map);
-      ensureClick(map);
-      if (camera) map.jumpTo(camera as never);
-      setAttribution(getAttributionText(map));
+    })().catch(() => {
+      // ignore
     });
   };
 
   useEffect(() => {
     recreateMap();
     return () => {
+      recreateTokenRef.current += 1;
       abortRef.current?.abort();
       abortRef.current = null;
 

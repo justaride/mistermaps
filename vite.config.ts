@@ -23,6 +23,7 @@ export default defineConfig(() => ({
   build: {
     chunkSizeWarningLimit: 1800,
     target: "es2020",
+    manifest: true,
     rollupOptions: {
       output: {
         manualChunks(id) {

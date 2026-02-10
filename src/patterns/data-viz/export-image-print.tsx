@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import maplibregl from "maplibre-gl";
+import type { Map as MapboxMap } from "mapbox-gl";
+import type { Map as MapLibreMap, MapOptions as MapLibreMapOptions } from "maplibre-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider, openFreeMapBasemapProvider } from "../../providers";
 import { formatTimestampForFilename } from "../utils/export";
 import { once } from "../utils/map-compat";
+import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
 type Engine = "mapbox" | "maplibre";
 
@@ -21,7 +22,7 @@ function styleFor(engine: Engine, theme: Theme): string {
     : mapboxBasemapProvider.getStyle(theme);
 }
 
-function getCamera(map: mapboxgl.Map | maplibregl.Map) {
+function getCamera(map: MapboxMap | MapLibreMap) {
   const c = map.getCenter();
   return {
     center: [c.lng, c.lat] as [number, number],
@@ -31,7 +32,7 @@ function getCamera(map: mapboxgl.Map | maplibregl.Map) {
   };
 }
 
-function getAttributionText(map: mapboxgl.Map | maplibregl.Map): string {
+function getAttributionText(map: MapboxMap | MapLibreMap): string {
   const container = map.getContainer();
   const el = container.querySelector(
     ".mapboxgl-ctrl-attrib, .maplibregl-ctrl-attrib",
@@ -40,7 +41,7 @@ function getAttributionText(map: mapboxgl.Map | maplibregl.Map): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
-function ensureDemo(map: mapboxgl.Map | maplibregl.Map) {
+function ensureDemo(map: MapboxMap | MapLibreMap) {
   const m = map as unknown as {
     getSource: (id: string) => unknown;
     addSource: (id: string, source: unknown) => void;
@@ -152,7 +153,7 @@ function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number
   return lines.length > 0 ? lines : [text];
 }
 
-function exportPngWithAttribution(map: mapboxgl.Map | maplibregl.Map): {
+function exportPngWithAttribution(map: MapboxMap | MapLibreMap): {
   pngDataUrl: string;
   attribution: string;
   meta: { center: [number, number]; zoom: number };
@@ -294,7 +295,8 @@ download(out.toDataURL('image/png'));`,
 
 function ExportImagePrintView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | maplibregl.Map | null>(null);
+  const mapRef = useRef<MapboxMap | MapLibreMap | null>(null);
+  const recreateTokenRef = useRef(0);
 
   const [engine, setEngine] = useState<Engine>("mapbox");
   const [loaded, setLoaded] = useState(false);
@@ -310,6 +312,7 @@ function ExportImagePrintView({ theme, onPrimaryMapReady }: PatternViewProps) {
 
   const recreateMap = () => {
     if (!containerRef.current) return;
+    const token = (recreateTokenRef.current += 1);
     const prev = mapRef.current;
     const camera = prev ? getCamera(prev) : null;
     if (prev) {
@@ -325,44 +328,56 @@ function ExportImagePrintView({ theme, onPrimaryMapReady }: PatternViewProps) {
     setStatus("");
     setError("");
 
-    if (engine === "mapbox") {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      const map = new mapboxgl.Map({
-        container: containerRef.current,
+    void (async () => {
+      if (engine === "mapbox") {
+        const mapboxgl = await loadMapboxGL();
+        if (recreateTokenRef.current !== token) return;
+
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        const map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style,
+          center: [10.7522, 59.9139],
+          zoom: 12.5,
+          bearing: 0,
+          pitch: 0,
+          preserveDrawingBuffer: true,
+        });
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        mapRef.current = map;
+        map.on("load", () => {
+          if (recreateTokenRef.current !== token) return;
+          setLoaded(true);
+          onPrimaryMapReady?.(map);
+          ensureDemo(map);
+          if (camera) map.jumpTo(camera);
+        });
+        return;
+      }
+
+      const maplibregl = await loadMapLibreGL();
+      if (recreateTokenRef.current !== token) return;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current!,
         style,
         center: [10.7522, 59.9139],
         zoom: 12.5,
         bearing: 0,
         pitch: 0,
         preserveDrawingBuffer: true,
-      });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      } as unknown as MapLibreMapOptions);
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
       mapRef.current = map;
       map.on("load", () => {
+        if (recreateTokenRef.current !== token) return;
         setLoaded(true);
-        onPrimaryMapReady?.(map);
+        onPrimaryMapReady?.(map as unknown as MapboxMap);
         ensureDemo(map);
-        if (camera) map.jumpTo(camera);
+        if (camera) map.jumpTo(camera as never);
       });
-      return;
-    }
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style,
-      center: [10.7522, 59.9139],
-      zoom: 12.5,
-      bearing: 0,
-      pitch: 0,
-      preserveDrawingBuffer: true,
-    } as unknown as maplibregl.MapOptions);
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    mapRef.current = map;
-    map.on("load", () => {
-      setLoaded(true);
-      onPrimaryMapReady?.(map as unknown as mapboxgl.Map);
-      ensureDemo(map);
-      if (camera) map.jumpTo(camera as never);
+    })().catch(() => {
+      // ignore
     });
   };
 

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import maplibregl from "maplibre-gl";
+import type { Map as MapboxMap } from "mapbox-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider, openFreeMapBasemapProvider } from "../../providers";
 import { getSource, once } from "../utils/map-compat";
+import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
 type Engine = "mapbox" | "maplibre";
 type LngLat = [number, number];
@@ -27,7 +28,7 @@ function styleFor(engine: Engine, theme: Theme): string {
     : mapboxBasemapProvider.getStyle(theme);
 }
 
-function getCamera(map: mapboxgl.Map | maplibregl.Map) {
+function getCamera(map: MapboxMap | MapLibreMap) {
   const c = map.getCenter();
   return {
     center: [c.lng, c.lat] as [number, number],
@@ -87,7 +88,8 @@ map.getSource(sourceId).setData({ type:'FeatureCollection', features });`,
 
 function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | maplibregl.Map | null>(null);
+  const mapRef = useRef<MapboxMap | MapLibreMap | null>(null);
+  const recreateTokenRef = useRef(0);
 
   const [engine, setEngine] = useState<Engine>("mapbox");
   const [loaded, setLoaded] = useState(false);
@@ -106,7 +108,7 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const seededRandRef = useRef<() => number>(() => 0.5);
   const intervalRef = useRef<number | null>(null);
 
-  const ensureDemo = (map: mapboxgl.Map | maplibregl.Map) => {
+  const ensureDemo = (map: MapboxMap | MapLibreMap) => {
     const m = map as unknown as {
       getSource: (id: string) => unknown;
       addSource: (id: string, source: unknown) => void;
@@ -147,7 +149,7 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
     }
   };
 
-  const setDataOnMap = (map: mapboxgl.Map | maplibregl.Map) => {
+  const setDataOnMap = (map: MapboxMap | MapLibreMap) => {
     const src = getSource(map, SOURCE_ID) as { setData?: (d: unknown) => void };
     src.setData?.(buildCollection(featuresRef.current));
   };
@@ -216,6 +218,7 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
 
   const recreateMap = () => {
     if (!containerRef.current) return;
+    const token = (recreateTokenRef.current += 1);
     const prev = mapRef.current;
     const camera = prev ? getCamera(prev) : null;
     if (prev) {
@@ -231,44 +234,56 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
     setAddSourceCount(0);
     setAddLayerCount(0);
 
-    if (engine === "mapbox") {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      const map = new mapboxgl.Map({
-        container: containerRef.current,
+    void (async () => {
+      if (engine === "mapbox") {
+        const mapboxgl = await loadMapboxGL();
+        if (recreateTokenRef.current !== token) return;
+
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        const map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style,
+          center: [10.7522, 59.9139],
+          zoom: 12.5,
+          bearing: 0,
+          pitch: 0,
+        });
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        mapRef.current = map;
+        map.on("load", () => {
+          if (recreateTokenRef.current !== token) return;
+          setLoaded(true);
+          onPrimaryMapReady?.(map);
+          ensureDemo(map);
+          setDataOnMap(map);
+          if (camera) map.jumpTo(camera);
+        });
+        return;
+      }
+
+      const maplibregl = await loadMapLibreGL();
+      if (recreateTokenRef.current !== token) return;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current!,
         style,
         center: [10.7522, 59.9139],
         zoom: 12.5,
         bearing: 0,
         pitch: 0,
       });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
       mapRef.current = map;
       map.on("load", () => {
+        if (recreateTokenRef.current !== token) return;
         setLoaded(true);
-        onPrimaryMapReady?.(map);
+        onPrimaryMapReady?.(map as unknown as MapboxMap);
         ensureDemo(map);
         setDataOnMap(map);
-        if (camera) map.jumpTo(camera);
+        if (camera) map.jumpTo(camera as never);
       });
-      return;
-    }
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style,
-      center: [10.7522, 59.9139],
-      zoom: 12.5,
-      bearing: 0,
-      pitch: 0,
-    });
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    mapRef.current = map;
-    map.on("load", () => {
-      setLoaded(true);
-      onPrimaryMapReady?.(map as unknown as mapboxgl.Map);
-      ensureDemo(map);
-      setDataOnMap(map);
-      if (camera) map.jumpTo(camera as never);
+    })().catch(() => {
+      // ignore
     });
   };
 
@@ -279,6 +294,7 @@ function StreamingUpdatesView({ theme, onPrimaryMapReady }: PatternViewProps) {
   useEffect(() => {
     recreateMap();
     return () => {
+      recreateTokenRef.current += 1;
       const map = mapRef.current;
       if (!map) return;
       try {

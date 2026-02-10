@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl, { type Map, type GeoJSONSource } from "mapbox-gl";
-import maplibregl from "maplibre-gl";
+import type { Map, GeoJSONSource } from "mapbox-gl";
 import type { Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider } from "../../providers/basemap";
+import { once } from "../utils/map-compat";
+import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -397,11 +398,19 @@ export const fillPatternsPattern: Pattern = {
       lastFitTs = fitTs;
       const fc = buildDemoPolygons();
       const coords = fc.features.flatMap((f) => f.geometry.coordinates[0]);
-      const bounds = coords.reduce(
-        (b, c) => b.extend(c as [number, number]),
-        new mapboxgl.LngLatBounds(coords[0] as [number, number], coords[0] as [number, number]),
-      );
-      map.fitBounds(bounds, { padding: 60, duration: 700 });
+      let minLng = coords[0]?.[0] ?? 10.718;
+      let minLat = coords[0]?.[1] ?? 59.903;
+      let maxLng = minLng;
+      let maxLat = minLat;
+      for (const c of coords) {
+        const lng = c[0];
+        const lat = c[1];
+        if (lng < minLng) minLng = lng;
+        if (lat < minLat) minLat = lat;
+        if (lng > maxLng) maxLng = lng;
+        if (lat > maxLat) maxLat = lat;
+      }
+      map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 60, duration: 700 });
     }
   },
 
@@ -561,6 +570,7 @@ function cleanupAll(map: LayerEventTarget) {
 function FillPatternsView({ theme, values, onPrimaryMapReady }: PatternViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LayerEventTarget | null>(null);
+  const recreateTokenRef = useRef(0);
   const [engine, setEngine] = useState<Engine>("mapbox");
   const [loaded, setLoaded] = useState(false);
 
@@ -568,6 +578,7 @@ function FillPatternsView({ theme, values, onPrimaryMapReady }: PatternViewProps
 
   const recreate = () => {
     if (!containerRef.current) return;
+    const token = (recreateTokenRef.current += 1);
 
     const prev = mapRef.current;
     const camera = prev ? getCamera(prev) : null;
@@ -579,50 +590,63 @@ function FillPatternsView({ theme, values, onPrimaryMapReady }: PatternViewProps
 
     setLoaded(false);
 
-    if (engine === "mapbox") {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      const map = new mapboxgl.Map({
-        container: containerRef.current,
+    void (async () => {
+      if (engine === "mapbox") {
+        const mapboxgl = await loadMapboxGL();
+        if (recreateTokenRef.current !== token) return;
+
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        const map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style,
+          center: [10.7522, 59.9139],
+          zoom: 12.2,
+          bearing: 0,
+          pitch: 0,
+        });
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        const m = map as unknown as LayerEventTarget;
+        mapRef.current = m;
+        map.on("load", () => {
+          if (recreateTokenRef.current !== token) return;
+          setLoaded(true);
+          onPrimaryMapReady?.(map);
+          ensureAll(m, values);
+          if (camera) map.jumpTo(camera as never);
+        });
+        return;
+      }
+
+      const maplibregl = await loadMapLibreGL();
+      if (recreateTokenRef.current !== token) return;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current!,
         style,
         center: [10.7522, 59.9139],
         zoom: 12.2,
         bearing: 0,
         pitch: 0,
       });
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
       const m = map as unknown as LayerEventTarget;
       mapRef.current = m;
       map.on("load", () => {
+        if (recreateTokenRef.current !== token) return;
         setLoaded(true);
-        onPrimaryMapReady?.(map);
+        onPrimaryMapReady?.(map as unknown as Map);
         ensureAll(m, values);
         if (camera) map.jumpTo(camera as never);
       });
-      return;
-    }
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style,
-      center: [10.7522, 59.9139],
-      zoom: 12.2,
-      bearing: 0,
-      pitch: 0,
-    });
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    const m = map as unknown as LayerEventTarget;
-    mapRef.current = m;
-    map.on("load", () => {
-      setLoaded(true);
-      onPrimaryMapReady?.(map as unknown as mapboxgl.Map);
-      ensureAll(m, values);
-      if (camera) map.jumpTo(camera as never);
+    })().catch(() => {
+      // ignore
     });
   };
 
   useEffect(() => {
     recreate();
     return () => {
+      recreateTokenRef.current += 1;
       const map = mapRef.current;
       if (!map) return;
       cleanupAll(map);
@@ -638,7 +662,7 @@ function FillPatternsView({ theme, values, onPrimaryMapReady }: PatternViewProps
 
     const camera = getCamera(map);
     map.setStyle(style);
-    map.once("style.load", () => {
+    once(map as never, "style.load", () => {
       map.jumpTo(camera);
       map.resize();
       ensureAll(map, values);
@@ -682,7 +706,7 @@ function FillPatternsView({ theme, values, onPrimaryMapReady }: PatternViewProps
               const map = mapRef.current;
               if (!map) return;
               map.fitBounds(
-                new mapboxgl.LngLatBounds([10.718, 59.903], [10.784, 59.929]),
+                [[10.718, 59.903], [10.784, 59.929]],
                 { padding: 60, duration: 700 },
               );
             }}
