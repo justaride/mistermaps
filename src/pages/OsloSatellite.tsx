@@ -126,6 +126,11 @@ export default function OsloSatellite() {
   return (
     <div className={`${styles.app} map-root`}>
       <div ref={containerRef} className={containerStyles.container} />
+      {(!map || !isLoaded) && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-bg/80 font-mono text-xs text-muted">
+          Loading map...
+        </div>
+      )}
 
       <div className="absolute left-4 top-4 z-10">
         <Link

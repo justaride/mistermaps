@@ -160,5 +160,14 @@ export function MapContainerMulti({
     };
   }, [map]);
 
-  return <div ref={containerRef} className={styles.container} />;
+  return (
+    <>
+      <div ref={containerRef} className={styles.container} />
+      {(!map || !isLoaded) && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-bg/80 font-mono text-xs text-muted">
+          Loading map...
+        </div>
+      )}
+    </>
+  );
 }

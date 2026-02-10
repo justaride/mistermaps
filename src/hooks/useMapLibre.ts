@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import type { Theme } from "../types";
 
 const STYLES: Record<Theme, string> = {
@@ -13,30 +13,51 @@ type UseMapLibreOptions = {
 };
 
 export function useMapLibre({ container, theme }: UseMapLibreOptions) {
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
+  const creatingRef = useRef(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!container.current || mapRef.current) return;
+    if (!container.current || mapRef.current || creatingRef.current) return;
+    creatingRef.current = true;
 
-    const map = new maplibregl.Map({
-      container: container.current,
-      style: STYLES[theme],
-      center: [10.75, 59.91],
-      zoom: 12,
-    });
+    let cancelled = false;
 
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    void (async () => {
+      const mod = await import("maplibre-gl");
+      const maplibregl = (mod.default ?? mod) as unknown as typeof import("maplibre-gl");
+      if (cancelled) return;
 
-    map.on("load", () => {
-      setIsLoaded(true);
-    });
+      const map = new maplibregl.Map({
+        container: container.current!,
+        style: STYLES[theme],
+        center: [10.75, 59.91],
+        zoom: 12,
+      });
 
-    mapRef.current = map;
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+      map.on("load", () => {
+        setIsLoaded(true);
+      });
+
+      mapRef.current = map;
+    })()
+      .catch(() => {
+        // ignore
+      })
+      .finally(() => {
+        creatingRef.current = false;
+      });
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      cancelled = true;
+      const map = mapRef.current;
+      if (map) {
+        map.remove();
+        mapRef.current = null;
+      }
+      creatingRef.current = false;
       setIsLoaded(false);
     };
   }, [container]);
@@ -48,4 +69,3 @@ export function useMapLibre({ container, theme }: UseMapLibreOptions) {
 
   return { map: mapRef.current, isLoaded };
 }
-

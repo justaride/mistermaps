@@ -36,8 +36,11 @@ export default defineConfig(() => ({
             return "map-engines-css";
           }
 
-          if (id.includes("mapbox-gl") || id.includes("maplibre-gl")) {
-            return "map-engines";
+          if (id.includes("node_modules/mapbox-gl/") || id.includes("node_modules/@mapbox/")) {
+            return "mapbox-engine";
+          }
+          if (id.includes("node_modules/maplibre-gl/")) {
+            return "maplibre-engine";
           }
           if (id.includes("@turf/") || id.includes("/@turf")) return "geo";
           if (id.includes("react-syntax-highlighter")) return "code";

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import type { Map as MapboxMap } from "mapbox-gl";
 import type { Theme } from "../types";
 import { mapboxBasemapProvider } from "../providers/basemap";
 
@@ -11,35 +11,57 @@ type UseMapOptions = {
 };
 
 export function useMap({ container, theme }: UseMapOptions) {
-  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapRef = useRef<MapboxMap | null>(null);
+  const creatingRef = useRef(false);
   const prevThemeRef = useRef(theme);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!container.current || mapRef.current) return;
+    if (!container.current || mapRef.current || creatingRef.current) return;
+    creatingRef.current = true;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    let cancelled = false;
 
-    const map = new mapboxgl.Map({
-      container: container.current,
-      style: mapboxBasemapProvider.getStyle(theme),
-      center: [11.0, 61.83],
-      zoom: 10,
-      pitch: 0,
-      bearing: 0,
-    });
+    void (async () => {
+      type MapboxGL = (typeof import("mapbox-gl"))["default"];
+      const mod = await import("mapbox-gl");
+      const mapboxgl = (mod as unknown as { default: MapboxGL }).default;
+      if (cancelled) return;
 
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    map.on("load", () => {
-      setIsLoaded(true);
-    });
+      const map = new mapboxgl.Map({
+        container: container.current!,
+        style: mapboxBasemapProvider.getStyle(theme),
+        center: [11.0, 61.83],
+        zoom: 10,
+        pitch: 0,
+        bearing: 0,
+      });
 
-    mapRef.current = map;
+      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+      map.on("load", () => {
+        setIsLoaded(true);
+      });
+
+      mapRef.current = map;
+    })()
+      .catch(() => {
+        // ignore
+      })
+      .finally(() => {
+        creatingRef.current = false;
+      });
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      cancelled = true;
+      const map = mapRef.current;
+      if (map) {
+        map.remove();
+        mapRef.current = null;
+      }
+      creatingRef.current = false;
       setIsLoaded(false);
     };
   }, [container]);

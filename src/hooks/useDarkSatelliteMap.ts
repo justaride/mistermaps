@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import type { Map as MapboxMap } from "mapbox-gl";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -8,59 +8,81 @@ type UseDarkSatelliteMapOptions = {
 };
 
 export function useDarkSatelliteMap({ container }: UseDarkSatelliteMapOptions) {
-  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapRef = useRef<MapboxMap | null>(null);
+  const creatingRef = useRef(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!container.current || mapRef.current) return;
+    if (!container.current || mapRef.current || creatingRef.current) return;
+    creatingRef.current = true;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    let cancelled = false;
 
-    const map = new mapboxgl.Map({
-      container: container.current,
-      style: "mapbox://styles/mapbox/satellite-streets-v12",
-      center: [10.95, 59.93],
-      zoom: 11,
-      pitch: 0,
-      bearing: 0,
-    });
+    void (async () => {
+      type MapboxGL = (typeof import("mapbox-gl"))["default"];
+      const mod = await import("mapbox-gl");
+      const mapboxgl = (mod as unknown as { default: MapboxGL }).default;
+      if (cancelled) return;
 
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+      mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    map.on("style.load", () => {
-      const layers = map.getStyle().layers;
-      if (!layers) return;
+      const map = new mapboxgl.Map({
+        container: container.current!,
+        style: "mapbox://styles/mapbox/satellite-streets-v12",
+        center: [10.95, 59.93],
+        zoom: 11,
+        pitch: 0,
+        bearing: 0,
+      });
 
-      for (const layer of layers) {
-        if (layer.type === "raster") {
-          map.setPaintProperty(layer.id, "raster-brightness-max", 0.6);
-          map.setPaintProperty(layer.id, "raster-brightness-min", 0.05);
-          map.setPaintProperty(layer.id, "raster-saturation", -0.3);
+      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+      map.on("style.load", () => {
+        const layers = map.getStyle().layers;
+        if (!layers) return;
+
+        for (const layer of layers) {
+          if (layer.type === "raster") {
+            map.setPaintProperty(layer.id, "raster-brightness-max", 0.6);
+            map.setPaintProperty(layer.id, "raster-brightness-min", 0.05);
+            map.setPaintProperty(layer.id, "raster-saturation", -0.3);
+          }
+
+          if (layer.type === "line" && layer.id.includes("road")) {
+            map.setPaintProperty(layer.id, "line-color", "#FF8C42");
+            map.setPaintProperty(layer.id, "line-opacity", 0.85);
+          }
+
+          if (
+            layer.type === "symbol" &&
+            (layer.id.includes("label") || layer.id.includes("place"))
+          ) {
+            map.setPaintProperty(layer.id, "text-color", "#f0f0f0");
+            map.setPaintProperty(layer.id, "text-halo-color", "rgba(0,0,0,0.8)");
+            map.setPaintProperty(layer.id, "text-halo-width", 1.5);
+          }
         }
 
-        if (layer.type === "line" && layer.id.includes("road")) {
-          map.setPaintProperty(layer.id, "line-color", "#FF8C42");
-          map.setPaintProperty(layer.id, "line-opacity", 0.85);
-        }
+        setIsLoaded(true);
+      });
 
-        if (
-          layer.type === "symbol" &&
-          (layer.id.includes("label") || layer.id.includes("place"))
-        ) {
-          map.setPaintProperty(layer.id, "text-color", "#f0f0f0");
-          map.setPaintProperty(layer.id, "text-halo-color", "rgba(0,0,0,0.8)");
-          map.setPaintProperty(layer.id, "text-halo-width", 1.5);
-        }
-      }
-
-      setIsLoaded(true);
-    });
-
-    mapRef.current = map;
+      mapRef.current = map;
+    })()
+      .catch(() => {
+        // ignore
+      })
+      .finally(() => {
+        creatingRef.current = false;
+      });
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      cancelled = true;
+      const map = mapRef.current;
+      if (map) {
+        map.remove();
+        mapRef.current = null;
+      }
+      creatingRef.current = false;
       setIsLoaded(false);
     };
   }, [container]);
