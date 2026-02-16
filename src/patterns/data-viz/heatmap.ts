@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "heatmap-source";
 const LAYER_ID = "heatmap-layer";
@@ -40,7 +40,7 @@ export const heatmapPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     const points = generateRandomPoints([10.8, 61.7], [11.3, 62.0], 500);
 
     map.addSource(SOURCE_ID, {
@@ -98,7 +98,7 @@ export const heatmapPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LAYER_ID)) return;
     map.setPaintProperty(LAYER_ID, "heatmap-radius", controls.radius as number);
     map.setPaintProperty(

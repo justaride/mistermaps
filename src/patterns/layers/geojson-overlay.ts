@@ -1,6 +1,6 @@
 import type { GeoJSONSource, Map } from "mapbox-gl";
 import * as turf from "@turf/turf";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import {
   copyText,
   downloadText,
@@ -86,7 +86,7 @@ export const geojsonOverlayPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     const persisted = currentGeoJson ?? loadPersistedGeoJson();
     const geojson = persisted ?? createSampleGeoJSON();
     currentGeoJson = geojson;
@@ -168,7 +168,7 @@ export const geojsonOverlayPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(FILL_LAYER_ID)) return;
 
     map.setPaintProperty(

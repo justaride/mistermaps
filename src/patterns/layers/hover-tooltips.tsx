@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Map, MapLayerMouseEvent, GeoJSONSource } from "mapbox-gl";
-import type { Pattern, PatternViewProps, Theme } from "../../types";
+import type { ControlValues, Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider } from "../../providers/basemap";
 import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
 
@@ -117,7 +117,7 @@ function readColor(value: unknown, fallback: string): string {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
 
-function ensureLayerAndSource(map: Map, controls: Record<string, unknown>) {
+function ensureLayerAndSource(map: Map, controls: ControlValues) {
   if (!map.getSource(SOURCE_ID)) {
     map.addSource(SOURCE_ID, { type: "geojson", data: buildDemoPoints() });
   } else {
@@ -250,7 +250,7 @@ export const hoverTooltipsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     latestControls = controls;
 
     map.easeTo({
@@ -274,7 +274,7 @@ export const hoverTooltipsPattern: Pattern = {
     map.setLayoutProperty(LAYER_ID, "visibility", enabled ? "visible" : "none");
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     latestControls = controls;
     if (!map.getLayer(LAYER_ID)) return;
 

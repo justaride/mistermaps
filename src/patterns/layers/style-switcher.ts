@@ -1,5 +1,5 @@
 import type { GeoJSONSource, Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const OVERLAY_SOURCE_ID = "mm-style-switcher:overlay";
 const OVERLAY_LINE_ID = "mm-style-switcher:overlay-line";
@@ -136,7 +136,7 @@ function removeOverlay(map: Map) {
   if (map.getSource(OVERLAY_SOURCE_ID)) map.removeSource(OVERLAY_SOURCE_ID);
 }
 
-function ensureOverlay(map: Map, controls: Record<string, unknown>) {
+function ensureOverlay(map: Map, controls: ControlValues) {
   if (!controls.showOverlay) {
     removeOverlay(map);
     return;
@@ -182,7 +182,7 @@ function ensureOverlay(map: Map, controls: Record<string, unknown>) {
   }
 }
 
-function setStyleSafely(map: Map, style: string, controls: Record<string, unknown>) {
+function setStyleSafely(map: Map, style: string, controls: ControlValues) {
   activeGen += 1;
   const gen = activeGen;
 
@@ -269,7 +269,7 @@ export const styleSwitcherPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     ensurePanel(map);
     ensureOverlay(map, controls);
 
@@ -278,7 +278,7 @@ export const styleSwitcherPattern: Pattern = {
     setPanelMessage("Ready.");
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     ensurePanel(map);
 
     if (!controls.showOverlay) {

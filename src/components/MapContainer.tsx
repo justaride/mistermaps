@@ -1,13 +1,13 @@
 import { useRef, useEffect, useState } from "react";
 import type { Map } from "mapbox-gl";
 import { useMap } from "../hooks/useMap";
-import type { Theme, Pattern } from "../types";
+import type { ControlValues, Theme, Pattern } from "../types";
 import styles from "./MapContainer.module.css";
 
 type Props = {
   theme: Theme;
   pattern: Pattern | null;
-  controlValues: Record<string, unknown>;
+  controlValues: ControlValues;
   onMapReady: (map: Map) => void;
 };
 

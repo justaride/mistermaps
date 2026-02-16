@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Map, GeoJSONSource } from "mapbox-gl";
-import type { Pattern, PatternViewProps, Theme } from "../../types";
+import type { ControlValues, Pattern, PatternViewProps, Theme } from "../../types";
 import { mapboxBasemapProvider } from "../../providers/basemap";
 import { once } from "../utils/map-compat";
 import { loadMapboxGL, loadMapLibreGL } from "../utils/load-map-engine";
@@ -65,7 +65,7 @@ function setPanelVisibility(visible: boolean) {
   infoPanel.style.display = visible ? "block" : "none";
 }
 
-function updatePanelMeta(controls: Record<string, unknown>) {
+function updatePanelMeta(controls: ControlValues) {
   const patternEl = document.getElementById("fill-patterns-meta-pattern");
   const scaleEl = document.getElementById("fill-patterns-meta-scale");
   const opacityEl = document.getElementById("fill-patterns-meta-opacity");
@@ -196,7 +196,7 @@ function createPatternImage(
   return { width: scale, height: scale, data: img.data };
 }
 
-function ensureImage(map: Map, controls: Record<string, unknown>) {
+function ensureImage(map: Map, controls: ControlValues) {
   const mode = readMode(controls.pattern);
   const scale = readScale(controls.scale);
   const patternColor = readColor(controls.patternColor, "#2c2c2c");
@@ -219,7 +219,7 @@ function ensureImage(map: Map, controls: Record<string, unknown>) {
   });
 }
 
-function ensureSourceAndLayers(map: Map, controls: Record<string, unknown>) {
+function ensureSourceAndLayers(map: Map, controls: ControlValues) {
   if (!map.getSource(SOURCE_ID)) {
     map.addSource(SOURCE_ID, {
       type: "geojson",
@@ -270,7 +270,7 @@ function ensureSourceAndLayers(map: Map, controls: Record<string, unknown>) {
   }
 }
 
-function applyControls(map: Map, controls: Record<string, unknown>) {
+function applyControls(map: Map, controls: ControlValues) {
   if (!map.getLayer(PATTERN_FILL_LAYER_ID)) return;
 
   map.setPaintProperty(
@@ -366,7 +366,7 @@ export const fillPatternsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     createInfoPanel();
     setPanelVisibility(true);
     updatePanelMeta(controls);
@@ -383,7 +383,7 @@ export const fillPatternsPattern: Pattern = {
     applyControls(map, normalizeControls(controls));
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(PATTERN_FILL_LAYER_ID)) return;
     const normalized = normalizeControls(controls);
 
@@ -438,7 +438,7 @@ map.addLayer({
 });`,
 };
 
-function normalizeControls(controls: Record<string, unknown>) {
+function normalizeControls(controls: ControlValues) {
   // Controls store select values as strings; normalize to consistent internal types.
   return {
     ...controls,
@@ -503,7 +503,7 @@ function createEngineButtonClass(active: boolean) {
   return `status-panel__button ${active ? "primary" : ""}`;
 }
 
-function ensureAll(map: LayerEventTarget, controls: Record<string, unknown>) {
+function ensureAll(map: LayerEventTarget, controls: ControlValues) {
   const normalized = normalizeControls(controls);
 
   // Replace active image.

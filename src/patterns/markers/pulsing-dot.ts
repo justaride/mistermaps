@@ -1,5 +1,5 @@
 import type { Map, StyleImageInterface } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "pulsing-dot-source";
 const SYMBOL_LAYER_ID = "pulsing-dot-layer";
@@ -8,7 +8,7 @@ const IMAGE_ID = "mm-pulsing-dot";
 
 const IMAGE_SIZE = 64;
 
-let currentControls: Record<string, unknown> = {};
+let currentControls: ControlValues = {};
 let imageMap: Map | null = null;
 let imageCanvas: HTMLCanvasElement | null = null;
 let imageContext: CanvasRenderingContext2D | null = null;
@@ -73,7 +73,7 @@ export const pulsingDotPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     currentControls = controls;
 
     ensurePulsingImage(map);
@@ -137,7 +137,7 @@ export const pulsingDotPattern: Pattern = {
     imageContext = null;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(SYMBOL_LAYER_ID)) return;
 
     currentControls = controls;

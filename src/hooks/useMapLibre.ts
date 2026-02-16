@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import type { Theme } from "../types";
+import { useManagedMap } from "./useManagedMap";
+import { logError } from "../utils/logger";
 
 const STYLES: Record<Theme, string> = {
   light: "https://tiles.openfreemap.org/styles/bright",
@@ -8,64 +10,54 @@ const STYLES: Record<Theme, string> = {
 };
 
 type UseMapLibreOptions = {
-  container: React.RefObject<HTMLDivElement | null>;
+  container: RefObject<HTMLDivElement | null>;
   theme: Theme;
 };
 
 export function useMapLibre({ container, theme }: UseMapLibreOptions) {
-  const mapRef = useRef<MapLibreMap | null>(null);
-  const creatingRef = useRef(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!container.current || mapRef.current || creatingRef.current) return;
-    creatingRef.current = true;
-
-    let cancelled = false;
-
-    void (async () => {
+  const prevThemeRef = useRef(theme);
+  const createMap = useCallback(
+    async (containerEl: HTMLDivElement): Promise<MapLibreMap> => {
       const mod = await import("maplibre-gl");
-      const maplibregl = (mod.default ?? mod) as unknown as typeof import("maplibre-gl");
-      if (cancelled) return;
+      const maplibregl = (mod.default ??
+        mod) as unknown as typeof import("maplibre-gl");
 
       const map = new maplibregl.Map({
-        container: container.current!,
+        container: containerEl,
         style: STYLES[theme],
         center: [10.75, 59.91],
         zoom: 12,
       });
 
       map.addControl(new maplibregl.NavigationControl(), "top-right");
-
       map.on("load", () => {
         setIsLoaded(true);
       });
 
-      mapRef.current = map;
-    })()
-      .catch(() => {
-        // ignore
-      })
-      .finally(() => {
-        creatingRef.current = false;
-      });
+      return map;
+    },
+    [theme],
+  );
 
-    return () => {
-      cancelled = true;
-      const map = mapRef.current;
-      if (map) {
-        map.remove();
-        mapRef.current = null;
-      }
-      creatingRef.current = false;
-      setIsLoaded(false);
-    };
-  }, [container]);
+  const { mapRef, isLoaded, setIsLoaded } = useManagedMap<MapLibreMap>({
+    container,
+    createMap,
+    onCreateError: (error) => {
+      logError("Failed to initialize MapLibre map", error);
+    },
+  });
 
   useEffect(() => {
-    if (!mapRef.current) return;
-    mapRef.current.setStyle(STYLES[theme]);
-  }, [theme]);
+    const map = mapRef.current;
+    if (!map || !isLoaded) return;
+    if (prevThemeRef.current === theme) return;
+    prevThemeRef.current = theme;
+    map.setStyle(STYLES[theme]);
+    setIsLoaded(false);
+    map.once("style.load", () => {
+      setIsLoaded(true);
+    });
+  }, [theme, isLoaded]);
 
   return { map: mapRef.current, isLoaded };
 }

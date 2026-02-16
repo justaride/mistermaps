@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import {
   mapboxRoutingProvider,
   osrmRoutingProvider,
@@ -79,7 +79,7 @@ export const routeDisplayPattern: Pattern = {
     },
   ],
 
-  async setup(map: Map, controls: Record<string, unknown>) {
+  async setup(map: Map, controls: ControlValues) {
     lastConfig = JSON.stringify({
       p: controls.provider,
       pr: controls.profile,
@@ -157,7 +157,7 @@ export const routeDisplayPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  async update(map: Map, controls: Record<string, unknown>) {
+  async update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LAYER_ID)) return;
 
     const currentConfig = JSON.stringify({
@@ -240,7 +240,7 @@ map.addLayer({
 };
 
 async function fetchRoute(
-  controls: Record<string, unknown>,
+  controls: ControlValues,
 ): Promise<LngLat[] | null> {
   const providerId = controls.provider as string;
   const profile = isRoutingProfile(controls.profile)

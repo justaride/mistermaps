@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 let layerPanel: HTMLDivElement | null = null;
 
@@ -36,7 +36,7 @@ export const layerExplorerPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     createLayerPanel(map);
     applyLayerVisibility(map, controls);
   },
@@ -57,7 +57,7 @@ export const layerExplorerPattern: Pattern = {
     });
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     applyLayerVisibility(map, controls);
   },
 
@@ -172,7 +172,7 @@ function createLayerPanel(map: Map) {
   document.body.appendChild(layerPanel);
 }
 
-function applyLayerVisibility(map: Map, controls: Record<string, unknown>) {
+function applyLayerVisibility(map: Map, controls: ControlValues) {
   const layers = map.getStyle()?.layers || [];
 
   layers.forEach((layer) => {

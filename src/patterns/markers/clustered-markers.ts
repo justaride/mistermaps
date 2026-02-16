@@ -1,5 +1,5 @@
 import type { GeoJSONSource, Map, MapLayerMouseEvent } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "clusters-source";
 const CLUSTERS_LAYER_ID = "clusters";
@@ -43,7 +43,7 @@ export const clusteredMarkersPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     const points = generateRandomPoints([10.8, 61.7], [11.3, 62.0], 200);
 
     map.addSource(SOURCE_ID, {
@@ -164,7 +164,7 @@ export const clusteredMarkersPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(CLUSTERS_LAYER_ID)) return;
 
     map.setPaintProperty(

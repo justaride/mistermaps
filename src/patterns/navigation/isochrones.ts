@@ -1,5 +1,5 @@
 import type { Map, MapMouseEvent } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import { valhallaRoutingProvider } from "../../providers/routing";
 import type { LngLat, RoutingProfile } from "../../providers/types";
 
@@ -8,7 +8,7 @@ const LAYER_ID_PREFIX = "isochrone-layer-";
 
 let clickHandler: ((e: MapMouseEvent) => void) | null = null;
 let currentCenter: LngLat | null = null;
-let currentControls: Record<string, unknown> = {};
+let currentControls: ControlValues = {};
 let lastFetchKey = "";
 
 function isRoutingProfile(value: unknown): value is RoutingProfile {
@@ -56,7 +56,7 @@ function parseMinutes(raw: unknown): number[] {
 async function updateIsochrones(
   map: Map,
   center: LngLat,
-  controls: Record<string, unknown>,
+  controls: ControlValues,
 ) {
   const minutes = parseMinutes(controls.intervals);
   const profile = isRoutingProfile(controls.profile)
@@ -166,7 +166,7 @@ export const isochronesPattern: Pattern = {
     },
   ],
 
-  async setup(map: Map, controls: Record<string, unknown>) {
+  async setup(map: Map, controls: ControlValues) {
     currentControls = controls;
     currentCenter = map.getCenter().toArray() as LngLat;
     lastFetchKey = "";
@@ -194,7 +194,7 @@ export const isochronesPattern: Pattern = {
     lastFetchKey = "";
   },
 
-  async update(map: Map, controls: Record<string, unknown>) {
+  async update(map: Map, controls: ControlValues) {
     currentControls = controls;
     const center = currentCenter ?? (map.getCenter().toArray() as LngLat);
     await updateIsochrones(map, center, currentControls);

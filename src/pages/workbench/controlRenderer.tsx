@@ -1,74 +1,25 @@
-import { useState } from "react";
-import type { ControlConfig, ControlValue } from "../types";
-import styles from "./ControlsPanel.module.css";
+import type { ControlConfig, ControlValue, PatternId } from "../../types";
+import styles from "../Workbench.module.css";
 
-type Props = {
-  controls: ControlConfig[];
-  values: Record<string, ControlValue | undefined>;
-  onChange: (id: string, value: ControlValue) => void;
-  onViewCode: () => void;
-};
-
-export function ControlsPanel({
-  controls,
-  values,
-  onChange,
-  onViewCode,
-}: Props) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  if (controls.length === 0) {
-    return null;
-  }
-
-  return (
-    <div
-      className={`panel ${styles.panel} ${collapsed ? styles.collapsed : ""}`}
-    >
-      <div className={styles.header}>
-        <h3 className={styles.title}>Controls</h3>
-        <button
-          className="secondary"
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? "Expand" : "Collapse"}
-        >
-          {collapsed ? "+" : "-"}
-        </button>
-      </div>
-
-      {!collapsed && (
-        <>
-          <div className={styles.controls}>
-            {controls.map((control) => (
-              <div key={control.id} className={styles.control}>
-                {control.type !== "button" && (
-                  <label htmlFor={control.id}>{control.label}</label>
-                )}
-                {renderControl(control, values[control.id], onChange)}
-              </div>
-            ))}
-          </div>
-          <button className={styles.codeButton} onClick={onViewCode}>
-            View Code
-          </button>
-        </>
-      )}
-    </div>
-  );
+export function controlDomId(patternId: PatternId, controlId: string): string {
+  return `${patternId}__${controlId}`;
 }
 
-function renderControl(
+export function renderControlInline(
+  patternId: PatternId,
   config: ControlConfig,
   value: ControlValue | undefined,
-  onChange: (id: string, value: ControlValue) => void,
+  onChange: (controlId: string, value: ControlValue) => void,
 ) {
+  const id = controlDomId(patternId, config.id);
+
   switch (config.type) {
     case "text": {
       const textValue = typeof value === "string" ? value : config.defaultValue;
       return (
         <input
           type="text"
-          id={config.id}
+          id={id}
           value={textValue}
           onChange={(e) => onChange(config.id, e.target.value)}
           className={styles.textInput}
@@ -80,7 +31,7 @@ function renderControl(
       const textValue = typeof value === "string" ? value : config.defaultValue;
       return (
         <textarea
-          id={config.id}
+          id={id}
           value={textValue}
           onChange={(e) => onChange(config.id, e.target.value)}
           className={`${styles.textInput} ${styles.textarea}`}
@@ -94,7 +45,7 @@ function renderControl(
       return (
         <button
           type="button"
-          className="secondary"
+          className={`secondary ${styles.inlineButton}`}
           onClick={() => onChange(config.id, Date.now())}
         >
           {config.label}
@@ -104,10 +55,10 @@ function renderControl(
     case "slider": {
       const sliderValue = typeof value === "number" ? value : config.defaultValue;
       return (
-        <div className={styles.sliderWrapper}>
+        <div className={styles.sliderRow}>
           <input
             type="range"
-            id={config.id}
+            id={id}
             min={config.min}
             max={config.max}
             step={config.step}
@@ -122,15 +73,18 @@ function renderControl(
     case "toggle": {
       const checked = typeof value === "boolean" ? value : config.defaultValue;
       return (
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            id={config.id}
-            checked={checked}
-            onChange={(e) => onChange(config.id, e.target.checked)}
-          />
-          <span className={styles.toggleSlider} />
-        </label>
+        <div className={styles.toggleRow}>
+          <div className={styles.toggleLabel}>{config.label}</div>
+          <label className={styles.toggle} aria-label={config.label}>
+            <input
+              type="checkbox"
+              id={id}
+              checked={checked}
+              onChange={(e) => onChange(config.id, e.target.checked)}
+            />
+            <span className={styles.toggleSlider} />
+          </label>
+        </div>
       );
     }
 
@@ -139,7 +93,7 @@ function renderControl(
         typeof value === "string" ? value : config.defaultValue;
       return (
         <select
-          id={config.id}
+          id={id}
           value={selectedValue}
           onChange={(e) => onChange(config.id, e.target.value)}
         >
@@ -157,7 +111,7 @@ function renderControl(
       return (
         <input
           type="color"
-          id={config.id}
+          id={id}
           value={colorValue}
           onChange={(e) => onChange(config.id, e.target.value)}
           className={styles.colorInput}

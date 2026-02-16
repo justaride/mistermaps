@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "choropleth-source";
 const LAYER_ID = "choropleth-layer";
@@ -41,7 +41,7 @@ export const choroplethPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     const boroughs = createRendalenAreas();
     const colors = getColorScheme(controls.colorScheme as string);
 
@@ -98,7 +98,7 @@ export const choroplethPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LAYER_ID)) return;
 
     const colors = getColorScheme(controls.colorScheme as string);

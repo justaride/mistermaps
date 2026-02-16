@@ -1,6 +1,6 @@
 import type { Map } from "mapbox-gl";
 import type { RasterSourceSpecification } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "mm-raster-overlay-source";
 const LAYER_ID = "mm-raster-overlay-layer";
@@ -64,7 +64,7 @@ export const rasterOverlayPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     // Visible-by-default behavior: if inputs are filled, overlay shows on load.
     isActive = true;
     applyIfNeeded(map, controls, { forceRebuild: true });
@@ -78,7 +78,7 @@ export const rasterOverlayPattern: Pattern = {
     appliedKey = null;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     const addTs = typeof controls.addOverlay === "number" ? controls.addOverlay : null;
     const removeTs =
       typeof controls.removeOverlay === "number" ? controls.removeOverlay : null;
@@ -138,7 +138,7 @@ map.addLayer({
 
 function applyIfNeeded(
   map: Map,
-  controls: Record<string, unknown>,
+  controls: ControlValues,
   options: { forceRebuild: boolean },
 ) {
   const tileUrl = (controls.tileUrlTemplate as string | undefined)?.trim() ?? "";
@@ -189,7 +189,7 @@ function removeOverlay(map: Map) {
   if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
 }
 
-function buildConfigKey(controls: Record<string, unknown>): string {
+function buildConfigKey(controls: ControlValues): string {
   const tileUrl = (controls.tileUrlTemplate as string | undefined)?.trim() ?? "";
   const attribution = (controls.attribution as string | undefined)?.trim() ?? "";
   const minZoom = (controls.minZoom as string | undefined)?.trim() ?? "";

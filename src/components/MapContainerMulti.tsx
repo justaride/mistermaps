@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
 import type { Map as MapboxMap } from "mapbox-gl";
 import { useMap } from "../hooks/useMap";
-import type { Pattern, PatternId, Theme } from "../types";
+import type { ControlValues, Pattern, PatternId, Theme } from "../types";
+import { logError } from "../utils/logger";
 import styles from "./MapContainer.module.css";
 
 type Props = {
   theme: Theme;
   patterns: Pattern[];
-  controlValuesByPattern: Partial<Record<PatternId, Record<string, unknown>>>;
+  controlValuesByPattern: Partial<Record<PatternId, ControlValues>>;
   onMapReady?: (map: MapboxMap) => void;
 };
 
@@ -51,8 +52,8 @@ export function MapContainerMulti({
       for (const pattern of activePatterns) {
         try {
           pattern.cleanup(map);
-        } catch {
-          // Ignore cleanup errors to avoid trapping the map in a broken state.
+        } catch (error) {
+          logError(`Pattern cleanup failed during style reset (${pattern.id})`, error);
         }
       }
       activeIdsRef.current.clear();
@@ -78,8 +79,8 @@ export function MapContainerMulti({
       if (pattern) {
         try {
           pattern.cleanup(map);
-        } catch {
-          // ignore
+        } catch (error) {
+          logError(`Pattern cleanup failed while disabling (${pattern.id})`, error);
         }
       }
       activeIdsRef.current.delete(activeId);
@@ -110,8 +111,8 @@ export function MapContainerMulti({
           if (!isStillDesired || !isStillCurrentStyle || !isStillCurrentToken) {
             try {
               pattern.cleanup(map);
-            } catch {
-              // ignore
+            } catch (error) {
+              logError(`Pattern cleanup failed after stale setup (${pattern.id})`, error);
             }
             return;
           }
@@ -122,12 +123,13 @@ export function MapContainerMulti({
           const latestControls = controlValuesRef.current[pattern.id] ?? {};
           try {
             pattern.update(map, latestControls);
-          } catch {
-            // ignore update errors here; pattern should guard on missing layers.
+          } catch (error) {
+            logError(`Pattern update failed after setup (${pattern.id})`, error);
           }
         })
-        .catch(() => {
+        .catch((error) => {
           inflightIdsRef.current.delete(pattern.id);
+          logError(`Pattern setup failed (${pattern.id})`, error);
         });
     }
   }, [map, isLoaded, patterns]);
@@ -139,8 +141,8 @@ export function MapContainerMulti({
       if (!activeIdsRef.current.has(pattern.id)) continue;
       try {
         pattern.update(map, controlValuesByPattern[pattern.id] ?? {});
-      } catch {
-        // ignore
+      } catch (error) {
+        logError(`Pattern update failed (${pattern.id})`, error);
       }
     }
   }, [map, isLoaded, patterns, controlValuesByPattern]);
@@ -152,8 +154,8 @@ export function MapContainerMulti({
         if (!activeIdsRef.current.has(pattern.id)) continue;
         try {
           pattern.cleanup(map);
-        } catch {
-          // ignore
+        } catch (error) {
+          logError(`Pattern cleanup failed on unmount (${pattern.id})`, error);
         }
       }
       activeIdsRef.current.clear();

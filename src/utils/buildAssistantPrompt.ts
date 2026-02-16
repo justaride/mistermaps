@@ -1,4 +1,4 @@
-import type { Pattern, PatternId } from "../types";
+import type { ControlValues, Pattern, PatternId } from "../types";
 
 function stableJson(value: unknown): string {
   try {
@@ -10,7 +10,7 @@ function stableJson(value: unknown): string {
 
 export function buildAssistantPrompt(
   enabledPatterns: Pattern[],
-  controlValuesByPattern: Partial<Record<PatternId, Record<string, unknown>>>,
+  controlValuesByPattern: Partial<Record<PatternId, ControlValues>>,
 ): string {
   const header = [
     "You are helping implement a Mapbox GL JS map in a React + TypeScript (Vite) project.",
@@ -56,4 +56,3 @@ export function buildAssistantPrompt(
 
   return [header, ...blocks, footer].join("\n");
 }
-

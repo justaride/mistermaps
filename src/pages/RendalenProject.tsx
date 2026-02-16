@@ -11,14 +11,14 @@ import {
   SearchBox,
 } from "../components";
 import { rendalenDataPattern } from "../patterns";
-import type { Theme } from "../types";
+import type { ControlValue, ControlValues, Theme } from "../types";
 import styles from "../App.module.css";
 
 export default function RendalenProject() {
   const [theme, setTheme] = useState<Theme>("light");
-  const [controlValues, setControlValues] = useState<Record<string, unknown>>(
+  const [controlValues, setControlValues] = useState<ControlValues>(
     () => {
-      const defaults: Record<string, unknown> = {};
+      const defaults: ControlValues = {};
       rendalenDataPattern.controls.forEach((c) => {
         defaults[c.id] = c.defaultValue;
       });
@@ -36,7 +36,7 @@ export default function RendalenProject() {
     setMap(mapInstance);
   }, []);
 
-  const handleControlChange = (controlId: string, value: unknown) => {
+  const handleControlChange = (controlId: string, value: ControlValue) => {
     setControlValues((prev) => ({ ...prev, [controlId]: value }));
   };
 

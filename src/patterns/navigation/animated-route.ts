@@ -1,5 +1,5 @@
 import type { ExpressionSpecification, Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import {
   mapboxRoutingProvider,
   osrmRoutingProvider,
@@ -15,7 +15,7 @@ const SAMPLE_COORDS: LngLat[] = [
   [10.6225, 59.9596], // Holmenkollen
 ];
 
-let currentControls: Record<string, unknown> = {};
+let currentControls: ControlValues = {};
 let animationFrameId: number | null = null;
 let lastTimeMs = 0;
 let progress = 0;
@@ -85,7 +85,7 @@ export const animatedRoutePattern: Pattern = {
     },
   ],
 
-  async setup(map: Map, controls: Record<string, unknown>) {
+  async setup(map: Map, controls: ControlValues) {
     currentControls = controls;
     lastConfig = JSON.stringify({ p: controls.provider });
 
@@ -153,7 +153,7 @@ export const animatedRoutePattern: Pattern = {
     progress = 0;
   },
 
-  async update(map: Map, controls: Record<string, unknown>) {
+  async update(map: Map, controls: ControlValues) {
     if (!map.getLayer(BASE_LAYER_ID)) return;
 
     currentControls = controls;
@@ -201,7 +201,7 @@ map.addSource('route', {
 };
 
 async function fetchRoute(
-  controls: Record<string, unknown>,
+  controls: ControlValues,
 ): Promise<LngLat[] | null> {
   const providerId = controls.provider as string;
   const provider =

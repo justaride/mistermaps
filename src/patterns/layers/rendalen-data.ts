@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const KOMMUNE_SOURCE = "rendalen-kommune";
 const KOMMUNE_FILL = "rendalen-kommune-fill";
@@ -58,7 +58,7 @@ export const rendalenDataPattern: Pattern = {
     },
   ],
 
-  async setup(map: Map, controls: Record<string, unknown>) {
+  async setup(map: Map, controls: ControlValues) {
     const controller = new AbortController();
     const ctx: LoadContext = {
       signal: controller.signal,
@@ -138,7 +138,7 @@ export const rendalenDataPattern: Pattern = {
     );
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     applyVisibility(map, controls);
   },
 
@@ -192,7 +192,7 @@ const trailsUrl = 'https://wfs.geonorge.no/skwms1/wfs.turogfriluftsruter?' +
 // - Kommune info: ws.geonorge.no/kommuneinfo/v1/`,
 };
 
-function applyVisibility(map: Map, controls: Record<string, unknown>) {
+function applyVisibility(map: Map, controls: ControlValues) {
   const setVisible = (id: string, visible: boolean) => {
     if (map.getLayer(id)) {
       map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");

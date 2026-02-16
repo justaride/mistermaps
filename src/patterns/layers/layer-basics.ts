@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const CIRCLE_SOURCE = "basics-circles";
 const CIRCLE_LAYER = "basics-circles-layer";
@@ -197,7 +197,7 @@ export const layerBasicsPattern: Pattern = {
     });
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     const setVisible = (layerId: string, visible: boolean) => {
       if (map.getLayer(layerId)) {
         map.setLayoutProperty(

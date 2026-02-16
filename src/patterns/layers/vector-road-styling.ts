@@ -3,7 +3,7 @@ import type {
   FilterSpecification,
   Map,
 } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "composite";
 const SOURCE_LAYER = "road";
@@ -101,7 +101,7 @@ export const vectorRoadStylingPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.easeTo({
       center: [10.7522, 59.9139], // Oslo
       zoom: 12.8,
@@ -176,7 +176,7 @@ export const vectorRoadStylingPattern: Pattern = {
     if (map.getLayer(CASING_LAYER_ID)) map.removeLayer(CASING_LAYER_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     setPanelVisibility(controls.showPanel as boolean);
     updatePanelMessage(getPanelSummary(controls));
 
@@ -285,7 +285,7 @@ function updatePanelMessage(message: string) {
   el.textContent = message;
 }
 
-function getPanelSummary(controls: Record<string, unknown>): string {
+function getPanelSummary(controls: ControlValues): string {
   const major = Boolean(controls.showMajor);
   const minor = Boolean(controls.showMinor);
   const paths = Boolean(controls.showPaths);
@@ -310,7 +310,7 @@ function clamp(value: number, min: number, max: number, fallback: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function getRoadFilter(controls: Record<string, unknown>): FilterSpecification {
+function getRoadFilter(controls: ControlValues): FilterSpecification {
   const classes: string[] = [];
 
   if (controls.showMajor) {
@@ -343,7 +343,7 @@ function getRoadFilter(controls: Record<string, unknown>): FilterSpecification {
   return ["in", "class", ...classes] as unknown as FilterSpecification;
 }
 
-function getRoadColorExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getRoadColorExpr(controls: ControlValues): ExpressionSpecification {
   if (controls.colorMode === "single") {
     return ["literal", controls.roadColor as string] as ExpressionSpecification;
   }
@@ -391,7 +391,7 @@ function getRoadColorExpr(controls: Record<string, unknown>): ExpressionSpecific
   ] as ExpressionSpecification;
 }
 
-function getRoadWidthExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getRoadWidthExpr(controls: ControlValues): ExpressionSpecification {
   const mul = clamp(controls.widthMultiplier as number, 0.5, 2.5, 1.15);
   return [
     "*",
@@ -455,7 +455,7 @@ function getRoadWidthExpr(controls: Record<string, unknown>): ExpressionSpecific
   ] as ExpressionSpecification;
 }
 
-function getCasingWidthExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getCasingWidthExpr(controls: ControlValues): ExpressionSpecification {
   return ["+", getRoadWidthExpr(controls), 2] as ExpressionSpecification;
 }
 

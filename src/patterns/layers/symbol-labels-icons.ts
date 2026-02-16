@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "mm-symbol-demo-source";
 const ICON_LAYER_ID = "mm-symbol-demo-icons";
@@ -113,7 +113,7 @@ export const symbolLabelsIconsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.easeTo({
       center: DEFAULT_CENTER,
       zoom: 12.5,
@@ -184,7 +184,7 @@ export const symbolLabelsIconsPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(ICON_LAYER_ID) || !map.getLayer(TEXT_LAYER_ID)) return;
 
     map.setLayoutProperty(

@@ -1,6 +1,6 @@
 import type { GeoJSONSource, Map, MapMouseEvent } from "mapbox-gl";
 import * as turf from "@turf/turf";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import {
   copyText,
   downloadText,
@@ -17,7 +17,7 @@ const LABEL_LAYER_ID = "area-measurement-label";
 let points: [number, number][] = [];
 let hoverCoord: [number, number] | null = null;
 let isFinished = false;
-let currentControls: Record<string, unknown> = {};
+let currentControls: ControlValues = {};
 
 let clickHandler: ((e: MapMouseEvent) => void) | null = null;
 let moveHandler: ((e: MapMouseEvent) => void) | null = null;
@@ -101,7 +101,7 @@ export const areaMeasurementPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     currentControls = controls;
     points = [];
     hoverCoord = null;
@@ -288,7 +288,7 @@ export const areaMeasurementPattern: Pattern = {
     downloadGpxButton = null;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LINE_LAYER_ID)) return;
 
     currentControls = controls;

@@ -79,16 +79,44 @@ export type ControlType =
   | "textarea"
   | "button";
 
-export type ControlConfig = {
+export type ControlValue = string | number | boolean;
+export type ControlValues = Record<string, ControlValue>;
+
+type ControlConfigBase<TType extends ControlType, TValue extends ControlValue> = {
   id: string;
   label: string;
-  type: ControlType;
-  defaultValue: number | boolean | string;
-  min?: number;
-  max?: number;
-  step?: number;
-  options?: { label: string; value: string }[];
+  type: TType;
+  defaultValue: TValue;
 };
+
+export type SliderControlConfig = ControlConfigBase<"slider", number> & {
+  min: number;
+  max: number;
+  step: number;
+};
+
+export type ToggleControlConfig = ControlConfigBase<"toggle", boolean>;
+
+export type SelectControlConfig = ControlConfigBase<"select", string> & {
+  options: { label: string; value: string }[];
+};
+
+export type ColorControlConfig = ControlConfigBase<"color", string>;
+
+export type TextControlConfig = ControlConfigBase<"text", string>;
+
+export type TextareaControlConfig = ControlConfigBase<"textarea", string>;
+
+export type ButtonControlConfig = ControlConfigBase<"button", ControlValue>;
+
+export type ControlConfig =
+  | SliderControlConfig
+  | ToggleControlConfig
+  | SelectControlConfig
+  | ColorControlConfig
+  | TextControlConfig
+  | TextareaControlConfig
+  | ButtonControlConfig;
 
 export type Pattern = {
   id: PatternId;
@@ -96,9 +124,9 @@ export type Pattern = {
   category: PatternCategory;
   description: string;
   controls: ControlConfig[];
-  setup: (map: Map, controls: Record<string, unknown>) => void | Promise<void>;
+  setup: (map: Map, controls: ControlValues) => void | Promise<void>;
   cleanup: (map: Map) => void;
-  update: (map: Map, controls: Record<string, unknown>) => void;
+  update: (map: Map, controls: ControlValues) => void;
   view?: ComponentType<PatternViewProps>;
   // Some patterns render their own in-map search UI; disable the global SearchBox to avoid duplication.
   disableGlobalSearch?: boolean;
@@ -107,8 +135,8 @@ export type Pattern = {
 
 export type PatternViewProps = {
   theme: Theme;
-  values: Record<string, unknown>;
-  onChange: (controlId: string, value: unknown) => void;
+  values: ControlValues;
+  onChange: (controlId: string, value: ControlValue) => void;
   onPrimaryMapReady?: (map: MapboxMap) => void;
 };
 
@@ -129,6 +157,6 @@ export type Theme = "light" | "dark";
 export type AppState = {
   activePattern: PatternId;
   theme: Theme;
-  controlValues: Record<string, unknown>;
+  controlValues: ControlValues;
   codeViewerOpen: boolean;
 };

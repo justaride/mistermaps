@@ -10,7 +10,7 @@ import {
   SearchBox,
 } from "../components";
 import { patterns } from "../patterns";
-import type { PatternId, Theme } from "../types";
+import type { ControlValue, ControlValues, PatternId, Theme } from "../types";
 import styles from "../App.module.css";
 
 export default function MapView() {
@@ -21,17 +21,17 @@ export default function MapView() {
   const [theme, setTheme] = useState<Theme>("light");
   const [activePatternId, setActivePatternId] =
     useState<PatternId>(initialPattern);
-  const getDefaults = (patternId: PatternId) => {
+  const getDefaults = (patternId: PatternId): ControlValues => {
     const p = patterns.find((p) => p.id === patternId);
     if (!p) return {};
-    const defaults: Record<string, unknown> = {};
+    const defaults: ControlValues = {};
     p.controls.forEach((c) => {
       defaults[c.id] = c.defaultValue;
     });
     return defaults;
   };
 
-  const [controlValues, setControlValues] = useState<Record<string, unknown>>(
+  const [controlValues, setControlValues] = useState<ControlValues>(
     () => getDefaults(initialPattern),
   );
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
@@ -56,7 +56,7 @@ export default function MapView() {
     setCodeViewerOpen(false);
   };
 
-  const handleControlChange = (id: string, value: unknown) => {
+  const handleControlChange = (id: string, value: ControlValue) => {
     setControlValues((prev) => ({ ...prev, [id]: value }));
   };
 

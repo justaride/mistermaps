@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "mm-image-overlay-source";
 const LAYER_ID = "mm-image-overlay-layer";
@@ -67,7 +67,7 @@ export const imageOverlayPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     // Visible-by-default behavior: overlay is enabled initially.
     ensureOverlay(map, controls, { forceRebuild: true });
 
@@ -83,7 +83,7 @@ export const imageOverlayPattern: Pattern = {
     appliedKey = null;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     const enabled = Boolean(controls.enabled);
 
     if (!enabled) {
@@ -136,7 +136,7 @@ map.fitBounds([[west, south], [east, north]], { padding: 60 });`,
 
 function ensureOverlay(
   map: Map,
-  controls: Record<string, unknown>,
+  controls: ControlValues,
   options: { forceRebuild: boolean },
 ) {
   const url = (controls.imageUrl as string | undefined)?.trim() ?? "";
@@ -187,7 +187,7 @@ function removeOverlay(map: Map) {
   if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
 }
 
-function parseBounds(controls: Record<string, unknown>): {
+function parseBounds(controls: ControlValues): {
   west: number;
   south: number;
   east: number;

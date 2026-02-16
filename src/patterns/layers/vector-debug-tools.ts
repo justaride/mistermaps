@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 type DebugFlag =
   | "showTileBoundaries"
@@ -57,7 +57,7 @@ export const vectorDebugToolsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.easeTo({
       center: [10.7522, 59.9139], // Oslo
       zoom: 12.5,
@@ -80,7 +80,7 @@ export const vectorDebugToolsPattern: Pattern = {
     }
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     setPanelVisibility(controls.showPanel as boolean);
     updatePanel(map);
     applyDebugFlags(map, controls);
@@ -96,7 +96,7 @@ map.showPadding = true;             // padding debug (if used)
 map.showTerrainWireframe = true;    // terrain mesh wireframe (if terrain is enabled)`,
 };
 
-function applyDebugFlags(map: Map, controls: Record<string, unknown>) {
+function applyDebugFlags(map: Map, controls: ControlValues) {
   const debugMap = map as DebuggableMap;
   debugMap.showTileBoundaries = Boolean(controls.showTileBoundaries);
   debugMap.showCollisionBoxes = Boolean(controls.showCollisionBoxes);

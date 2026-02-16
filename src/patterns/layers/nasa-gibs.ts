@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import {
   addNasaGibsRasterLayer,
   clamp,
@@ -52,7 +52,7 @@ export const nasaGibsTrueColorPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.easeTo({
       center: [11.0, 61.83],
       zoom: 4,
@@ -70,7 +70,7 @@ export const nasaGibsTrueColorPattern: Pattern = {
     appliedDaysBack = null;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LAYER_ID)) {
       applyLayer(map, controls);
       return;
@@ -113,7 +113,7 @@ map.addLayer({
 }, map.getStyle().layers?.find(l => l.type === 'symbol')?.id);`,
 };
 
-function applyLayer(map: Map, controls: Record<string, unknown>) {
+function applyLayer(map: Map, controls: ControlValues) {
   const product = toProduct(controls.product);
   const daysBack = toDaysBack(controls.daysBack);
   const date = getUtcDateDaysAgo(daysBack);

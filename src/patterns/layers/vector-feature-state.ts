@@ -5,7 +5,7 @@ import type {
   MapLayerMouseEvent,
   MapMouseEvent,
 } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "composite";
 const SOURCE_LAYER = "building";
@@ -96,7 +96,7 @@ export const vectorFeatureStatePattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     resetState();
 
     map.easeTo({
@@ -301,7 +301,7 @@ export const vectorFeatureStatePattern: Pattern = {
     });
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     setPanelVisibility(controls.showPanel as boolean);
 
     map.easeTo({
@@ -522,7 +522,7 @@ function getBuildingFilter(extrudeOnly: boolean): FilterSpecification {
     : ["==", "$type", "Polygon"];
 }
 
-function getColorExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getColorExpr(controls: ControlValues): ExpressionSpecification {
   return [
     "case",
     ["boolean", ["feature-state", "selected"], false],
@@ -533,7 +533,7 @@ function getColorExpr(controls: Record<string, unknown>): ExpressionSpecificatio
   ] as ExpressionSpecification;
 }
 
-function getOpacityExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getOpacityExpr(controls: ControlValues): ExpressionSpecification {
   const baseOpacity = Math.min(1, Math.max(0, (controls.opacity as number) ?? 0.8));
   return [
     "*",
@@ -549,7 +549,7 @@ function getOpacityExpr(controls: Record<string, unknown>): ExpressionSpecificat
   ] as ExpressionSpecification;
 }
 
-function getHeightExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getHeightExpr(controls: ControlValues): ExpressionSpecification {
   const mul = (controls.heightMultiplier as number) ?? 1;
   return [
     "*",
@@ -564,7 +564,7 @@ function getHeightExpr(controls: Record<string, unknown>): ExpressionSpecificati
   ] as ExpressionSpecification;
 }
 
-function getBaseExpr(controls: Record<string, unknown>): ExpressionSpecification {
+function getBaseExpr(controls: ControlValues): ExpressionSpecification {
   const mul = (controls.heightMultiplier as number) ?? 1;
   return [
     "*",

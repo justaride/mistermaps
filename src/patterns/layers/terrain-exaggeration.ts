@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const DEM_SOURCE_ID = "terrain-dem";
 const HILLSHADE_LAYER_ID = "terrain-hillshade";
@@ -34,7 +34,7 @@ export const terrainExaggerationPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.easeTo({
       center: [10.9, 61.94],
       zoom: 11.5,
@@ -100,7 +100,7 @@ export const terrainExaggerationPattern: Pattern = {
     });
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     map.setTerrain({
       source: DEM_SOURCE_ID,
       exaggeration: clampNumber(controls.exaggeration, 0, 5, 1.6),

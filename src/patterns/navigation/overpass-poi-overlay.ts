@@ -4,7 +4,7 @@ import mapboxgl, {
   type MapLayerMouseEvent,
   type MapMouseEvent,
 } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 import type { LngLat } from "../../providers/types";
 import {
   buildOverpassQuery,
@@ -37,7 +37,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
   { label: "Viewpoint", value: "tourism=viewpoint" },
 ];
 
-let currentControls: Record<string, unknown> = {};
+let currentControls: ControlValues = {};
 let currentCenter: LngLat | null = null;
 let lastAppliedKey = "";
 
@@ -338,7 +338,7 @@ export const overpassPoiOverlayPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     currentControls = controls;
     currentCenter = DEFAULT_CENTER;
     lastAppliedKey = "";
@@ -481,7 +481,7 @@ export const overpassPoiOverlayPattern: Pattern = {
     statusMessage = null;
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(CIRCLE_LAYER_ID)) return;
 
     currentControls = controls;

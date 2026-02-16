@@ -1,33 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, type RefObject } from "react";
 import type { Map as MapboxMap } from "mapbox-gl";
+import { useManagedMap } from "./useManagedMap";
+import { logError } from "../utils/logger";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 type UseDarkSatelliteMapOptions = {
-  container: React.RefObject<HTMLDivElement | null>;
+  container: RefObject<HTMLDivElement | null>;
 };
 
 export function useDarkSatelliteMap({ container }: UseDarkSatelliteMapOptions) {
-  const mapRef = useRef<MapboxMap | null>(null);
-  const creatingRef = useRef(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!container.current || mapRef.current || creatingRef.current) return;
-    creatingRef.current = true;
-
-    let cancelled = false;
-
-    void (async () => {
+  const createMap = useCallback(
+    async (containerEl: HTMLDivElement): Promise<MapboxMap> => {
       type MapboxGL = (typeof import("mapbox-gl"))["default"];
       const mod = await import("mapbox-gl");
       const mapboxgl = (mod as unknown as { default: MapboxGL }).default;
-      if (cancelled) return;
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
 
       const map = new mapboxgl.Map({
-        container: container.current!,
+        container: containerEl,
         style: "mapbox://styles/mapbox/satellite-streets-v12",
         center: [10.95, 59.93],
         zoom: 11,
@@ -66,26 +58,18 @@ export function useDarkSatelliteMap({ container }: UseDarkSatelliteMapOptions) {
         setIsLoaded(true);
       });
 
-      mapRef.current = map;
-    })()
-      .catch(() => {
-        // ignore
-      })
-      .finally(() => {
-        creatingRef.current = false;
-      });
+      return map;
+    },
+    [],
+  );
 
-    return () => {
-      cancelled = true;
-      const map = mapRef.current;
-      if (map) {
-        map.remove();
-        mapRef.current = null;
-      }
-      creatingRef.current = false;
-      setIsLoaded(false);
-    };
-  }, [container]);
+  const { mapRef, isLoaded, setIsLoaded } = useManagedMap<MapboxMap>({
+    container,
+    createMap,
+    onCreateError: (error) => {
+      logError("Failed to initialize dark satellite map", error);
+    },
+  });
 
   return { map: mapRef.current, isLoaded };
 }

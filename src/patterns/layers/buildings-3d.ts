@@ -1,5 +1,5 @@
 import type { Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const LAYER_ID = "3d-buildings";
 
@@ -36,7 +36,7 @@ export const buildings3DPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.easeTo({
       center: [11.0, 61.83],
       zoom: 14,
@@ -84,7 +84,7 @@ export const buildings3DPattern: Pattern = {
     });
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LAYER_ID)) return;
 
     map.setPaintProperty(

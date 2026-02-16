@@ -4,7 +4,7 @@ import type {
   MapLayerMouseEvent,
   MapMouseEvent,
 } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "feature-state-source";
 const FILL_LAYER_ID = "feature-state-fill";
@@ -67,7 +67,7 @@ export const featureStatePattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     resetState();
 
     map.flyTo({
@@ -253,7 +253,7 @@ export const featureStatePattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(FILL_LAYER_ID)) return;
 
     map.setPaintProperty(FILL_LAYER_ID, "fill-color", getFillColorExpr(controls));
@@ -410,7 +410,7 @@ function updateInfoPanel() {
 }
 
 function getFillColorExpr(
-  controls: Record<string, unknown>,
+  controls: ControlValues,
 ): ExpressionSpecification {
   return [
     "case",

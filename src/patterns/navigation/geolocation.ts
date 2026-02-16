@@ -1,6 +1,6 @@
 import type { Map, GeoJSONSource } from "mapbox-gl";
 import * as turf from "@turf/turf";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const LOCATION_SOURCE_ID = "geolocation-location";
 const ACCURACY_SOURCE_ID = "geolocation-accuracy";
@@ -14,7 +14,7 @@ let lastTracking: "off" | "once" | "follow" | null = null;
 let statusPanel: HTMLDivElement | null = null;
 let hasFix = false;
 let lastFollowMs = 0;
-let currentControls: Record<string, unknown> = {};
+let currentControls: ControlValues = {};
 
 export const geolocationPattern: Pattern = {
   id: "geolocation",
@@ -66,7 +66,7 @@ export const geolocationPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     currentControls = controls;
     createStatusPanel();
 
@@ -103,7 +103,7 @@ export const geolocationPattern: Pattern = {
     currentControls = {};
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LOCATION_LAYER_ID)) return;
 
     currentControls = controls;
@@ -134,7 +134,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
 });`,
 };
 
-function updateTracking(map: Map, controls: Record<string, unknown>) {
+function updateTracking(map: Map, controls: ControlValues) {
   const tracking = controls.tracking as "off" | "once" | "follow";
   if (tracking === lastTracking) return;
 
@@ -238,7 +238,7 @@ function ensureSources(map: Map) {
   }
 }
 
-function ensureLayers(map: Map, controls: Record<string, unknown>) {
+function ensureLayers(map: Map, controls: ControlValues) {
   if (!map.getLayer(ACCURACY_FILL_LAYER_ID)) {
     map.addLayer(
       {
@@ -285,7 +285,7 @@ function ensureLayers(map: Map, controls: Record<string, unknown>) {
   }
 }
 
-function applyStyles(map: Map, controls: Record<string, unknown>) {
+function applyStyles(map: Map, controls: ControlValues) {
   map.setPaintProperty(LOCATION_LAYER_ID, "circle-radius", controls.dotSize as number);
   map.setPaintProperty(LOCATION_LAYER_ID, "circle-color", controls.dotColor as string);
 
@@ -311,7 +311,7 @@ function applyStyles(map: Map, controls: Record<string, unknown>) {
   }
 }
 
-function applyVisibility(map: Map, controls: Record<string, unknown>) {
+function applyVisibility(map: Map, controls: ControlValues) {
   const showAccuracy = (controls.showAccuracy as boolean) && hasFix;
 
   if (map.getLayer(ACCURACY_FILL_LAYER_ID)) {

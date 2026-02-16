@@ -12,7 +12,8 @@ import {
   SearchBox,
 } from "../components";
 import { loadPatternById } from "../patterns/loadCatalogPattern";
-import type { Pattern, Theme } from "../types";
+import type { ControlValue, ControlValues, Pattern, Theme } from "../types";
+import { logError } from "../utils/logger";
 import styles from "../App.module.css";
 
 export default function MapDetail() {
@@ -22,9 +23,7 @@ export default function MapDetail() {
   const [isPatternLoading, setIsPatternLoading] = useState(!isMaplibre);
 
   const [theme, setTheme] = useState<Theme>("light");
-  const [controlValues, setControlValues] = useState<Record<string, unknown>>(
-    {},
-  );
+  const [controlValues, setControlValues] = useState<ControlValues>({});
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
   const [map, setMap] = useState<Map | null>(null);
 
@@ -65,14 +64,15 @@ export default function MapDetail() {
           return;
         }
 
-        const defaults: Record<string, unknown> = {};
+        const defaults: ControlValues = {};
         loadedPattern.controls.forEach((control) => {
           defaults[control.id] = control.defaultValue;
         });
         setControlValues(defaults);
       })
-      .catch(() => {
+      .catch((error) => {
         if (isCancelled) return;
+        logError(`Failed to load pattern "${id}"`, error);
         setPattern(null);
         setControlValues({});
       })
@@ -90,7 +90,7 @@ export default function MapDetail() {
     setMap(mapInstance);
   }, []);
 
-  const handleControlChange = (controlId: string, value: unknown) => {
+  const handleControlChange = (controlId: string, value: ControlValue) => {
     setControlValues((prev) => ({ ...prev, [controlId]: value }));
   };
 

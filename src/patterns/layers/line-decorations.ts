@@ -1,5 +1,5 @@
 import type { ExpressionSpecification, Map } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "mm-line-decorations-source";
 const LINE_LAYER_ID = "mm-line-decorations-line";
@@ -138,7 +138,7 @@ export const lineDecorationsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     map.addSource(SOURCE_ID, {
       type: "geojson",
       lineMetrics: true,
@@ -197,7 +197,7 @@ export const lineDecorationsPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LINE_LAYER_ID)) return;
 
     map.setPaintProperty(
@@ -283,7 +283,7 @@ map.addLayer({
 });`,
 };
 
-function applyMode(map: Map, controls: Record<string, unknown>) {
+function applyMode(map: Map, controls: ControlValues) {
   const mode = toMode(controls.styleMode);
   const colorA = (controls.colorA as string) ?? "#5b8fa8";
   const colorB = (controls.colorB as string) ?? "#c85a2a";

@@ -1,5 +1,5 @@
 import mapboxgl, { type Map, type MapLayerMouseEvent } from "mapbox-gl";
-import type { Pattern } from "../../types";
+import type { ControlValues, Pattern } from "../../types";
 
 const SOURCE_ID = "popups-source";
 const LAYER_ID = "popups-layer";
@@ -40,7 +40,7 @@ export const customPopupsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: Record<string, unknown>) {
+  setup(map: Map, controls: ControlValues) {
     const locations = getSampleLocations();
     markerColor = controls.markerColor as string;
 
@@ -141,7 +141,7 @@ export const customPopupsPattern: Pattern = {
     if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
   },
 
-  update(map: Map, controls: Record<string, unknown>) {
+  update(map: Map, controls: ControlValues) {
     if (!map.getLayer(LAYER_ID)) return;
 
     markerColor = controls.markerColor as string;
