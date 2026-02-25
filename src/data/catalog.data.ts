@@ -116,6 +116,17 @@ export const CATALOG_DATA: CatalogEntry[] = [
     workbenchCompatible: false,
   },
   {
+    patternId: "clip-simplify",
+    name: "Viewport Clip + Simplification",
+    description: "Client-side GeoJSON clipping and Douglas-Peucker simplification using Turf.js.",
+    capabilities: ["bboxClip", "simplify", "viewport bounds", "before/after stats"],
+    category: "layers",
+    subcategory: "data-import",
+    tags: ["interactive", "geojson", "turf"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "streaming-updates",
     name: "Streaming Updates (setData)",
     description:

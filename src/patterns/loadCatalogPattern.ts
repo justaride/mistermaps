@@ -23,6 +23,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/property-filtering")).propertyFilteringPattern,
   "streaming-updates": async () =>
     (await import("./layers/streaming-updates")).streamingUpdatesPattern,
+  "clip-simplify": async () =>
+    (await import("./layers/clip-simplify")).clipSimplifyPattern,
   "symbol-labels-icons": async () =>
     (await import("./layers/symbol-labels-icons")).symbolLabelsIconsPattern,
   "line-decorations": async () =>

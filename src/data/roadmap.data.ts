@@ -112,6 +112,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Print view has a simplified layout suitable for paper/PDF.",
     "Export does not crash when controls/panels are open.",
   ],
+  "clip-simplify": [
+    "Toggle clipping and simplification independently.",
+    "Simplification tolerance is adjustable.",
+    "Shows before/after feature counts or size estimates.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -125,6 +130,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "streaming-updates": { mapbox: true, maplibre: true },
   "reverse-geocoding": { mapbox: true, maplibre: true },
   "export-image-print": { mapbox: true, maplibre: true },
+  "clip-simplify": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -227,23 +233,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
-  {
-    id: "planned:clip-simplify",
-    name: "Viewport Clip + Simplification",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["interactive", "performance"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description:
-      "Demonstrate client-side clipping and simplification to improve render performance.",
-    acceptanceCriteria: [
-      "Toggle clipping and simplification independently.",
-      "Simplification tolerance is adjustable.",
-      "Shows before/after feature counts or size estimates.",
-    ],
-  },
   {
     id: "planned:geojson-vt",
     name: "Client-Side Tiling (geojson-vt)",

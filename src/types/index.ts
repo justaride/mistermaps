@@ -40,6 +40,7 @@ export type PatternId =
   | "clustered-markers"
   | "custom-popups"
   | "pulsing-dot"
+  | "clip-simplify"
   | "export-image-print";
 
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
