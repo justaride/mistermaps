@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from "react";
-import mapboxgl from "mapbox-gl";
+import type { Map as MapboxMap, CameraOptions } from "mapbox-gl";
 import type { Pattern, PatternViewProps } from "../../types";
+import { loadMapboxGL } from "../utils/load-map-engine";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -90,8 +91,8 @@ function MapCompareSwipeView({
   const leftRef = useRef<HTMLDivElement | null>(null);
   const rightRef = useRef<HTMLDivElement | null>(null);
 
-  const leftMapRef = useRef<mapboxgl.Map | null>(null);
-  const rightMapRef = useRef<mapboxgl.Map | null>(null);
+  const leftMapRef = useRef<MapboxMap | null>(null);
+  const rightMapRef = useRef<MapboxMap | null>(null);
 
   const appliedLeftStyleRef = useRef<string | null>(null);
   const appliedRightStyleRef = useRef<string | null>(null);
@@ -125,80 +126,92 @@ function MapCompareSwipeView({
     if (!leftRef.current || !rightRef.current) return;
     if (leftMapRef.current || rightMapRef.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    let cancelled = false;
+    let ro: ResizeObserver | null = null;
+    let syncFromLeft: (() => void) | null = null;
+    let syncFromRight: (() => void) | null = null;
 
-    const leftMap = new mapboxgl.Map({
-      container: leftRef.current,
-      style: leftStyle,
-      center: [10.75, 59.91],
-      zoom: 11.5,
-      bearing: 0,
-      pitch: 0,
-      attributionControl: true,
-    });
+    (async () => {
+      const gl = await loadMapboxGL();
+      if (cancelled) return;
 
-    const rightMap = new mapboxgl.Map({
-      container: rightRef.current,
-      style: rightStyle,
-      center: [10.75, 59.91],
-      zoom: 11.5,
-      bearing: 0,
-      pitch: 0,
-      // Avoid double attribution and control overlaps.
-      attributionControl: false,
-    });
+      gl.accessToken = MAPBOX_TOKEN;
 
-    leftMap.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-    leftMapRef.current = leftMap;
-    rightMapRef.current = rightMap;
-
-    appliedLeftStyleRef.current = leftStyle;
-    appliedRightStyleRef.current = rightStyle;
-
-    onPrimaryMapReady?.(leftMap);
-
-    const syncFromLeft = () => {
-      if (!syncEnabledRef.current) return;
-      if (isApplyingToLeftRef.current) return;
-      if (!leftMapRef.current || !rightMapRef.current) return;
-      if (isApplyingToRightRef.current) return;
-
-      isApplyingToRightRef.current = true;
-      rightMap.jumpTo(getCamera(leftMap));
-      requestAnimationFrame(() => {
-        isApplyingToRightRef.current = false;
+      const leftMap = new gl.Map({
+        container: leftRef.current!,
+        style: leftStyle,
+        center: [10.75, 59.91],
+        zoom: 11.5,
+        bearing: 0,
+        pitch: 0,
+        attributionControl: true,
       });
-    };
 
-    const syncFromRight = () => {
-      if (!syncEnabledRef.current) return;
-      if (isApplyingToRightRef.current) return;
-      if (!leftMapRef.current || !rightMapRef.current) return;
-      if (isApplyingToLeftRef.current) return;
-
-      isApplyingToLeftRef.current = true;
-      leftMap.jumpTo(getCamera(rightMap));
-      requestAnimationFrame(() => {
-        isApplyingToLeftRef.current = false;
+      const rightMap = new gl.Map({
+        container: rightRef.current!,
+        style: rightStyle,
+        center: [10.75, 59.91],
+        zoom: 11.5,
+        bearing: 0,
+        pitch: 0,
+        attributionControl: false,
       });
-    };
 
-    leftMap.on("move", syncFromLeft);
-    rightMap.on("move", syncFromRight);
+      leftMap.addControl(new gl.NavigationControl(), "top-right");
 
-    const ro = new ResizeObserver(() => {
-      leftMap.resize();
-      rightMap.resize();
-    });
-    if (rootRef.current) ro.observe(rootRef.current);
+      leftMapRef.current = leftMap;
+      rightMapRef.current = rightMap;
+
+      appliedLeftStyleRef.current = leftStyle;
+      appliedRightStyleRef.current = rightStyle;
+
+      onPrimaryMapReady?.(leftMap);
+
+      syncFromLeft = () => {
+        if (!syncEnabledRef.current) return;
+        if (isApplyingToLeftRef.current) return;
+        if (!leftMapRef.current || !rightMapRef.current) return;
+        if (isApplyingToRightRef.current) return;
+
+        isApplyingToRightRef.current = true;
+        rightMap.jumpTo(getCamera(leftMap));
+        requestAnimationFrame(() => {
+          isApplyingToRightRef.current = false;
+        });
+      };
+
+      syncFromRight = () => {
+        if (!syncEnabledRef.current) return;
+        if (isApplyingToRightRef.current) return;
+        if (!leftMapRef.current || !rightMapRef.current) return;
+        if (isApplyingToLeftRef.current) return;
+
+        isApplyingToLeftRef.current = true;
+        leftMap.jumpTo(getCamera(rightMap));
+        requestAnimationFrame(() => {
+          isApplyingToLeftRef.current = false;
+        });
+      };
+
+      leftMap.on("move", syncFromLeft);
+      rightMap.on("move", syncFromRight);
+
+      ro = new ResizeObserver(() => {
+        leftMap.resize();
+        rightMap.resize();
+      });
+      if (rootRef.current) ro.observe(rootRef.current);
+    })();
 
     return () => {
-      ro.disconnect();
-      leftMap.off("move", syncFromLeft);
-      rightMap.off("move", syncFromRight);
-      leftMap.remove();
-      rightMap.remove();
+      cancelled = true;
+      ro?.disconnect();
+      const leftMap = leftMapRef.current;
+      const rightMap = rightMapRef.current;
+      if (leftMap && syncFromLeft) leftMap.off("move", syncFromLeft);
+      if (rightMap && syncFromRight) rightMap.off("move", syncFromRight);
+      leftMap?.remove();
+      rightMap?.remove();
       leftMapRef.current = null;
       rightMapRef.current = null;
     };
@@ -327,7 +340,7 @@ function MapCompareSwipeView({
   );
 }
 
-function getCamera(map: mapboxgl.Map): mapboxgl.CameraOptions {
+function getCamera(map: MapboxMap): CameraOptions {
   const center = map.getCenter();
   return {
     center: [center.lng, center.lat],

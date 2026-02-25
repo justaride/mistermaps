@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { Map } from "mapbox-gl";
+import "../map/engine-css";
 import {
   MapContainer,
   PatternSelector,

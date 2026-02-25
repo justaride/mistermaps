@@ -1,10 +1,14 @@
-import mapboxgl, { type Map, type MapLayerMouseEvent } from "mapbox-gl";
+import type { Map, MapLayerMouseEvent, Popup } from "mapbox-gl";
 import type { ControlValues, Pattern } from "../../types";
+import { loadMapboxGL } from "../utils/load-map-engine";
+
+type MapboxGL = Awaited<ReturnType<typeof loadMapboxGL>>;
+let mapboxgl: MapboxGL | null = null;
 
 const SOURCE_ID = "popups-source";
 const LAYER_ID = "popups-layer";
 
-let popup: mapboxgl.Popup | null = null;
+let popup: Popup | null = null;
 let markerColor = "#8b5cf6";
 let clickHandler: ((e: MapLayerMouseEvent) => void) | null = null;
 let mouseEnterHandler: (() => void) | null = null;
@@ -40,7 +44,8 @@ export const customPopupsPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: ControlValues) {
+  async setup(map: Map, controls: ControlValues) {
+    mapboxgl = await loadMapboxGL();
     const locations = getSampleLocations();
     markerColor = controls.markerColor as string;
 
@@ -157,7 +162,7 @@ export const customPopupsPattern: Pattern = {
       controls.markerSize as number,
     );
 
-    if (popup) {
+    if (popup && mapboxgl) {
       popup.remove();
       popup = new mapboxgl.Popup({
         closeButton: true,

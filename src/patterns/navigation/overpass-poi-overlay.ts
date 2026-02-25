@@ -1,8 +1,9 @@
-import mapboxgl, {
-  type GeoJSONSource,
-  type Map,
-  type MapLayerMouseEvent,
-  type MapMouseEvent,
+import type {
+  GeoJSONSource,
+  Map,
+  MapLayerMouseEvent,
+  MapMouseEvent,
+  Popup,
 } from "mapbox-gl";
 import type { ControlValues, Pattern } from "../../types";
 import type { LngLat } from "../../providers/types";
@@ -12,6 +13,10 @@ import {
   overpassElementsToFeatureCollection,
   type OverpassCategoryFilter,
 } from "../../providers/osm/overpass";
+import { loadMapboxGL } from "../utils/load-map-engine";
+
+type MapboxGL = Awaited<ReturnType<typeof loadMapboxGL>>;
+let mapboxgl: MapboxGL | null = null;
 
 const SOURCE_ID = "overpass-poi-source";
 const CIRCLE_LAYER_ID = "overpass-poi-circles";
@@ -49,7 +54,7 @@ let mouseLeaveHandler: (() => void) | null = null;
 
 let pendingTimer: number | null = null;
 let abortController: AbortController | null = null;
-let popup: mapboxgl.Popup | null = null;
+let popup: Popup | null = null;
 
 let statusPanel: HTMLDivElement | null = null;
 let statusMessage: HTMLDivElement | null = null;
@@ -338,7 +343,8 @@ export const overpassPoiOverlayPattern: Pattern = {
     },
   ],
 
-  setup(map: Map, controls: ControlValues) {
+  async setup(map: Map, controls: ControlValues) {
+    mapboxgl = await loadMapboxGL();
     currentControls = controls;
     currentCenter = DEFAULT_CENTER;
     lastAppliedKey = "";

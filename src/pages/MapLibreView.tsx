@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import "../map/engine-css";
 import { MapLibreContainer, ThemeToggle } from "../components";
 import type { Theme } from "../types";
 import styles from "../App.module.css";
