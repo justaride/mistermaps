@@ -1,4 +1,5 @@
 export { buildings3DPattern } from "./buildings-3d";
+export { draggablePointsPattern } from "./draggable-points";
 export { featureStatePattern } from "./feature-state";
 export { geojsonOverlayPattern } from "./geojson-overlay";
 export { imageOverlayPattern } from "./image-overlay";

@@ -2,6 +2,7 @@ import type { Pattern } from "../types";
 import { heatmapPattern, choroplethPattern } from "./data-viz";
 import {
   buildings3DPattern,
+  draggablePointsPattern,
   featureStatePattern,
   fillPatternsPattern,
   geojsonOverlayPattern,
@@ -52,6 +53,7 @@ export const catalogPatterns: Pattern[] = [
   imageOverlayPattern,
   geojsonOverlayPattern,
   buildings3DPattern,
+  draggablePointsPattern,
   featureStatePattern,
   vectorFeatureStatePattern,
   vectorRoadStylingPattern,

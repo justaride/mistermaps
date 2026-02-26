@@ -27,6 +27,10 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/clip-simplify")).clipSimplifyPattern,
   "geojson-vt": async () =>
     (await import("./layers/geojson-vt-tiling")).geojsonVtTilingPattern,
+  "draggable-points": async () =>
+    (await import("./layers/draggable-points")).draggablePointsPattern,
+  "box-select": async () =>
+    (await import("./layers/box-select")).boxSelectPattern,
   "symbol-labels-icons": async () =>
     (await import("./layers/symbol-labels-icons")).symbolLabelsIconsPattern,
   "line-decorations": async () =>
@@ -60,6 +64,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
   heatmap: async () => (await import("./data-viz/heatmap")).heatmapPattern,
   "export-image-print": async () =>
     (await import("./data-viz/export-image-print")).exportImagePrintPattern,
+  "time-slider": async () =>
+    (await import("./data-viz/time-slider")).timeSliderPattern,
   geolocation: async () =>
     (await import("./navigation/geolocation")).geolocationPattern,
   "geocoding-search": async () =>
@@ -86,6 +92,14 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./markers/custom-popups")).customPopupsPattern,
   "pulsing-dot": async () =>
     (await import("./markers/pulsing-dot")).pulsingDotPattern,
+  "context-menu": async () =>
+    (await import("./layers/context-menu")).contextMenuPattern,
+  "keyboard-shortcuts": async () =>
+    (await import("./layers/keyboard-shortcuts")).keyboardShortcutsPattern,
+  "cluster-spiderfy": async () =>
+    (await import("./markers/cluster-spiderfy")).clusterSpiderfyPattern,
+  "hexbin-grid": async () =>
+    (await import("./data-viz/hexbin-grid")).hexbinGridPattern,
 };
 
 export async function loadPatternById(id: string): Promise<Pattern | null> {

@@ -42,7 +42,14 @@ export type PatternId =
   | "pulsing-dot"
   | "clip-simplify"
   | "geojson-vt"
-  | "export-image-print";
+  | "draggable-points"
+  | "box-select"
+  | "export-image-print"
+  | "context-menu"
+  | "keyboard-shortcuts"
+  | "time-slider"
+  | "cluster-spiderfy"
+  | "hexbin-grid";
 
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
 

@@ -122,6 +122,41 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Includes a comparison toggle vs raw GeoJSON rendering.",
     "Works without freezing on a larger sample dataset.",
   ],
+  "keyboard-shortcuts": [
+    "Shortcuts are discoverable in the UI (hint panel).",
+    "Shortcuts do not trigger while typing in inputs.",
+    "Preset camera positions can be recalled reliably.",
+  ],
+  "box-select": [
+    "Shift-drag draws a rectangle and selects intersecting features.",
+    "Selected styling is visually distinct and can be cleared.",
+    "Selection does not break map panning when not active.",
+  ],
+  "draggable-points": [
+    "Points can be dragged with mouse/touch.",
+    "Dragging updates the GeoJSON source data.",
+    "Drag handles do not interfere with map gestures when inactive.",
+  ],
+  "context-menu": [
+    "Right-click opens a menu at cursor location.",
+    "Includes actions: copy coords, drop pin, clear pins.",
+    "Closes on escape and outside click.",
+  ],
+  "hexbin-grid": [
+    "Computes bins from point data and styles by aggregated count.",
+    "Legend updates with the active scale.",
+    "Bin size is adjustable.",
+  ],
+  "time-slider": [
+    "Includes a scrubber and play/pause controls.",
+    "Visual output updates smoothly (no full reloads).",
+    "Current time label is visible and accurate.",
+  ],
+  "cluster-spiderfy": [
+    "Clicking a cluster expands it into a spider layout.",
+    "Clicking away collapses it.",
+    "Expanded points remain clickable with their original properties.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -137,6 +172,13 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "export-image-print": { mapbox: true, maplibre: true },
   "clip-simplify": { mapbox: true, maplibre: true },
   "geojson-vt": { mapbox: true, maplibre: true },
+  "keyboard-shortcuts": { mapbox: true, maplibre: true },
+  "box-select": { mapbox: true, maplibre: true },
+  "draggable-points": { mapbox: true, maplibre: true },
+  "context-menu": { mapbox: true, maplibre: true },
+  "hexbin-grid": { mapbox: true, maplibre: true },
+  "time-slider": { mapbox: true, maplibre: true },
+  "cluster-spiderfy": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -272,89 +314,6 @@ export const PLANNED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
     ],
   },
   {
-    id: "planned:box-select",
-    name: "Box Select (Shift-Drag)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Interaction & Editing",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Shift-drag rectangle selection for features.",
-    acceptanceCriteria: [
-      "Shift-drag draws a rectangle and selects intersecting features.",
-      "Selected styling is visually distinct and can be cleared.",
-      "Selection does not break map panning when not active.",
-    ],
-  },
-  {
-    id: "planned:draggable-points",
-    name: "Draggable Points",
-    artifact: "pattern",
-    status: "planned",
-    category: "Interaction & Editing",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Drag point features and update underlying GeoJSON in real time.",
-    acceptanceCriteria: [
-      "Points can be dragged with mouse/touch.",
-      "Dragging updates the GeoJSON source data.",
-      "Drag handles do not interfere with map gestures when inactive.",
-    ],
-  },
-  {
-    id: "planned:context-menu",
-    name: "Right-Click Context Menu",
-    artifact: "pattern",
-    status: "planned",
-    category: "Interaction & Editing",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description:
-      "Context menu with actions like copy coordinates and drop pin.",
-    acceptanceCriteria: [
-      "Right-click opens a menu at cursor location.",
-      "Includes actions: copy coords, drop pin, clear pins.",
-      "Closes on escape and outside click.",
-    ],
-  },
-  {
-    id: "planned:keyboard-shortcuts",
-    name: "Keyboard Shortcuts + Presets",
-    artifact: "pattern",
-    status: "planned",
-    category: "Interaction & Editing",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Documented shortcuts for toggles and camera presets.",
-    acceptanceCriteria: [
-      "Shortcuts are discoverable in the UI (hint panel).",
-      "Shortcuts do not trigger while typing in inputs.",
-      "Preset camera positions can be recalled reliably.",
-    ],
-  },
-
-  {
-    id: "planned:geocoding-search",
-    name: "Geocoding Search Pattern",
-    artifact: "pattern",
-    status: "planned",
-    category: "Search & Navigation",
-    tags: ["interactive", "api-required"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: { api: ["Mapbox Geocoding", "Nominatim", "Photon"] },
-    description:
-      "A reusable geocoding UI with provider toggle and fly-to result pins.",
-    acceptanceCriteria: [
-      "Provider can be switched (mapbox/nominatim/photon).",
-      "Selecting a result flies the camera and optionally drops a pin.",
-      "Errors are handled without leaving stale results open.",
-    ],
-  },
-  {
     id: "planned:routing-instructions",
     name: "Routing With Instructions Panel",
     artifact: "pattern",
@@ -419,54 +378,6 @@ export const PLANNED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
     ],
   },
 
-  {
-    id: "planned:hexbin-grid",
-    name: "Hexbin / Grid Aggregation",
-    artifact: "pattern",
-    status: "planned",
-    category: "Data Viz & Export",
-    tags: ["interactive", "turf"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Aggregate points into hexbins or grids and style by count.",
-    acceptanceCriteria: [
-      "Computes bins from point data and styles by aggregated count.",
-      "Legend updates with the active scale.",
-      "Bin size is adjustable.",
-    ],
-  },
-  {
-    id: "planned:time-slider",
-    name: "Time Slider Playback",
-    artifact: "pattern",
-    status: "planned",
-    category: "Data Viz & Export",
-    tags: ["interactive", "animation"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Scrub and play through time-series events on the map.",
-    acceptanceCriteria: [
-      "Includes a scrubber and play/pause controls.",
-      "Visual output updates smoothly (no full reloads).",
-      "Current time label is visible and accurate.",
-    ],
-  },
-  {
-    id: "planned:cluster-spiderfy",
-    name: "Cluster Spiderfy",
-    artifact: "pattern",
-    status: "planned",
-    category: "Data Viz & Export",
-    tags: ["interactive"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Expand dense clusters into a radial arrangement for selection.",
-    acceptanceCriteria: [
-      "Clicking a cluster expands it into a spider layout.",
-      "Clicking away collapses it.",
-      "Expanded points remain clickable with their original properties.",
-    ],
-  },
 ];
 
 export const ROADMAP_ITEMS_DATA: RoadmapItem[] = [
