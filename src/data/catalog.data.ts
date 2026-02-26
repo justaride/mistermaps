@@ -127,6 +127,17 @@ export const CATALOG_DATA: CatalogEntry[] = [
     workbenchCompatible: false,
   },
   {
+    patternId: "geojson-vt",
+    name: "Client-Side Tiling (geojson-vt)",
+    description: "Render large GeoJSON using client-side tiling to reduce per-frame cost.",
+    capabilities: ["geojson-vt", "client-side tiling", "viewport filtering", "raw vs tiled comparison"],
+    category: "layers",
+    subcategory: "data-import",
+    tags: ["interactive", "geojson"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "streaming-updates",
     name: "Streaming Updates (setData)",
     description:

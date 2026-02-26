@@ -25,6 +25,8 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./layers/streaming-updates")).streamingUpdatesPattern,
   "clip-simplify": async () =>
     (await import("./layers/clip-simplify")).clipSimplifyPattern,
+  "geojson-vt": async () =>
+    (await import("./layers/geojson-vt-tiling")).geojsonVtTilingPattern,
   "symbol-labels-icons": async () =>
     (await import("./layers/symbol-labels-icons")).symbolLabelsIconsPattern,
   "line-decorations": async () =>

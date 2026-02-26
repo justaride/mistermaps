@@ -117,6 +117,11 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Simplification tolerance is adjustable.",
     "Shows before/after feature counts or size estimates.",
   ],
+  "geojson-vt": [
+    "Uses geojson-vt to create vector-tile-like tiles from GeoJSON.",
+    "Includes a comparison toggle vs raw GeoJSON rendering.",
+    "Works without freezing on a larger sample dataset.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -131,6 +136,7 @@ const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
   "reverse-geocoding": { mapbox: true, maplibre: true },
   "export-image-print": { mapbox: true, maplibre: true },
   "clip-simplify": { mapbox: true, maplibre: true },
+  "geojson-vt": { mapbox: true, maplibre: true },
 };
 
 function buildCatalogRoadmapItem(entry: CatalogEntry): RoadmapItem {
@@ -233,23 +239,6 @@ export const IMPLEMENTED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
 ];
 
 export const PLANNED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
-  {
-    id: "planned:geojson-vt",
-    name: "Client-Side Tiling (geojson-vt)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Layers & Data",
-    tags: ["vector", "performance"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description:
-      "Render large GeoJSON using client-side tiling to reduce per-frame cost.",
-    acceptanceCriteria: [
-      "Uses geojson-vt to create vector-tile-like tiles from GeoJSON.",
-      "Includes a comparison toggle vs raw GeoJSON rendering.",
-      "Works without freezing on a larger sample dataset.",
-    ],
-  },
   {
     id: "planned:draw-tools-basic",
     name: "Draw Tools (Basic)",

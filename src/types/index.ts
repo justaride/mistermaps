@@ -41,6 +41,7 @@ export type PatternId =
   | "custom-popups"
   | "pulsing-dot"
   | "clip-simplify"
+  | "geojson-vt"
   | "export-image-print";
 
 export type PatternCategory = "layers" | "data-viz" | "markers" | "navigation";
