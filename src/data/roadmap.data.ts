@@ -26,6 +26,10 @@ const PATTERN_APIS_BY_ID: Partial<Record<string, string[]>> = {
     "NVE (ArcGIS)",
   ],
   "route-display": ["Mapbox Directions API", "OSRM"],
+  "routing-instructions": ["Mapbox Directions API", "OSRM"],
+  "route-alternatives": ["Mapbox Directions API", "OSRM"],
+  "map-matching": ["Mapbox Map Matching API"],
+  "elevation-profile": ["Mapbox Directions API", "Mapbox Terrain-RGB"],
   "animated-route": ["Mapbox Directions API", "OSRM"],
   isochrones: ["Valhalla"],
   "overpass-poi-overlay": ["Overpass API"],
@@ -157,6 +161,36 @@ const IMPLEMENTED_ACCEPTANCE_CRITERIA_BY_PATTERN_ID: Partial<
     "Clicking away collapses it.",
     "Expanded points remain clickable with their original properties.",
   ],
+  "routing-instructions": [
+    "Shows turn-by-turn steps with distance/time per step.",
+    "Supports switching profiles/providers and re-requesting routes.",
+    "Waypoints can be adjusted and route updates accordingly.",
+  ],
+  "route-alternatives": [
+    "Renders multiple route alternatives when available.",
+    "Clicking an alternative makes it active and updates stats.",
+    "Active route is visually emphasized.",
+  ],
+  "map-matching": [
+    "Accepts an input trace and shows original vs snapped line.",
+    "Shows confidence and route distance comparison.",
+    "Handles API errors with actionable messages.",
+  ],
+  "elevation-profile": [
+    "Samples elevations along a route at a configurable interval.",
+    "Renders an SVG profile chart with map-hover synchronization.",
+    "Communicates terrain-data fallback limitations clearly.",
+  ],
+  "draw-tools-basic": [
+    "Draw point, line, and polygon with clear mode switching.",
+    "Edit vertices and delete features.",
+    "No lingering event handlers after cleanup.",
+  ],
+  "feature-edit-export": [
+    "Edit geometry and feature properties in-session.",
+    "Export edited features to GeoJSON and import them back.",
+    "Round-trip preserves properties and geometry types.",
+  ],
 };
 
 const ENGINE_SUPPORT_OVERRIDES_BY_PATTERN_ID: Partial<
@@ -280,105 +314,7 @@ export const IMPLEMENTED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
   },
 ];
 
-export const PLANNED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [
-  {
-    id: "planned:draw-tools-basic",
-    name: "Draw Tools (Basic)",
-    artifact: "pattern",
-    status: "planned",
-    category: "Interaction & Editing",
-    tags: ["interactive", "editing"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: { notes: "Prefer minimal custom draw interactions (no heavy deps)." },
-    description: "Basic draw/edit/delete for point/line/polygon geometries.",
-    acceptanceCriteria: [
-      "Draw point, line, and polygon with clear mode switching.",
-      "Edit vertices and delete features.",
-      "No lingering event handlers after cleanup.",
-    ],
-  },
-  {
-    id: "planned:feature-edit-export",
-    name: "Feature Editing + Persist Export",
-    artifact: "pattern",
-    status: "planned",
-    category: "Interaction & Editing",
-    tags: ["interactive", "editing", "export"],
-    engineSupport: { mapbox: true, maplibre: true },
-    dependencies: {},
-    description: "Edit geometry and export it for reuse.",
-    acceptanceCriteria: [
-      "Export edited features to GeoJSON.",
-      "Import the exported GeoJSON back into the session.",
-      "Round-trip preserves properties and geometry types.",
-    ],
-  },
-  {
-    id: "planned:routing-instructions",
-    name: "Routing With Instructions Panel",
-    artifact: "pattern",
-    status: "planned",
-    category: "Search & Navigation",
-    tags: ["interactive", "api-required"],
-    engineSupport: { mapbox: true, maplibre: false },
-    dependencies: { api: ["Mapbox Directions API", "OSRM"] },
-    description: "Route rendering plus turn-by-turn instructions and profiles.",
-    acceptanceCriteria: [
-      "Shows turn-by-turn steps with distance/time per step.",
-      "Supports switching profiles and re-requesting routes.",
-      "Waypoints can be adjusted and route updates accordingly.",
-    ],
-  },
-  {
-    id: "planned:route-alternatives",
-    name: "Route Alternatives Selector",
-    artifact: "pattern",
-    status: "planned",
-    category: "Search & Navigation",
-    tags: ["interactive", "api-required"],
-    engineSupport: { mapbox: true, maplibre: false },
-    dependencies: { api: ["Mapbox Directions API", "OSRM"] },
-    description: "Display and select among alternative routes.",
-    acceptanceCriteria: [
-      "Renders multiple route alternatives when available.",
-      "Clicking an alternative makes it active and updates stats.",
-      "Active route is visually emphasized.",
-    ],
-  },
-  {
-    id: "planned:map-matching",
-    name: "Snap-To-Road / Map Matching",
-    artifact: "pattern",
-    status: "planned",
-    category: "Search & Navigation",
-    tags: ["api-required"],
-    engineSupport: { mapbox: true, maplibre: false },
-    dependencies: { api: ["Mapbox Map Matching API"], tokenRequired: true },
-    description: "Snap a noisy GPS trace to roads and compare before/after.",
-    acceptanceCriteria: [
-      "Accepts an input trace and shows original vs snapped line.",
-      "Shows summary stats (distance/time where available).",
-      "Handles API errors with actionable messages.",
-    ],
-  },
-  {
-    id: "planned:elevation-profile",
-    name: "Elevation Profile Along Route",
-    artifact: "pattern",
-    status: "planned",
-    category: "Search & Navigation",
-    tags: ["interactive", "3d"],
-    engineSupport: { mapbox: true, maplibre: false },
-    dependencies: { tokenRequired: true },
-    description: "Sample terrain elevation along a line and render a profile chart.",
-    acceptanceCriteria: [
-      "Samples elevations along a line at a configurable interval.",
-      "Renders a simple profile chart (SVG) with hover marker sync to map.",
-      "Works only when terrain is enabled and communicates limitations.",
-    ],
-  },
-
-];
+export const PLANNED_ROADMAP_ITEMS_DATA: RoadmapItem[] = [];
 
 export const ROADMAP_ITEMS_DATA: RoadmapItem[] = [
   ...IMPLEMENTED_ROADMAP_ITEMS_DATA,

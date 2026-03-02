@@ -77,6 +77,15 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
       .overpassPoiOverlayPattern,
   "route-display": async () =>
     (await import("./navigation/route-display")).routeDisplayPattern,
+  "routing-instructions": async () =>
+    (await import("./navigation/routing-instructions"))
+      .routingInstructionsPattern,
+  "route-alternatives": async () =>
+    (await import("./navigation/route-alternatives")).routeAlternativesPattern,
+  "map-matching": async () =>
+    (await import("./navigation/map-matching")).mapMatchingPattern,
+  "elevation-profile": async () =>
+    (await import("./navigation/elevation-profile")).elevationProfilePattern,
   "distance-measurement": async () =>
     (await import("./navigation/distance-measurement"))
       .distanceMeasurementPattern,
@@ -92,6 +101,10 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./markers/custom-popups")).customPopupsPattern,
   "pulsing-dot": async () =>
     (await import("./markers/pulsing-dot")).pulsingDotPattern,
+  "draw-tools-basic": async () =>
+    (await import("./markers/draw-tools-basic")).drawToolsBasicPattern,
+  "feature-edit-export": async () =>
+    (await import("./markers/feature-edit-export")).featureEditExportPattern,
   "context-menu": async () =>
     (await import("./layers/context-menu")).contextMenuPattern,
   "keyboard-shortcuts": async () =>

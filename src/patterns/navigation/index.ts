@@ -1,4 +1,8 @@
 export { routeDisplayPattern } from "./route-display";
+export { routingInstructionsPattern } from "./routing-instructions";
+export { routeAlternativesPattern } from "./route-alternatives";
+export { mapMatchingPattern } from "./map-matching";
+export { elevationProfilePattern } from "./elevation-profile";
 export { distanceMeasurementPattern } from "./distance-measurement";
 export { areaMeasurementPattern } from "./area-measurement";
 export { geolocationPattern } from "./geolocation";

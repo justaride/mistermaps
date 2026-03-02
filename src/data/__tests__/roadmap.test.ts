@@ -20,7 +20,6 @@ describe("ROADMAP_ITEMS", () => {
 
   it("planned items have acceptance criteria", () => {
     const planned = ROADMAP_ITEMS.filter((i) => i.status === "planned");
-    expect(planned.length).toBeGreaterThan(0);
     for (const item of planned) {
       expect(Array.isArray(item.acceptanceCriteria)).toBe(true);
       expect(item.acceptanceCriteria.length).toBeGreaterThan(0);
@@ -44,4 +43,3 @@ describe("ROADMAP_ITEMS", () => {
     }
   });
 });
-

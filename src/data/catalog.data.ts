@@ -394,6 +394,28 @@ export const CATALOG_DATA: CatalogEntry[] = [
     provider: "mapbox",
   },
   {
+    patternId: "draw-tools-basic",
+    name: "Draw Tools (Basic)",
+    description:
+      "Minimal draw/edit/delete interactions for point, line, and polygon geometries.",
+    capabilities: ["draw", "vertex editing", "delete", "custom interactions"],
+    category: "markers",
+    tags: ["interactive", "geojson"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
+    patternId: "feature-edit-export",
+    name: "Feature Editing + Persist Export",
+    description:
+      "Edit geometries/properties and round-trip feature collections through GeoJSON export/import.",
+    capabilities: ["geometry editing", "property editing", "GeoJSON export", "GeoJSON import"],
+    category: "markers",
+    tags: ["interactive", "geojson"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
     patternId: "route-display",
     name: "Route Display",
     description: "Display driving/walking routes between waypoints.",
@@ -402,6 +424,54 @@ export const CATALOG_DATA: CatalogEntry[] = [
     subcategory: "routing",
     tags: ["api-required", "interactive"],
     provider: "mapbox",
+  },
+  {
+    patternId: "routing-instructions",
+    name: "Routing With Instructions Panel",
+    description:
+      "Turn-by-turn instructions panel with draggable waypoints, profile switching, and provider selection.",
+    capabilities: ["turn-by-turn", "steps", "provider switch", "waypoint drag"],
+    category: "navigation",
+    subcategory: "routing",
+    tags: ["api-required", "interactive"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
+    patternId: "route-alternatives",
+    name: "Route Alternatives Selector",
+    description:
+      "Fetch multiple route options, select active route by click, and compare route stats.",
+    capabilities: ["alternatives", "active route selection", "route comparison"],
+    category: "navigation",
+    subcategory: "routing",
+    tags: ["api-required", "interactive"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
+    patternId: "map-matching",
+    name: "Snap-To-Road / Map Matching",
+    description:
+      "Compare raw GPS traces against map-matched road geometry with confidence and API error handling.",
+    capabilities: ["map matching", "trace input", "confidence", "error handling"],
+    category: "navigation",
+    subcategory: "routing",
+    tags: ["api-required", "interactive"],
+    provider: "mapbox",
+    workbenchCompatible: false,
+  },
+  {
+    patternId: "elevation-profile",
+    name: "Elevation Profile Along Route",
+    description:
+      "Sample terrain elevations along a route and sync chart hover with map marker position.",
+    capabilities: ["terrain sampling", "profile chart", "hover sync", "route analytics"],
+    category: "navigation",
+    subcategory: "routing",
+    tags: ["interactive", "3d", "api-required"],
+    provider: "mapbox",
+    workbenchCompatible: false,
   },
   {
     patternId: "animated-route",
