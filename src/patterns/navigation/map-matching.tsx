@@ -15,7 +15,7 @@ type CameraState = {
   pitch: number;
 };
 
-type ParsedTrace = {
+export type ParsedTrace = {
   coords: LngLat[];
   error: string | null;
 };
@@ -77,7 +77,7 @@ function haversineMeters(a: LngLat, b: LngLat): number {
   return 2 * 6371000 * Math.asin(Math.sqrt(h));
 }
 
-function lineDistance(coords: LngLat[]): number {
+export function lineDistance(coords: LngLat[]): number {
   if (coords.length < 2) return 0;
   let total = 0;
   for (let i = 1; i < coords.length; i += 1) {
@@ -90,7 +90,7 @@ function coordsToTraceText(coords: LngLat[]): string {
   return coords.map(([lng, lat]) => `${lng.toFixed(6)},${lat.toFixed(6)}`).join("\n");
 }
 
-function parseTraceInput(input: string): ParsedTrace {
+export function parseTraceInput(input: string): ParsedTrace {
   const text = input.trim();
   if (!text) return { coords: [], error: "Trace is empty" };
 

@@ -25,7 +25,7 @@ type CameraState = {
   pitch: number;
 };
 
-type RouteOption = {
+export type RouteOption = {
   id: string;
   geometry: {
     type: "LineString";
@@ -92,7 +92,7 @@ function normalizeError(error: unknown): string {
   return "Failed to fetch route alternatives";
 }
 
-function routesToFeatureCollection(
+export function routesToFeatureCollection(
   routes: RouteOption[],
   activeRouteId: string | null,
 ): GeoJSON.FeatureCollection<GeoJSON.LineString> {
