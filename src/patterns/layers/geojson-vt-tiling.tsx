@@ -213,7 +213,6 @@ function GeojsonVtTilingView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const mapRef = useRef<MapboxMap | MapLibreMap | null>(null);
   const recreateTokenRef = useRef(0);
   const tileIndexRef = useRef<ReturnType<typeof geojsonvt> | null>(null);
-  const rawDataRef = useRef<GeoJSON.FeatureCollection>(EMPTY_FC);
 
   const [engine, setEngine] = useState<Engine>("mapbox");
   const [loaded, setLoaded] = useState(false);
@@ -224,11 +223,14 @@ function GeojsonVtTilingView({ theme, onPrimaryMapReady }: PatternViewProps) {
   const [tileCount, setTileCount] = useState(0);
   const [indexTime, setIndexTime] = useState(0);
 
-  const rawData = useMemo(() => {
-    const data = buildLargeDataset(featureCount);
-    rawDataRef.current = data;
+  const rawData = useMemo(() => buildLargeDataset(featureCount), [featureCount]);
+
+  const totalCoords = useMemo(() => countCoordinates(rawData), [rawData]);
+  const style = useMemo(() => styleFor(engine, theme), [engine, theme]);
+
+  useEffect(() => {
     const t0 = performance.now();
-    tileIndexRef.current = geojsonvt(data, {
+    tileIndexRef.current = geojsonvt(rawData, {
       maxZoom: 18,
       tolerance: 3,
       extent: 4096,
@@ -237,11 +239,7 @@ function GeojsonVtTilingView({ theme, onPrimaryMapReady }: PatternViewProps) {
       indexMaxPoints: 100000,
     });
     setIndexTime(Math.round(performance.now() - t0));
-    return data;
-  }, [featureCount]);
-
-  const totalCoords = useMemo(() => countCoordinates(rawData), [rawData]);
-  const style = useMemo(() => styleFor(engine, theme), [engine, theme]);
+  }, [rawData]);
 
   const updateTiledSource = useCallback(() => {
     const map = mapRef.current;

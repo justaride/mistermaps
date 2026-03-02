@@ -204,7 +204,10 @@ function TimeSliderView({ theme, onPrimaryMapReady }: PatternViewProps) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loaded) return;
-    (map as any).setFilter(LYR_ID, ['<=', ['get', 'timestamp'], currentTime]);
+    const filterMap = map as unknown as {
+      setFilter: (layerId: string, filter: unknown) => void;
+    };
+    filterMap.setFilter(LYR_ID, ['<=', ['get', 'timestamp'], currentTime]);
     const count = EVENTS.features.filter(
       f => (f.properties?.timestamp ?? 0) <= currentTime
     ).length;

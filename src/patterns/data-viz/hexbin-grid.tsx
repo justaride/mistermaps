@@ -50,7 +50,10 @@ function computeHexbins(
 ): GeoJSON.FeatureCollection {
   const grid = turf.hexGrid(BBOX, cellSize, { units: 'kilometers' });
   for (const hex of grid.features) {
-    const within = turf.pointsWithinPolygon(points, hex as any);
+    const within = turf.pointsWithinPolygon(
+      points,
+      hex as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>
+    );
     hex.properties = { ...hex.properties, count: within.features.length };
   }
   return grid as GeoJSON.FeatureCollection;
@@ -218,7 +221,10 @@ function HexbinGridView({ theme, onPrimaryMapReady }: PatternViewProps) {
     if (!map || !loaded) return;
     const src = getSource(map, SRC_HEXBIN) as { setData?: (d: unknown) => void } | null;
     if (src?.setData) src.setData(hexbins);
-    (map as any).setPaintProperty(LYR_FILL, 'fill-color', colorExpression(colorScheme));
+    const paintMap = map as unknown as {
+      setPaintProperty: (layerId: string, property: string, value: unknown) => void;
+    };
+    paintMap.setPaintProperty(LYR_FILL, 'fill-color', colorExpression(colorScheme));
   }, [hexbins, colorScheme, loaded]);
 
   return (

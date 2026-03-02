@@ -58,6 +58,13 @@ function KeyboardShortcutsView({ theme, onPrimaryMapReady }: PatternViewProps) {
 
       const map = mapRef.current;
       if (!map) return;
+      const cameraMap = map as unknown as {
+        flyTo: (options: {
+          center: [number, number];
+          zoom: number;
+          duration: number;
+        }) => void;
+      };
 
       const key = e.key.toLowerCase();
 
@@ -68,14 +75,18 @@ function KeyboardShortcutsView({ theme, onPrimaryMapReady }: PatternViewProps) {
       }
 
       if (key === "r") {
-        (map as any).flyTo({ center: CENTER, zoom: 10, duration: 1500 });
+        cameraMap.flyTo({ center: CENTER, zoom: 10, duration: 1500 });
         setLastAction("Reset to default view");
         return;
       }
 
       const preset = PRESETS[key];
       if (preset) {
-        (map as any).flyTo({ center: preset.center, zoom: preset.zoom, duration: 1500 });
+        cameraMap.flyTo({
+          center: preset.center,
+          zoom: preset.zoom,
+          duration: 1500,
+        });
         setLastAction(`Flew to ${preset.label}`);
       }
     };
