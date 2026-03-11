@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { ProviderRequestError } from "../../errors";
 import { createReverseGeocodingService } from "../create-reverse-geocoding-service";
 import type {
@@ -86,5 +86,36 @@ describe("createReverseGeocodingService", () => {
       ProviderRequestError,
     );
   });
-});
 
+  it("deduplicates fallback providers by id", async () => {
+    const telemetry = vi.fn();
+    const primary = provider("p1", async () => [
+      {
+        id: "p1:1",
+        placeName: "A",
+        center: [10, 59],
+        providerId: "p1",
+      },
+    ]);
+
+    const service = createReverseGeocodingService({
+      primaryProvider: primary,
+      fallbackEnabled: true,
+      fallbackProviders: [
+        provider("p1", async () => {
+          throw new Error("should not run");
+        }),
+      ],
+      onTelemetry: telemetry,
+    });
+
+    await service.reverseGeocode({ center: [10, 59] });
+
+    const requestEvents = telemetry.mock.calls
+      .map(([event]) => event)
+      .filter((event) => event.action === "request");
+
+    expect(requestEvents).toHaveLength(1);
+    expect(requestEvents[0]?.providerId).toBe("p1");
+  });
+});

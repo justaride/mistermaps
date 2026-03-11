@@ -3,6 +3,7 @@ node_modules.bak-*
 node_modules.broken-*
 node_modules 2
 dist
+coverage
 logs
 .env.local
 *.local

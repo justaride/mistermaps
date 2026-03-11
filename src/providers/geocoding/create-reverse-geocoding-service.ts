@@ -1,9 +1,8 @@
-import { isRateLimitError } from "../errors";
 import {
-  describeProviderError,
   emitProviderTelemetry,
   type ProviderTelemetryEvent,
 } from "../telemetry";
+import { dedupeProviders, runProviderRequest } from "../run-provider-request";
 import type {
   ProviderId,
   ReverseGeocodingProvider,
@@ -31,25 +30,6 @@ type CreateReverseGeocodingServiceOptions = {
   onTelemetry?: (event: ProviderTelemetryEvent) => void;
 };
 
-function dedupeProviders(
-  providers: ReverseGeocodingProvider[],
-): ReverseGeocodingProvider[] {
-  const seen = new Set<string>();
-  const unique: ReverseGeocodingProvider[] = [];
-
-  for (const provider of providers) {
-    if (seen.has(provider.id)) continue;
-    seen.add(provider.id);
-    unique.push(provider);
-  }
-
-  return unique;
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
-}
-
 export function createReverseGeocodingService(
   options: CreateReverseGeocodingServiceOptions,
 ): ReverseGeocodingService {
@@ -61,70 +41,34 @@ export function createReverseGeocodingService(
 
   return {
     async reverseGeocode(request, signal) {
-      const attemptedProviders: ProviderId[] = [];
+      const response = await runProviderRequest({
+        area: "geocoding",
+        providers,
+        emit,
+        getRequestMessage: () =>
+          `${request.center[0].toFixed(5)},${request.center[1].toFixed(5)}`,
+        execute: (candidate) => candidate.reverseGeocode(request, signal),
+        getSuccessEvent: (results, context) => ({
+          resultCount: results.length,
+          metadata: {
+            fallbackUsed: context.index > 0,
+          },
+        }),
+      });
 
-      for (let index = 0; index < providers.length; index += 1) {
-        const provider = providers[index];
-        attemptedProviders.push(provider.id);
-        const start = Date.now();
-
-        emit({
-          area: "geocoding",
-          action: "request",
-          providerId: provider.id,
-          message: `${request.center[0].toFixed(5)},${request.center[1].toFixed(5)}`,
-        });
-
-        try {
-          const results = await provider.reverseGeocode(request, signal);
-
-          emit({
-            area: "geocoding",
-            action: "success",
-            providerId: provider.id,
-            durationMs: Date.now() - start,
-            resultCount: results.length,
-            metadata: {
-              fallbackUsed: index > 0,
-            },
-          });
-
-          return {
-            providerId: provider.id,
-            results,
-            attemptedProviders,
-          };
-        } catch (error) {
-          if (isAbortError(error)) throw error;
-
-          emit({
-            area: "geocoding",
-            action: "failure",
-            providerId: provider.id,
-            durationMs: Date.now() - start,
-            message: describeProviderError(error),
-          });
-
-          const hasFallback = index < providers.length - 1;
-          if (!hasFallback) {
-            throw error;
-          }
-
-          emit({
-            area: "geocoding",
-            action: "fallback",
-            providerId: provider.id,
-            message: isRateLimitError(error) ? "rate_limited" : "provider_error",
-          });
-        }
+      if (!response) {
+        return {
+          providerId: options.primaryProvider.id,
+          results: [],
+          attemptedProviders: [],
+        };
       }
 
       return {
-        providerId: options.primaryProvider.id,
-        results: [],
-        attemptedProviders,
+        providerId: response.provider.id,
+        results: response.result,
+        attemptedProviders: response.attemptedProviders,
       };
     },
   };
 }
-

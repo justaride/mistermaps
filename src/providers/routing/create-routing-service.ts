@@ -1,9 +1,8 @@
-import { isRateLimitError } from "../errors";
 import {
-  describeProviderError,
   emitProviderTelemetry,
   type ProviderTelemetryEvent,
 } from "../telemetry";
+import { dedupeProviders, runProviderRequest } from "../run-provider-request";
 import type {
   RoutingProvider,
   RoutingRequest,
@@ -31,23 +30,6 @@ type CreateRoutingServiceOptions = {
   onTelemetry?: (event: ProviderTelemetryEvent) => void;
 };
 
-function dedupeProviders(providers: RoutingProvider[]): RoutingProvider[] {
-  const seen = new Set<string>();
-  const unique: RoutingProvider[] = [];
-
-  for (const provider of providers) {
-    if (seen.has(provider.id)) continue;
-    seen.add(provider.id);
-    unique.push(provider);
-  }
-
-  return unique;
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
-}
-
 export function createRoutingService(
   options: CreateRoutingServiceOptions,
 ): RoutingService {
@@ -59,65 +41,30 @@ export function createRoutingService(
 
   return {
     async route(request, signal) {
-      const attemptedProviders: ProviderId[] = [];
+      const response = await runProviderRequest({
+        area: "routing",
+        providers,
+        emit,
+        getRequestMessage: () =>
+          `${request.profile || "driving"} (${request.coordinates.length} pts)`,
+        execute: (candidate) => candidate.route(request, signal),
+        getSuccessEvent: (result, context) => ({
+          metadata: {
+            fallbackUsed: context.index > 0,
+            distance: result.summary.distanceMeters,
+          },
+        }),
+      });
 
-      for (let index = 0; index < providers.length; index += 1) {
-        const provider = providers[index];
-        attemptedProviders.push(provider.id);
-        const start = Date.now();
-
-        emit({
-          area: "routing",
-          action: "request",
-          providerId: provider.id,
-          message: `${request.profile || "driving"} (${request.coordinates.length} pts)`,
-        });
-
-        try {
-          const result = await provider.route(request, signal);
-
-          emit({
-            area: "routing",
-            action: "success",
-            providerId: provider.id,
-            durationMs: Date.now() - start,
-            metadata: {
-              fallbackUsed: index > 0,
-              distance: result.summary.distanceMeters,
-            },
-          });
-
-          return {
-            providerId: provider.id,
-            result,
-            attemptedProviders,
-          };
-        } catch (error) {
-          if (isAbortError(error)) throw error;
-
-          emit({
-            area: "routing",
-            action: "failure",
-            providerId: provider.id,
-            durationMs: Date.now() - start,
-            message: describeProviderError(error),
-          });
-
-          const hasFallback = index < providers.length - 1;
-          if (!hasFallback) {
-            throw error;
-          }
-
-          emit({
-            area: "routing",
-            action: "fallback",
-            providerId: provider.id,
-            message: isRateLimitError(error) ? "rate_limited" : "provider_error",
-          });
-        }
+      if (!response) {
+        throw new Error("Routing service failed: all providers exhausted");
       }
 
-      throw new Error("Routing service failed: all providers exhausted");
+      return {
+        providerId: response.provider.id,
+        result: response.result,
+        attemptedProviders: response.attemptedProviders,
+      };
     },
   };
 }

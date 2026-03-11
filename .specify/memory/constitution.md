@@ -9,15 +9,17 @@
 ## Ralph Wiggum
 
 **Source:** https://github.com/fstandhartinger/ralph-wiggum
-**Commit:** 22b6c3c4fad47d8e5a5824ac2093b8d58ab057ff
+**Installed Commit:** 22b6c3c4fad47d8e5a5824ac2093b8d58ab057ff
+**Upstream HEAD:** 6022995317363dc3dba3aa0100dc3e40ed83dfff
 **Installed:** 2026-02-05
+**Checked:** 2026-03-11
 
 ### Auto-Update
 
 At session start, check for updates:
 
 1. Run: `git ls-remote https://github.com/fstandhartinger/ralph-wiggum.git HEAD`
-2. If hash differs: fetch latest scripts, update this file, inform user
+2. If hash differs: fetch latest scripts, update `Installed Commit`, `Upstream HEAD`, and `Checked`, then inform user
 
 ---
 
@@ -68,7 +70,7 @@ Build exactly what's needed, nothing more. No premature abstractions.
 | Animation | Framer Motion 12                 | UI transitions                |
 | Icons     | Lucide React                     | Icon library                  |
 | Linting   | ESLint 9 + typescript-eslint     | With react-hooks plugin       |
-| Testing   | (not yet configured)             |                               |
+| Testing   | Vitest 4 + Testing Library       | Coverage via `@vitest/coverage-v8` |
 
 ---
 

@@ -56,15 +56,15 @@ Note: `/maps/maplibre` uses **OpenFreeMap vector tiles** and does not require a 
 
 ## Patterns
 
-24 Mapbox GL patterns across 4 categories, plus MapLibre as a provider:
+The current catalog contains 55 entries: 54 Mapbox patterns across 4 categories, plus 1 dedicated MapLibre route.
 
-| Category   | Patterns                                                                                                                                                                                              |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layers     | Layer Basics, Layer Inspector, Layer Explorer, GeoJSON Overlay, 3D Buildings, Feature State, Vector Feature State, Vector Road Styling, Vector Debug Tools, Terrain + Hillshade, NASA GIBS True Color |
-| Data Viz   | Heatmap, Choropleth                                                                                                                                                                                   |
-| Markers    | Clustered Markers, Custom Popups, Pulsing Dot                                                                                                                                                         |
-| Navigation | Route Display, Animated Route, Isochrones (Valhalla), Geolocation, Overpass POI Overlay, Distance Measurement, Area Measurement                                                                          |
-| Providers  | MapLibre GL (OpenFreeMap Vector)                                                                                                                                                                      |
+| Category   | Count | Examples |
+| ---------- | ----- | -------- |
+| Layers     | 31    | Style Switcher, GeoJSON Overlay, Fill Patterns, Terrain + Hillshade, Rendalen Data |
+| Data Viz   | 5     | Heatmap, Choropleth, Export Image + Print, Time Slider, Hexbin Grid |
+| Markers    | 6     | Clustered Markers, Draw Tools, Feature Editing + Persist Export, Cluster Spiderfy |
+| Navigation | 13    | Geocoding Search, Route Alternatives, Map Matching, Elevation Profile, Isochrones |
+| Providers  | 1     | MapLibre GL (OpenFreeMap Vector) |
 
 ## Open Source Providers & APIs
 
@@ -176,6 +176,8 @@ Sibling to MrNews — same 100x100 SVG architecture, shared animation patterns (
 ```bash
 npm run dev      # Start dev server
 npm run lint     # ESLint checks
+npm run test     # Run Vitest suite
+npm run test:coverage # Run Vitest with coverage
 npm run build    # Production build
 npm run preview  # Preview production build
 ```
