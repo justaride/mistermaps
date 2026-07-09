@@ -9,10 +9,10 @@
 ## Ralph Wiggum
 
 **Source:** https://github.com/fstandhartinger/ralph-wiggum
-**Installed Commit:** 22b6c3c4fad47d8e5a5824ac2093b8d58ab057ff
-**Upstream HEAD:** 6022995317363dc3dba3aa0100dc3e40ed83dfff
-**Installed:** 2026-02-05
-**Checked:** 2026-03-11
+**Installed Commit:** 3f15f0fb83b8c2e0ac8d11abdae0e83ab8204981
+**Upstream HEAD:** 3f15f0fb83b8c2e0ac8d11abdae0e83ab8204981
+**Installed:** 2026-07-09
+**Checked:** 2026-07-09
 
 ### Auto-Update
 

@@ -59,6 +59,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 mkdir -p "$LOG_DIR"
+source "$SCRIPT_DIR/lib/spec_queue.sh"
 
 # Check constitution for YOLO setting
 YOLO_ENABLED=true
@@ -525,14 +526,22 @@ fi
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 
-# Check for work sources - count .md files in specs/
+# Check for work sources, including the upstream completion-status convention.
 HAS_PLAN=false
 HAS_SPECS=false
 SPEC_COUNT=0
+INCOMPLETE_SPEC_COUNT=0
+FIRST_INCOMPLETE_SPEC=""
 [ -f "IMPLEMENTATION_PLAN.md" ] && HAS_PLAN=true
 if [ -d "specs" ]; then
-    SPEC_COUNT=$(find specs -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
+    SPEC_COUNT=$(count_root_specs "specs")
     [ "$SPEC_COUNT" -gt 0 ] && HAS_SPECS=true
+    if [ "$HAS_SPECS" = true ]; then
+        INCOMPLETE_SPEC_COUNT=$(count_incomplete_root_specs "specs")
+        if [ "$INCOMPLETE_SPEC_COUNT" -gt 0 ]; then
+            FIRST_INCOMPLETE_SPEC=$(get_first_incomplete_root_spec "specs")
+        fi
+    fi
 fi
 
 echo ""
@@ -555,7 +564,12 @@ else
     echo -e "  ${YELLOW}○${NC} IMPLEMENTATION_PLAN.md (not found, that's OK)"
 fi
 if [ "$HAS_SPECS" = true ]; then
-    echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs)"
+    echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs, $INCOMPLETE_SPEC_COUNT incomplete)"
+    if [ "$INCOMPLETE_SPEC_COUNT" -gt 0 ]; then
+        echo -e "    ${CYAN}Next incomplete:${NC} $FIRST_INCOMPLETE_SPEC"
+    else
+        echo -e "    ${CYAN}All specs are marked complete; build mode will re-verify one before declaring DONE.${NC}"
+    fi
 else
     echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
