@@ -195,7 +195,7 @@ Create specs in `specs/` with testable acceptance criteria. The loop picks the h
 
 ## Deployment
 
-Deployed on Coolify with Docker + nginx. Push to `master` triggers automatic deploy.
+Deployed on Coolify with Docker + nginx. Push to `main` triggers automatic deploy.
 
 - `Dockerfile` builds the Vite app and serves it via nginx.
 - `nginx.conf` handles SPA rewrites so client-side routes like `/maps` work on refresh.
