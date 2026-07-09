@@ -249,19 +249,28 @@ function RoutingInstructionsView({
           },
           controller.signal,
         );
+        if (abortRef.current !== controller) return;
 
         setResult(nextResult);
         setStatus(
           `Route ready (${activeProvider.id.toUpperCase()}, ${formatDistance(nextResult.summary.distanceMeters)}, ${formatDuration(nextResult.summary.durationSeconds)})`,
         );
       } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
+        if (
+          err instanceof DOMException &&
+          err.name === "AbortError"
+        ) {
+          return;
+        }
+        if (abortRef.current !== controller) return;
 
         setResult(null);
         setStatus("");
         setError(normalizeError(err));
       } finally {
-        setIsRouting(false);
+        if (abortRef.current === controller) {
+          setIsRouting(false);
+        }
       }
     },
     [activeProvider, profile],

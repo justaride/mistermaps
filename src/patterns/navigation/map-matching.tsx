@@ -288,18 +288,22 @@ function MapMatchingView({ theme, onPrimaryMapReady }: PatternViewProps) {
         },
         controller.signal,
       );
+      if (abortRef.current !== controller) return;
 
       setMatchedCoords(result.matchedGeometry.coordinates);
       setConfidence(result.confidence ?? null);
       setStatus("Matched trace ready.");
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
+      if (abortRef.current !== controller) return;
       setMatchedCoords([]);
       setConfidence(null);
       setStatus("");
       setError(normalizeError(err));
     } finally {
-      setIsMatching(false);
+      if (abortRef.current === controller) {
+        setIsMatching(false);
+      }
     }
   }, [parsedTrace, profile, tidy]);
 

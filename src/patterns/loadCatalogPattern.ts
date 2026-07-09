@@ -1,4 +1,6 @@
 import type { Pattern, PatternId } from "../types";
+import { CATALOG } from "../data/catalog";
+import { logError } from "../utils/logger";
 
 type PatternLoader = () => Promise<Pattern>;
 
@@ -115,10 +117,37 @@ const patternLoaders: Record<PatternId, PatternLoader> = {
     (await import("./data-viz/hexbin-grid")).hexbinGridPattern,
 };
 
+const catalogByPatternId = new Map(
+  CATALOG.map((entry) => [entry.patternId, entry] as const),
+);
+
+function createUnavailablePattern(id: PatternId): Pattern {
+  const entry = catalogByPatternId.get(id);
+  return {
+    id,
+    name: entry?.name ?? `${id} (Unavailable)`,
+    category: entry?.category ?? "layers",
+    description:
+      "This pattern could not be loaded from disk. A fallback placeholder is shown so the map still loads.",
+    controls: [],
+    setup: () => {},
+    cleanup: () => {},
+    update: () => {},
+    snippet: `// Pattern "${id}" could not be loaded from disk.\n// Check local file availability (dataless/APFS placeholders) and restore the source file.`,
+  };
+}
+
 export async function loadPatternById(id: string): Promise<Pattern | null> {
   if (!Object.prototype.hasOwnProperty.call(patternLoaders, id)) {
     return null;
   }
 
-  return patternLoaders[id as PatternId]();
+  const patternId = id as PatternId;
+
+  try {
+    return await patternLoaders[patternId]();
+  } catch (error) {
+    logError(`Failed to load pattern module "${patternId}"`, error);
+    return createUnavailablePattern(patternId);
+  }
 }

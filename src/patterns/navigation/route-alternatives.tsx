@@ -213,6 +213,7 @@ function RouteAlternativesView({
         },
         controller.signal,
       );
+      if (abortRef.current !== controller) return;
 
       const alternatives: RoutingAlternative[] = response.alternatives ?? [];
       const nextRoutes: RouteOption[] = [
@@ -233,13 +234,16 @@ function RouteAlternativesView({
       setStatus(`Loaded ${nextRoutes.length} route option(s).`);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
+      if (abortRef.current !== controller) return;
 
       setRoutes([]);
       setActiveRouteId(null);
       setStatus("");
       setError(normalizeError(err));
     } finally {
-      setIsLoadingRoutes(false);
+      if (abortRef.current === controller) {
+        setIsLoadingRoutes(false);
+      }
     }
   }, [activeProvider, profile]);
 

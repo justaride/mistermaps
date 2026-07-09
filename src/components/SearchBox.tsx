@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Map } from "mapbox-gl";
-import styles from "./SearchBox.module.css";
 import { geocodingService } from "../providers/geocoding";
+import styles from "./SearchBox.module.css";
 
 type Props = {
   map: Map | null;
@@ -18,7 +18,7 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-function getProviderLabel(providerId: string): string {
+function providerLabel(providerId: string): string {
   switch (providerId) {
     case "mapbox":
       return "Mapbox";
@@ -35,21 +35,23 @@ export function SearchBox({ map }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
+    const onMouseDown = (event: MouseEvent) => {
+      if (!rootRef.current) return;
+      const target = event.target;
+      if (target instanceof Node && rootRef.current.contains(target)) return;
+      setIsOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener("mousedown", onMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+    };
   }, []);
 
   useEffect(() => {
@@ -57,29 +59,27 @@ export function SearchBox({ map }: Props) {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
-      abortControllerRef.current?.abort();
+      abortRef.current?.abort();
     };
   }, []);
 
-  const search = async (q: string) => {
-    if (!q.trim()) {
-      abortControllerRef.current?.abort();
+  const runSearch = async (rawQuery: string) => {
+    const trimmed = rawQuery.trim();
+    if (!trimmed) {
+      abortRef.current?.abort();
       setResults([]);
       setIsOpen(false);
       return;
     }
 
-    abortControllerRef.current?.abort();
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       const response = await geocodingService.geocode(
-        {
-          query: q,
-          limit: 5,
-        },
-        abortController.signal,
+        { query: trimmed, limit: 5 },
+        controller.signal,
       );
 
       setResults(
@@ -98,34 +98,47 @@ export function SearchBox({ map }: Props) {
     }
   };
 
-  const handleInput = (value: string) => {
+  const handleInputChange = (value: string) => {
     setQuery(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(value), 300);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      void runSearch(value);
+    }, 300);
   };
 
   const handleSelect = (result: SearchResult) => {
     if (!map) return;
+
     map.flyTo({
       center: result.center,
       zoom: 14,
       duration: 1500,
     });
-    setQuery(result.place_name.split(",")[0]);
+
+    setQuery(result.place_name.split(",")[0] ?? result.place_name);
     setIsOpen(false);
     setResults([]);
   };
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div ref={rootRef} className={styles.container}>
       <input
         type="text"
         value={query}
-        onChange={(e) => handleInput(e.target.value)}
-        onFocus={() => results.length > 0 && setIsOpen(true)}
+        onChange={(event) => handleInputChange(event.target.value)}
+        onFocus={() => {
+          if (results.length > 0) {
+            setIsOpen(true);
+          }
+        }}
         placeholder="Search location..."
         className={`panel ${styles.input}`}
       />
+
       {isOpen && results.length > 0 && (
         <ul className={`panel ${styles.results}`}>
           {results.map((result) => (
@@ -137,7 +150,7 @@ export function SearchBox({ map }: Props) {
               <div className={styles.resultRow}>
                 <span className={styles.placeName}>{result.place_name}</span>
                 <span className={styles.providerTag}>
-                  {getProviderLabel(result.providerId)}
+                  {providerLabel(result.providerId)}
                 </span>
               </div>
             </li>

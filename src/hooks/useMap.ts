@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import type { Map as MapboxMap } from "mapbox-gl";
 import type { Theme } from "../types";
-import { mapboxBasemapProvider } from "../providers/basemap";
+import { mapboxBasemapProvider, openFreeMapBasemapProvider } from "../providers/basemap";
 import { useManagedMap } from "./useManagedMap";
 import { logError } from "../utils/logger";
+import { getUsableMapboxToken } from "../utils/mapbox-token";
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+const MAPBOX_TOKEN = getUsableMapboxToken(import.meta.env.VITE_MAPBOX_TOKEN);
+const BASEMAP_PROVIDER = MAPBOX_TOKEN
+  ? mapboxBasemapProvider
+  : openFreeMapBasemapProvider;
 
 type UseMapOptions = {
   container: RefObject<HTMLDivElement | null>;
@@ -20,11 +24,11 @@ export function useMap({ container, theme }: UseMapOptions) {
       const mod = await import("mapbox-gl");
       const mapboxgl = (mod as unknown as { default: MapboxGL }).default;
 
-      mapboxgl.accessToken = MAPBOX_TOKEN;
+      mapboxgl.accessToken = MAPBOX_TOKEN ?? "";
 
       const map = new mapboxgl.Map({
         container: containerEl,
-        style: mapboxBasemapProvider.getStyle(theme),
+        style: BASEMAP_PROVIDER.getStyle(theme),
         center: [11.0, 61.83],
         zoom: 10,
         pitch: 0,
@@ -54,7 +58,7 @@ export function useMap({ container, theme }: UseMapOptions) {
     if (!map || !isLoaded) return;
     if (prevThemeRef.current === theme) return;
     prevThemeRef.current = theme;
-    map.setStyle(mapboxBasemapProvider.getStyle(theme));
+    map.setStyle(BASEMAP_PROVIDER.getStyle(theme));
     setIsLoaded(false);
     map.once("style.load", () => {
       setIsLoaded(true);

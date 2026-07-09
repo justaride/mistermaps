@@ -1,14 +1,15 @@
-import { useRef, useEffect, useState } from "react";
-import type { Map } from "mapbox-gl";
+import { useEffect, useRef, useState } from "react";
+import type { Map as MapboxMap } from "mapbox-gl";
 import { useMap } from "../hooks/useMap";
-import type { ControlValues, Theme, Pattern } from "../types";
+import type { ControlValues, Pattern, Theme } from "../types";
+import { logError } from "../utils/logger";
 import styles from "./MapContainer.module.css";
 
 type Props = {
   theme: Theme;
   pattern: Pattern | null;
   controlValues: ControlValues;
-  onMapReady: (map: Map) => void;
+  onMapReady?: (map: MapboxMap) => void;
 };
 
 export function MapContainer({
@@ -19,13 +20,14 @@ export function MapContainer({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { map, isLoaded } = useMap({ container: containerRef, theme });
+
   const activePatternRef = useRef<Pattern | null>(null);
-  const styleGenRef = useRef(0);
-  const [setupComplete, setSetupComplete] = useState(false);
+  const setupTokenRef = useRef(0);
+  const [isPatternReady, setIsPatternReady] = useState(false);
 
   useEffect(() => {
     if (map && isLoaded) {
-      onMapReady(map);
+      onMapReady?.(map);
     }
   }, [map, isLoaded, onMapReady]);
 
@@ -33,43 +35,79 @@ export function MapContainer({
     if (!map || !isLoaded) return;
 
     if (activePatternRef.current) {
-      activePatternRef.current.cleanup(map);
+      try {
+        activePatternRef.current.cleanup(map);
+      } catch (error) {
+        logError(
+          `Pattern cleanup failed (${activePatternRef.current.id})`,
+          error,
+        );
+      }
       activePatternRef.current = null;
     }
-    setSetupComplete(false);
 
-    if (pattern) {
-      styleGenRef.current++;
-      const gen = styleGenRef.current;
+    setIsPatternReady(false);
 
-      const setupPattern = async () => {
-        if (gen !== styleGenRef.current) return;
+    if (!pattern) return;
+
+    setupTokenRef.current += 1;
+    const token = setupTokenRef.current;
+
+    const setupPattern = async () => {
+      if (token !== setupTokenRef.current) return;
+
+      try {
         await pattern.setup(map, controlValues);
-        if (gen !== styleGenRef.current) return;
-        activePatternRef.current = pattern;
-        setSetupComplete(true);
-      };
-
-      if (map.isStyleLoaded()) {
-        setupPattern();
-      } else {
-        map.once("style.load", setupPattern);
+      } catch (error) {
+        logError(`Pattern setup failed (${pattern.id})`, error);
+        return;
       }
 
-      return () => {
-        if (!map.isStyleLoaded()) {
-          map.off("style.load", setupPattern);
-        }
-      };
+      if (token !== setupTokenRef.current) return;
+
+      activePatternRef.current = pattern;
+      setIsPatternReady(true);
+    };
+
+    if (map.isStyleLoaded()) {
+      void setupPattern();
+      return;
     }
+
+    map.once("style.load", setupPattern);
+
+    return () => {
+      map.off("style.load", setupPattern);
+    };
   }, [map, isLoaded, pattern?.id]);
 
   useEffect(() => {
-    if (!map || !isLoaded || !pattern || !setupComplete) return;
-    if (activePatternRef.current?.id === pattern.id) {
+    if (!map || !isLoaded || !pattern || !isPatternReady) return;
+    if (activePatternRef.current?.id !== pattern.id) return;
+
+    try {
       pattern.update(map, controlValues);
+    } catch (error) {
+      logError(`Pattern update failed (${pattern.id})`, error);
     }
-  }, [map, isLoaded, pattern, controlValues, setupComplete]);
+  }, [map, isLoaded, pattern, controlValues, isPatternReady]);
+
+  useEffect(() => {
+    if (!map) return;
+
+    return () => {
+      if (!activePatternRef.current) return;
+      try {
+        activePatternRef.current.cleanup(map);
+      } catch (error) {
+        logError(
+          `Pattern cleanup failed on unmount (${activePatternRef.current.id})`,
+          error,
+        );
+      }
+      activePatternRef.current = null;
+    };
+  }, [map]);
 
   return (
     <>

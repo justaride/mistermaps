@@ -1,27 +1,27 @@
-import { useState, useCallback, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import type { Map } from "mapbox-gl";
 import { ArrowLeft } from "lucide-react";
 import "../map/engine-css";
 import {
   MapContainer,
   MapLibreContainer,
+  SearchBox,
   ControlsPanel,
   CodeViewer,
   ThemeToggle,
-  SearchBox,
 } from "../components";
 import { loadPatternById } from "../patterns/loadCatalogPattern";
 import type { ControlValue, ControlValues, Pattern, Theme } from "../types";
-import { logError } from "../utils/logger";
 import styles from "../App.module.css";
+import { logError } from "../utils/logger";
 
 export default function MapDetail() {
-  const { id } = useParams<{ id: string }>();
-  const isMaplibre = id === "maplibre";
-  const [pattern, setPattern] = useState<Pattern | null>(null);
-  const [isPatternLoading, setIsPatternLoading] = useState(!isMaplibre);
+  const { id } = useParams();
+  const isMapLibreRoute = id === "maplibre";
 
+  const [pattern, setPattern] = useState<Pattern | null>(null);
+  const [loadingPattern, setLoadingPattern] = useState(!isMapLibreRoute);
   const [theme, setTheme] = useState<Theme>("light");
   const [controlValues, setControlValues] = useState<ControlValues>({});
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
@@ -32,30 +32,30 @@ export default function MapDetail() {
   }, [theme]);
 
   useEffect(() => {
-    let isCancelled = false;
+    let cancelled = false;
 
     setCodeViewerOpen(false);
     setMap(null);
 
-    if (isMaplibre) {
+    if (isMapLibreRoute) {
       setPattern(null);
       setControlValues({});
-      setIsPatternLoading(false);
+      setLoadingPattern(false);
       return;
     }
 
     if (!id) {
       setPattern(null);
       setControlValues({});
-      setIsPatternLoading(false);
+      setLoadingPattern(false);
       return;
     }
 
-    setIsPatternLoading(true);
+    setLoadingPattern(true);
 
     void loadPatternById(id)
       .then((loadedPattern) => {
-        if (isCancelled) return;
+        if (cancelled) return;
 
         setPattern(loadedPattern);
 
@@ -68,23 +68,25 @@ export default function MapDetail() {
         loadedPattern.controls.forEach((control) => {
           defaults[control.id] = control.defaultValue;
         });
+
         setControlValues(defaults);
       })
       .catch((error) => {
-        if (isCancelled) return;
+        if (cancelled) return;
         logError(`Failed to load pattern "${id}"`, error);
         setPattern(null);
         setControlValues({});
       })
       .finally(() => {
-        if (isCancelled) return;
-        setIsPatternLoading(false);
+        if (!cancelled) {
+          setLoadingPattern(false);
+        }
       });
 
     return () => {
-      isCancelled = true;
+      cancelled = true;
     };
-  }, [id, isMaplibre]);
+  }, [id, isMapLibreRoute]);
 
   const handleMapReady = useCallback((mapInstance: Map) => {
     setMap(mapInstance);
@@ -98,7 +100,7 @@ export default function MapDetail() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  if (!isMaplibre && isPatternLoading) {
+  if (!isMapLibreRoute && loadingPattern) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-2 bg-bg text-fg">
         <p className="font-mono text-lg">Loading pattern...</p>
@@ -106,14 +108,11 @@ export default function MapDetail() {
     );
   }
 
-  if (!isMaplibre && !pattern) {
+  if (!isMapLibreRoute && !pattern) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-bg text-fg">
         <p className="mb-4 font-mono text-lg">Pattern not found</p>
-        <Link
-          to="/maps"
-          className="font-mono text-sm text-accent hover:underline"
-        >
+        <Link to="/maps" className="font-mono text-sm text-accent hover:underline">
           Back to catalog
         </Link>
       </div>
@@ -122,7 +121,7 @@ export default function MapDetail() {
 
   return (
     <div className={`${styles.app} map-root`}>
-      {isMaplibre ? (
+      {isMapLibreRoute ? (
         <MapLibreContainer theme={theme} />
       ) : pattern?.view ? (
         <pattern.view
@@ -140,7 +139,7 @@ export default function MapDetail() {
         />
       )}
 
-      {!isMaplibre && !pattern?.disableGlobalSearch && <SearchBox map={map} />}
+      {!isMapLibreRoute && !pattern?.disableGlobalSearch && <SearchBox map={map} />}
 
       <div className="absolute left-4 top-4 z-10">
         <Link
@@ -152,7 +151,7 @@ export default function MapDetail() {
         </Link>
       </div>
 
-      {!isMaplibre && pattern && (
+      {!isMapLibreRoute && pattern && (
         <>
           <ControlsPanel
             controls={pattern.controls}
@@ -160,6 +159,7 @@ export default function MapDetail() {
             onChange={handleControlChange}
             onViewCode={() => setCodeViewerOpen(true)}
           />
+
           <CodeViewer
             code={pattern.snippet}
             isOpen={codeViewerOpen}
